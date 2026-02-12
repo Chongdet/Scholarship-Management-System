@@ -63,6 +63,7 @@ python app.py
 🌐 Open browser: <http://localhost:5000>
 
 ### 🐳 Docker (Optional)
+# ใช้ docker-compose up --build
 test
 ```bash
 FROM python:3.13-slim

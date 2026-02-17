@@ -1,0 +1,47 @@
+{% extends "base_director.html" %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto font-prompt p-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <div>
+            <h2 class="text-xl font-bold text-gray-800">
+                <a href="#" class="hover:underline text-gray-500">พิจารณาทุน</a> > รายชื่อทุน
+            </h2>
+        </div>
+        <div class="relative w-full md:w-64">
+            <input type="text" placeholder="ค้นหาชื่อทุน" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
+            <span class="absolute left-3 top-2.5 text-gray-400">🔍</span>
+        </div>
+    </div>
+
+    <div class="space-y-3">
+        {% for scholarship in scholarships %}
+        <a href="{{ url_for('director.scholarship_students', scholarship_id=scholarship.id) }}" 
+           class="block bg-gray-100 hover:bg-gray-200 p-5 rounded-xl border border-transparent hover:border-blue-300 transition shadow-sm">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-800">{{ scholarship.name }}</h3>
+                    <p class="text-sm text-gray-500">
+                        ผู้สมัคร {{ scholarship.total_applicants }} คน  
+                        <span class="mx-2">|</span> 
+                        ผ่านเอกสาร {{ scholarship.passed_docs }} คน
+                    </p>
+                </div>
+                <div class="text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    <div class="mt-6 flex justify-start items-center space-x-2 text-sm">
+        <button class="p-2 text-gray-400 hover:text-gray-600"> < </button>
+        <button class="px-3 py-1 border-b-2 border-blue-600 font-bold">1</button>
+        <button class="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded">2</button>
+        <button class="p-2 text-gray-600 hover:text-black"> > </button>
+    </div>
+</div>
+{% endblock %}

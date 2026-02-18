@@ -1,21 +1,144 @@
 from flask import Flask
-
-# 1. นำเข้าไฟล์ Route ของแต่ละฝ่าย
 from routes.director_routes import director_bp
 from routes.officer_routes import officer_bp
 from routes.student_routes import student_bp
 
+# 1. นำเข้า db และ Models (ต้องสร้างไฟล์ models.py ไว้ด้วย)
+from models import db, Scholarship, Criterion, Application
+import os
+
 app = Flask(__name__)
 
-# 2. ลงทะเบียน (Register) ให้ระบบรู้จัก Route ของแต่ละฝ่าย
-app.register_blueprint(director_bp, url_prefix='/director')
-app.register_blueprint(officer_bp, url_prefix='/officer')
-app.register_blueprint(student_bp, url_prefix='/student')
+# 2. ตั้งค่า Database (SQLite)
+# สร้างไฟล์ชื่อ scholarship.db ไว้ในโฟลเดอร์โครงการ
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(
+    basedir, "scholarship.db"
+)
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# 3. Route หน้าแรกสุด (Homepage) อนุโลมให้เอาไว้ที่นี่ได้
-@app.route('/')
+# 3. เริ่มต้นใช้งาน Database ร่วมกับ App
+db.init_app(app)
+
+# 4. ลงทะเบียน Blueprint
+app.register_blueprint(director_bp, url_prefix="/director")
+app.register_blueprint(officer_bp, url_prefix="/officer")
+app.register_blueprint(student_bp, url_prefix="/student")
+
+# 5. สร้าง Database และข้อมูลจำลอง (จะทำเฉพาะตอนรันครั้งแรก)
+with app.app_context():
+    db.drop_all()  # ล้างตารางเดิม (ถ้ามี)
+    db.create_all()  # สร้างตารางใหม่
+
+    # 1. สร้างรายชื่อทุน (Scholarships)
+    sch1 = Scholarship(name="ทุนอาหารกลางวัน")
+    sch2 = Scholarship(name="ทุนเรียนดี (GPA สูง)")
+    sch3 = Scholarship(name="ทุนกิจกรรมเด่น")
+    db.session.add_all([sch1, sch2, sch3])
+    db.session.commit()
+
+    # 2. สร้างเกณฑ์คะแนนแยกตามทุน (Criteria)
+    # เกณฑ์สำหรับทุนอาหารกลางวัน
+    db.session.add_all(
+        [
+            Criterion(name="สถานะความขาดแคลน", max_score=50, scholarship_id=sch1.id),
+            Criterion(name="ความประพฤติ", max_score=30, scholarship_id=sch1.id),
+            Criterion(name="สัมภาษณ์", max_score=20, scholarship_id=sch1.id),
+        ]
+    )
+    # เกณฑ์สำหรับทุนเรียนดี
+    db.session.add_all(
+        [
+            Criterion(name="ผลการเรียนสะสม (GPA)", max_score=70, scholarship_id=sch2.id),
+            Criterion(name="เรียงความเป้าหมายชีวิต", max_score=30, scholarship_id=sch2.id),
+        ]
+    )
+    # เกณฑ์สำหรับทุนกิจกรรม
+    db.session.add_all(
+        [
+            Criterion(name="ผลงาน/เกียรติบัตร", max_score=60, scholarship_id=sch3.id),
+            Criterion(name="การมีส่วนร่วมในวิทยาลัย", max_score=40, scholarship_id=sch3.id),
+        ]
+    )
+    db.session.commit()
+
+    # 3. สร้างรายชื่อผู้สมัคร 10 คน (Applications) กระจายตามทุน
+    students = [
+        # ทุนอาหารกลางวัน (4 คน)
+        Application(
+            student_id="68114540214",
+            student_name="นาย ทรงเดช จำปาเทศ",
+            gpa="3.94",
+            scholarship_id=sch1.id,
+        ),
+        Application(
+            student_id="68114540101",
+            student_name="นางสาว สวยใส ใจชื่น",
+            gpa="3.20",
+            scholarship_id=sch1.id,
+        ),
+        Application(
+            student_id="68114540102",
+            student_name="นาย มานะ อดทน",
+            gpa="2.85",
+            scholarship_id=sch1.id,
+        ),
+        Application(
+            student_id="68114540103",
+            student_name="นางสาว ขยัน เรียนดี",
+            gpa="3.15",
+            scholarship_id=sch1.id,
+        ),
+        # ทุนเรียนดี (4 คน)
+        Application(
+            student_id="68114540215",
+            student_name="นาย ปกรณ์เกียรติ มั่นคง",
+            gpa="3.98",
+            scholarship_id=sch2.id,
+        ),
+        Application(
+            student_id="68114540104",
+            student_name="นางสาว ปัญญา เลิศล้ำ",
+            gpa="4.00",
+            scholarship_id=sch2.id,
+        ),
+        Application(
+            student_id="68114540105",
+            student_name="นาย ฉลาด รอบรู้",
+            gpa="3.85",
+            scholarship_id=sch2.id,
+        ),
+        Application(
+            student_id="68114540106",
+            student_name="นางสาว สมองไว ใจสู้",
+            gpa="3.92",
+            scholarship_id=sch2.id,
+        ),
+        # ทุนกิจกรรม (2 คน)
+        Application(
+            student_id="68114540107",
+            student_name="นาย กล้าหาญ ชาญชัย",
+            gpa="2.50",
+            scholarship_id=sch3.id,
+        ),
+        Application(
+            student_id="68114540108",
+            student_name="นางสาว ร่าเริง แจ่มใส",
+            gpa="3.45",
+            scholarship_id=sch3.id,
+        ),
+    ]
+
+    db.session.add_all(students)
+    db.session.commit()
+    print("--- ฐานข้อมูลถูกรีเซ็ตและเพิ่มข้อมูลชุดใหญ่ 10 คน เรียบร้อยแล้ว ---")
+
+
+@app.route("/")
 def home():
-    return "หน้าแรกของระบบ Scholarship Management"
+    return "หน้าแรกของระบบ Scholarship Management (Database Ready)"
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+
+if __name__ == "__main__":
+    # รันแอปพลิเคชัน
+    app.run(debug=True, host="0.0.0.0", port=5000)

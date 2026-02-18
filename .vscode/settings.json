@@ -1,4 +1,8 @@
 {
+<<<<<<< HEAD
+    "python-envs.pythonProjects": []
+}
+=======
   "[html]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
@@ -9,3 +13,4 @@
     "*.html": "jinja"
   }
 }
+>>>>>>> 5d35a819df5736dbabe859a15f79620d90f6cb09

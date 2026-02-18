@@ -13,9 +13,10 @@
 ## 🛠 Tech Stack & Framework
 
 * **Backend Framework:** Python Flask
-* **Frontend:** HTML, CSS, JavaScript (Jinja2 Templates)
+* **Frontend:** HTML, CSS, JavaScript (Jinja2 Templates) , tailwindcss
 * **Containerization:** Docker & Docker Compose
 * **Version Control:** Git & GitHub
+* **Database:** SQLite, Flask-SQLAlchemy (ORM), DB Browser for SQLite
 
 ---
 ## 👥 Route Assignments (การแบ่งงานและผู้ดูแล)
@@ -39,20 +40,26 @@
 ```text
 PROJECT_ROOT
 │
-├── static/             # เก็บไฟล์ CSS, JS, Images, Uploads
-├── templates/          # เก็บไฟล์ HTML แบ่งตาม Role (director, officer, student)
-├── routes/             # 📍 โฟลเดอร์จัดการ Routes (แบ่งตามผู้รับผิดชอบ)
-│   ├── __init__.py
-│   ├── director_routes.py
-│   ├── officer_routes.py
-│   └── student_routes.py
-├── venv/               # Virtual environment (ignored)
-├── app.py              # ไฟล์รันเซิร์ฟเวอร์หลัก (Register Blueprints)
-├── Dockerfile          # Docker setup
-├── docker-compose.yml  # Docker compose setup
-├── requirements.txt    # Dependencies list (เช่น Flask, Werkzeug)
-├── .gitignore
-└── README.md
+├── routes/                 # 📍 โฟลเดอร์จัดการ Routes (แบ่งตามผู้รับผิดชอบ)
+│   ├── director_routes.py  # ส่วนของกรรมการ (Scoring, Candidate Detail)
+│   ├── officer_routes.py   # ส่วนของเจ้าหน้าที่ (Scholarship Management)
+│   └── student_routes.py   # ส่วนของนักศึกษา (Application Form)
+├── static/                 # เก็บไฟล์ CSS, JS, Images และ Uploads
+│   ├── css/                # สไตล์การแต่งหน้าเว็บ
+│   ├── images/             # รูปภาพประกอบระบบ (เช่น ubu_logo.png)
+│   └── uploads/            # ไฟล์เอกสารสมัครทุนที่นักศึกษาอัพโหลด
+├── templates/              # 📁 เก็บไฟล์ HTML แบ่งตาม Role
+│   ├── director/           # scoring.html, give_score.html
+│   ├── officer/            # off.html
+│   ├── student/            # std.html
+│   └── home_page/          # หน้าแรกของระบบ
+├── venv/                   # สภาพแวดล้อมจำลอง (Virtual Environment)
+├── app.py                  # ไฟล์รันเซิร์ฟเวอร์หลัก (ศูนย์กลางการเชื่อมต่อ Blueprint)
+├── models.py               # 🗄️ โครงสร้างฐานข้อมูล (Database Schema)
+├── requirements.txt        # รายชื่อ Library ที่ต้องติดตั้ง
+├── scholarship.db          # 💾 ไฟล์ฐานข้อมูล SQLite
+├── Dockerfile              # ไฟล์ตั้งค่า Docker
+└── README.md               # คู่มือการใช้งานระบบ
 ```
 ## 🚀 วิธีติดตั้งและรันโปรเจกต์ (Local Development)
 

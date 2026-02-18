@@ -1,0 +1,63 @@
+{% extends "base_director.html" %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto font-prompt p-6">
+    <div class="mb-8 flex items-center text-sm text-gray-500">
+        <a href="{{ url_for('director.scoring') }}" class="hover:text-blue-600">พิจารณาทุน</a>
+        <span class="mx-2">></span>
+        <span>รายชื่อทุน</span>
+        <span class="mx-2">></span>
+        <span>ทุนอาหารกลางวัน</span>
+        <span class="mx-2">></span>
+        <span class="font-bold text-gray-800">ดูรายละเอียด</span>
+    </div>
+
+    <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+        <div class="flex flex-col md:flex-row gap-10">
+            
+            <div class="flex-1 space-y-4">
+                <div class="grid grid-cols-3 gap-2">
+                    <span class="text-gray-500 font-bold">รหัสนักศึกษา</span>
+                    <span class="col-span-2 text-gray-800">{{ student.id }}</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <span class="text-gray-500 font-bold">ชื่อ-นามสกุล</span>
+                    <span class="col-span-2 text-gray-800">{{ student.name }}</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <span class="text-gray-500 font-bold">GPA</span>
+                    <span class="col-span-2 text-gray-800">{{ student.gpa }}</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <span class="text-gray-500 font-bold">สถานะเอกสาร</span>
+                    <span class="col-span-2 text-green-600 font-bold">{{ student.doc_status }}</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2 pt-4">
+                    <span class="text-gray-500 font-bold">เอกสารไฟล์แนบ</span>
+                    <div class="col-span-2">
+                        <button class="bg-gray-500 text-white px-4 py-1 rounded text-xs hover:bg-gray-600 transition">
+                            เปิดไฟล์แนบ
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-full md:w-64">
+                <div class="border-2 border-gray-200 rounded-lg overflow-hidden aspect-[3/4] flex items-center justify-center bg-gray-50">
+                    <img src="{{ url_for('static', filename=student.image_url) }}" 
+                         alt="รูปถ่ายนักศึกษา" 
+                         class="w-full h-full object-cover"
+                         onerror="this.src='https://via.placeholder.com/300x400?text=No+Image';">
+                </div>
+            </div>
+
+        </div>
+
+        <div class="mt-10 border-t pt-6">
+            <button onclick="history.back()" class="text-gray-600 hover:text-black flex items-center gap-2">
+                <span>←</span> ย้อนกลับ
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}

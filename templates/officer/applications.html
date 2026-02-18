@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจัดการใบสมัครทุนการศึกษา - Ubon Ratchathani University</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Kanit', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #fff;
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background-color: #fff;
+            padding: 15px 30px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-placeholder {
+            width: 45px;
+            height: 45px;
+            background-color: transparent;
+            border: 2px solid #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .logo-placeholder::before,
+        .logo-placeholder::after {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 30px;
+            background-color: #999;
+        }
+
+        .logo-placeholder::before {
+            transform: rotate(45deg);
+        }
+
+        .logo-placeholder::after {
+            transform: rotate(-45deg);
+        }
+
+        .university-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .university-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .university-name-en {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .nav-bar {
+            background-color: #e8e8e8;
+            border-radius: 6px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 25px;
+            flex: 1;
+            margin: 0 20px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex: 1;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-size: 14px;
+            padding: 5px 10px;
+        }
+
+        .nav-links a:hover {
+            color: #666;
+        }
+
+        .nav-links a.active {
+            background-color: #d0d0d0;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0;
+        }
+
+        .user-icon {
+            width: 28px;
+            height: 28px;
+            background-color: transparent;
+            border: 2px solid #999;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .user-icon::before {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background-color: #999;
+            border-radius: 50%;
+            position: absolute;
+            top: 4px;
+        }
+
+        .user-icon::after {
+            content: '';
+            width: 16px;
+            height: 8px;
+            border: 2px solid #999;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            position: absolute;
+            bottom: 2px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .logout-btn {
+            background-color: #e8e8e8;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .logout-btn:hover {
+            background-color: #d0d0d0;
+        }
+
+
+        /* Main Container */
+        .container {
+            flex: 1;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 40px 80px;
+            width: 100%;
+        }
+
+        /* Title Section */
+        .title-section {
+            margin-bottom: 40px;
+        }
+
+        .main-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #222;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #666;
+        }
+
+        /* Search and Filter Section */
+        .search-filter-section {
+            background-color: #e8e8e8;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .search-filter-row {
+            display: flex;
+            gap: 20px;
+            align-items: flex-end;
+        }
+
+        .search-bar {
+            flex: 1;
+        }
+
+        .search-bar label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 15px 12px 40px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background-color: #d0d0d0;
+            font-size: 14px;
+            color: #555;
+            transition: background-color 0.2s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            background-color: #c0c0c0;
+        }
+
+        .search-input::placeholder {
+            color: #999;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            background-color: #999;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .filters {
+            display: flex;
+            gap: 20px;
+            flex-wrap: nowrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 200px;
+            flex: 0 0 auto;
+        }
+
+        .filter-group label {
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #555;
+            white-space: nowrap;
+        }
+
+        .filter-select {
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background-color: #d0d0d0;
+            font-size: 14px;
+            color: #555;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23555' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 35px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .filter-select:hover {
+            background-color: #c0c0c0;
+        }
+
+        .btn-clear-filters {
+            padding: 10px 20px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background-color: #e8e8e8;
+            font-size: 14px;
+            font-family: 'Kanit', sans-serif;
+            color: #333;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-clear-filters:hover {
+            background-color: #d0d0d0;
+        }
+
+        /* Summary Cards */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .summary-card {
+            background-color: #e8e8e8;
+            border-radius: 6px;
+            padding: 15px 12px;
+            text-align: center;
+            transition: background-color 0.2s ease;
+            cursor: pointer;
+        }
+
+        .summary-card:hover {
+            background-color: #d8d8d8;
+        }
+
+        .card-label {
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 8px;
+        }
+
+        .card-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        /* Data Table */
+        .table-section {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 30px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        /* Pagination Styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            background-color: #fff;
+        }
+
+        .pagination-btn {
+            padding: 8px 16px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background-color: #fff;
+            color: #333;
+            font-size: 14px;
+            font-family: 'Kanit', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background-color: #e8e8e8;
+            border-color: #999;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-info {
+            font-size: 14px;
+            color: #666;
+            margin: 0 10px;
+        }
+
+        .pagination-page-numbers {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .page-number {
+            min-width: 32px;
+            height: 32px;
+            padding: 0 8px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background-color: #fff;
+            color: #333;
+            font-size: 14px;
+            font-family: 'Kanit', sans-serif;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .page-number:hover {
+            background-color: #e8e8e8;
+            border-color: #999;
+        }
+
+        .page-number.active {
+            background-color: #e8e8e8;
+            border-color: #999;
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: auto;
+        }
+
+        thead {
+            background-color: #f5f5f5;
+        }
+
+        th {
+            padding: 18px 20px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+            border-bottom: 2px solid #ddd;
+        }
+
+        th:nth-child(1) { 
+            width: 40px; 
+            min-width: 40px;
+        }  /* ลำดับ */
+        th:nth-child(2) { 
+            width: 120px;
+            min-width: 100px;
+        } /* รหัสนักศึกษา */
+        th:nth-child(3) { 
+            width: 150px;
+            min-width: 120px;
+        } /* ชื่อ-นามสกุล */
+        th:nth-child(4) { 
+            width: 150px;
+            min-width: 120px;
+        } /* คณะ */
+        th:nth-child(5) { 
+            min-width: 300px;
+            width: auto;
+        } /* ชื่อทุน - ปรับอัตโนมัติ */
+        th:nth-child(6) { 
+            width: 60px;
+            min-width: 50px;
+        }  /* GPAX */
+        th:nth-child(7) { 
+            width: 100px;
+            min-width: 90px;
+        } /* วันที่สมัคร */
+        th:nth-child(8) { 
+            width: 100px;
+            min-width: 90px;
+        }  /* สถานะ */
+        th:nth-child(9) { 
+            width: 100px;
+            min-width: 90px;
+            white-space: nowrap;
+        }  /* การจัดการ */
+
+        td {
+            padding: 18px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+            color: #555;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            box-sizing: border-box;
+            line-height: 1.6;
+        }
+
+        td:nth-child(1) {
+            white-space: nowrap;
+            text-align: center;
+            width: 40px;
+        }
+
+        td:nth-child(2) {
+            white-space: nowrap;
+            width: 120px;
+        }
+
+        td:nth-child(3) {
+            white-space: nowrap;
+            width: 150px;
+        }
+
+        td:nth-child(4) {
+            white-space: nowrap;
+            width: 150px;
+        }
+
+        td:nth-child(5) {
+            white-space: normal;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            min-width: 300px;
+            width: auto;
+            line-height: 1.5;
+        }
+
+        td:nth-child(6) {
+            white-space: nowrap;
+            text-align: center;
+            width: 60px;
+        }
+
+        td:nth-child(7) {
+            white-space: nowrap;
+            width: 100px;
+        }
+
+        td:nth-child(8) {
+            white-space: nowrap;
+            width: 100px;
+            text-align: center;
+        }
+
+        td:nth-child(9) {
+            white-space: nowrap;
+            width: 100px;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 15px;
+            background-color: #e0e0e0;
+            color: #555;
+            white-space: nowrap;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .view-link {
+            color: #333;
+            text-decoration: underline;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .view-link:hover {
+            color: #666;
+            text-decoration: none;
+        }
+
+        /* Footer Styles */
+        .footer {
+            width: 100%;
+            margin-top: auto;
+        }
+
+        .footer-main {
+            background-color: #f5f5f5;
+            padding: 25px 30px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .footer-column h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .footer-column p,
+        .footer-column div {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 6px;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding: 12px;
+            background-color: #f5f5f5;
+            color: #333;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Tablet (iPad) - 768px and below */
+        @media (max-width: 1024px) {
+            .container {
+                padding: 30px 40px;
+            }
+
+            .nav-bar {
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+            }
+
+            .search-filter-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .filters {
+                flex-wrap: wrap;
+                width: 100%;
+            }
+
+            .filter-group {
+                flex: 1 1 calc(50% - 10px);
+                min-width: 150px;
+            }
+
+            .summary-cards {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            th:nth-child(5) {
+                min-width: 250px;
+            }
+
+            td:nth-child(5) {
+                min-width: 250px;
+            }
+        }
+
+        /* Mobile and Small Tablet - 768px and below */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+                max-width: 100%;
+            }
+
+            .header {
+                padding: 10px 15px;
+            }
+
+            .header-top {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .nav-bar {
+                flex-direction: column;
+                padding: 10px 15px;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                width: 100%;
+                gap: 10px;
+            }
+
+            .user-section {
+                margin-top: 10px;
+            }
+
+            .main-title {
+                font-size: 24px;
+            }
+
+            .subtitle {
+                font-size: 14px;
+            }
+
+            .search-filter-section {
+                padding: 20px 15px;
+            }
+
+            .section-title {
+                font-size: 16px;
+            }
+
+            .search-filter-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .filters {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .filter-group {
+                width: 100%;
+                min-width: unset;
+            }
+
+            .summary-cards {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .card-value {
+                font-size: 24px;
+            }
+
+            /* Table responsive */
+            .table-wrapper {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            table {
+                min-width: 800px;
+            }
+
+            th, td {
+                padding: 12px 10px;
+                font-size: 13px;
+            }
+
+            th:nth-child(1) { width: 35px; min-width: 35px; }
+            th:nth-child(2) { width: 100px; min-width: 100px; }
+            th:nth-child(3) { width: 130px; min-width: 130px; }
+            th:nth-child(4) { width: 130px; min-width: 130px; }
+            th:nth-child(5) { min-width: 250px; width: auto; }
+            th:nth-child(6) { width: 55px; min-width: 55px; }
+            th:nth-child(7) { width: 90px; min-width: 90px; }
+            th:nth-child(8) { width: 90px; min-width: 90px; }
+            th:nth-child(9) { width: 90px; min-width: 90px; }
+
+            td:nth-child(1) { width: 35px; }
+            td:nth-child(2) { width: 100px; }
+            td:nth-child(3) { width: 130px; }
+            td:nth-child(4) { width: 130px; }
+            td:nth-child(5) { min-width: 250px; width: auto; }
+            td:nth-child(6) { width: 55px; }
+            td:nth-child(7) { width: 90px; }
+            td:nth-child(8) { width: 90px; }
+            td:nth-child(9) { width: 90px; }
+
+            .pagination {
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+
+            .pagination-btn {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+
+            .page-number {
+                min-width: 28px;
+                height: 28px;
+                font-size: 13px;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .footer-main {
+                padding: 20px 15px;
+            }
+            
+            .footer-bottom {
+                padding: 10px;
+            }
+        }
+
+        /* Small Mobile - 480px and below */
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px 10px;
+            }
+
+            .main-title {
+                font-size: 20px;
+            }
+
+            .search-filter-section {
+                padding: 15px 10px;
+            }
+
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .card-value {
+                font-size: 22px;
+            }
+
+            th, td {
+                padding: 10px 8px;
+                font-size: 12px;
+            }
+
+            .status-badge {
+                padding: 2px 8px;
+                font-size: 12px;
+            }
+
+            .pagination-info {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-top">
+            <div class="logo-section">
+                <div class="logo-placeholder"></div>
+                <div class="university-info">
+                    <div class="university-name">ระบบทุนการศึกษา</div>
+                    <div class="university-name-en">Ubon Ratchathani University</div>
+                </div>
+            </div>
+            <div class="nav-bar">
+                <nav class="nav-links">
+                    <a href="{{ url_for('officer.verify_application') }}" class="active">
+                        ระบบจัดการใบสมัครทุนการศึกษา
+                    </a>
+                </nav>
+                <div class="user-section">
+                    <div class="user-icon"></div>
+                    <div class="user-info">
+                        <span id="usernameDisplay">เจ้าหน้าที่</span>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="window.location.href='index.html'">
+                    <span>ออกจากระบบ</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Title Section -->
+        <div class="title-section">
+            <h1 class="main-title">ระบบจัดการใบสมัครทุนการศึกษา</h1>
+            <p class="subtitle">จัดการและตรวจสอบใบสมัครทุนการศึกษาของนักศึกษา</p>
+        </div>
+
+        <!-- Search and Filter Section -->
+        <div class="search-filter-section">
+            <h2 class="section-title">ค้นหาและกรองข้อมูล</h2>
+            <div class="search-filter-row">
+                <div class="search-bar">
+                    <label>ค้นหา (ชื่อ-นามสกุล หรือรหัสนักศึกษา)</label>
+                    <div class="search-input-wrapper">
+                        <div class="search-icon">Q</div>
+                        <input type="text" id="searchInput" class="search-input" placeholder="พิมพ์ชื่อ-นามสกุล หรือรหัสนักศึกษา...">
+                    </div>
+                </div>
+                <div class="filters">
+                    <div class="filter-group">
+                        <label>ชื่อทุนการศึกษา</label>
+                        <select id="scholarshipFilter" class="filter-select">
+                            <option value="ทั้งหมด">ทั้งหมด</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>สถานะใบสมัคร</label>
+                        <select id="statusFilter" class="filter-select">
+                            <option value="ทั้งหมด">ทั้งหมด</option>
+                            <option value="รอตรวจสอบ">รอตรวจสอบ</option>
+                            <option value="กำลังตรวจสอบ">กำลังตรวจสอบ</option>
+                            <option value="เรียกสัมภาษณ์">เรียกสัมภาษณ์</option>
+                            <option value="ผ่าน">ผ่าน</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 15px;">
+                <button type="button" id="clearFilters" class="btn-clear-filters">ล้างตัวกรอง</button>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="summary-cards">
+            <div class="summary-card">
+                <div class="card-label">รวมทั้งหมด</div>
+                <div class="card-value" id="totalCount">0</div>
+            </div>
+            <div class="summary-card">
+                <div class="card-label">รอตรวจสอบ</div>
+                <div class="card-value" id="pendingCount">0</div>
+            </div>
+            <div class="summary-card">
+                <div class="card-label">กำลังตรวจสอบ</div>
+                <div class="card-value" id="reviewingCount">0</div>
+            </div>
+            <div class="summary-card">
+                <div class="card-label">เรียกสัมภาษณ์</div>
+                <div class="card-value" id="interviewCount">0</div>
+            </div>
+            <div class="summary-card">
+                <div class="card-label">ผ่าน</div>
+                <div class="card-value" id="passedCount">0</div>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="table-section">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ลำดับ</th>
+                            <th>รหัสนักศึกษา</th>
+                            <th>ชื่อ-นามสกุล</th>
+                            <th>คณะ</th>
+                            <th>ชื่อทุน</th>
+                            <th>GPAX</th>
+                            <th>วันที่สมัคร</th>
+                            <th>สถานะ</th>
+                            <th>การจัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- แถวข้อมูลจะถูกเติมโดย JavaScript จาก localStorage -->
+                    </tbody>
+                </table>
+            </div>
+            <!-- Pagination -->
+            <div class="pagination" id="pagination">
+                <button class="pagination-btn" id="prevBtn" onclick="changePage(-1)">ก่อนหน้า</button>
+                <div class="pagination-page-numbers" id="pageNumbers"></div>
+                <button class="pagination-btn" id="nextBtn" onclick="changePage(1)">ถัดไป</button>
+                <div class="pagination-info" id="paginationInfo"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get all elements
+        const searchInput = document.getElementById('searchInput');
+        const scholarshipFilter = document.getElementById('scholarshipFilter');
+        const statusFilter = document.getElementById('statusFilter');
+        const tableBody = document.getElementById('tableBody');
+        let allRows = Array.from(tableBody.querySelectorAll('tr'));
+
+        // Summary card elements
+        const totalCount = document.getElementById('totalCount');
+        const pendingCount = document.getElementById('pendingCount');
+        const reviewingCount = document.getElementById('reviewingCount');
+        const interviewCount = document.getElementById('interviewCount');
+        const passedCount = document.getElementById('passedCount');
+
+        // Pagination variables
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let filteredRows = [];
+
+        // Function to update summary counts
+        function updateSummaryCounts() {
+            // Use filtered rows if available, otherwise use all rows
+            const rowsToCount = filteredRows.length > 0 ? filteredRows : Array.from(tableBody.querySelectorAll('tr'));
+            let pending = 0, reviewing = 0, interview = 0, passed = 0;
+            
+            rowsToCount.forEach(row => {
+                const status = row.getAttribute('data-status');
+                if (status === 'รอตรวจสอบ') pending++;
+                else if (status === 'กำลังตรวจสอบ') reviewing++;
+                else if (status === 'เรียกสัมภาษณ์') interview++;
+                else if (status === 'ผ่าน') passed++;
+            });
+            
+            totalCount.textContent = rowsToCount.length;
+            pendingCount.textContent = pending;
+            reviewingCount.textContent = reviewing;
+            interviewCount.textContent = interview;
+            passedCount.textContent = passed;
+        }
+        
+        // Function to update status from localStorage
+        function updateStatusFromStorage() {
+            const applicationStatuses = JSON.parse(localStorage.getItem('applicationStatuses') || '{}');
+            const rows = tableBody.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const studentId = row.getAttribute('data-id');
+                if (applicationStatuses[studentId]) {
+                    const newStatus = applicationStatuses[studentId];
+                    // Update data-status attribute
+                    row.setAttribute('data-status', newStatus);
+                    // Update status badge text
+                    const statusBadge = row.querySelector('.status-badge');
+                    if (statusBadge) {
+                        statusBadge.textContent = newStatus;
+                    }
+                }
+            });
+            
+            // Update summary counts
+            updateSummaryCounts();
+        }
+        
+        // Function to filter and search
+        function filterTable() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const scholarshipValue = scholarshipFilter.value;
+            const statusValue = statusFilter.value;
+
+            // Get all rows (refresh in case new rows were added)
+            allRows = Array.from(tableBody.querySelectorAll('tr'));
+            
+            // Filter rows
+            filteredRows = allRows.filter(row => {
+                const scholarship = row.getAttribute('data-scholarship');
+                const status = row.getAttribute('data-status');
+                const name = row.getAttribute('data-name').toLowerCase();
+                const id = row.getAttribute('data-id');
+
+                // Exclude rejected applications from default view (unless explicitly filtered)
+                if (status === 'ปฏิเสธ' && statusValue === 'ทั้งหมด') {
+                    return false;
+                }
+
+                // Check search match
+                const matchesSearch = searchTerm === '' || 
+                    name.includes(searchTerm) || 
+                    id.includes(searchTerm);
+
+                // Check scholarship filter
+                const matchesScholarship = scholarshipValue === 'ทั้งหมด' || 
+                    scholarship === scholarshipValue;
+
+                // Check status filter
+                const matchesStatus = statusValue === 'ทั้งหมด' || 
+                    status === statusValue;
+
+                return matchesSearch && matchesScholarship && matchesStatus;
+            });
+
+            // Reset to first page when filtering
+            currentPage = 1;
+            
+            // Update pagination
+            updatePagination();
+            
+            // Update summary counts
+            updateSummaryCountsFromFiltered();
+        }
+
+        // Function to update summary counts from filtered rows
+        function updateSummaryCountsFromFiltered() {
+            let pending = 0, reviewing = 0, interview = 0, passed = 0;
+            
+            filteredRows.forEach(row => {
+                const status = row.getAttribute('data-status');
+                if (status === 'รอตรวจสอบ') pending++;
+                else if (status === 'กำลังตรวจสอบ') reviewing++;
+                else if (status === 'เรียกสัมภาษณ์') interview++;
+                else if (status === 'ผ่าน') passed++;
+            });
+            
+            totalCount.textContent = filteredRows.length;
+            pendingCount.textContent = pending;
+            reviewingCount.textContent = reviewing;
+            interviewCount.textContent = interview;
+            passedCount.textContent = passed;
+        }
+
+        // Function to update pagination display
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
+            
+            // Hide all rows first
+            allRows.forEach(row => {
+                row.style.display = 'none';
+            });
+            
+            // Show rows for current page
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const currentPageRows = filteredRows.slice(startIndex, endIndex);
+            
+            let rowNumber = startIndex + 1;
+            currentPageRows.forEach(row => {
+                row.style.display = '';
+                row.querySelector('td:first-child').textContent = rowNumber++;
+            });
+            
+            // Update pagination controls
+            updatePaginationControls(totalPages);
+        }
+
+        // Function to update pagination controls
+        function updatePaginationControls(totalPages) {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const pageNumbers = document.getElementById('pageNumbers');
+            const paginationInfo = document.getElementById('paginationInfo');
+            
+            // Enable/disable buttons
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+            
+            // Update pagination info
+            if (filteredRows.length === 0) {
+                paginationInfo.textContent = 'ไม่พบข้อมูล';
+            } else {
+                const startItem = (currentPage - 1) * itemsPerPage + 1;
+                const endItem = Math.min(currentPage * itemsPerPage, filteredRows.length);
+                paginationInfo.textContent = `แสดง ${startItem}-${endItem} จาก ${filteredRows.length} รายการ`;
+            }
+            
+            // Update page numbers
+            pageNumbers.innerHTML = '';
+            
+            if (totalPages === 0) {
+                return;
+            }
+            
+            // Show page numbers (max 5 pages at a time)
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, currentPage + 2);
+            
+            // Adjust if near start or end
+            if (endPage - startPage < 4) {
+                if (startPage === 1) {
+                    endPage = Math.min(5, totalPages);
+                } else {
+                    startPage = Math.max(1, totalPages - 4);
+                }
+            }
+            
+            // First page
+            if (startPage > 1) {
+                const firstBtn = document.createElement('button');
+                firstBtn.className = 'page-number';
+                firstBtn.textContent = '1';
+                firstBtn.onclick = () => goToPage(1);
+                pageNumbers.appendChild(firstBtn);
+                
+                if (startPage > 2) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.textContent = '...';
+                    ellipsis.style.padding = '0 4px';
+                    pageNumbers.appendChild(ellipsis);
+                }
+            }
+            
+            // Page numbers
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = 'page-number';
+                if (i === currentPage) {
+                    pageBtn.classList.add('active');
+                }
+                pageBtn.textContent = i;
+                pageBtn.onclick = () => goToPage(i);
+                pageNumbers.appendChild(pageBtn);
+            }
+            
+            // Last page
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.textContent = '...';
+                    ellipsis.style.padding = '0 4px';
+                    pageNumbers.appendChild(ellipsis);
+                }
+                
+                const lastBtn = document.createElement('button');
+                lastBtn.className = 'page-number';
+                lastBtn.textContent = totalPages;
+                lastBtn.onclick = () => goToPage(totalPages);
+                pageNumbers.appendChild(lastBtn);
+            }
+        }
+
+        // Function to change page
+        function changePage(direction) {
+            const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
+            const newPage = currentPage + direction;
+            
+            if (newPage >= 1 && newPage <= totalPages) {
+                currentPage = newPage;
+                updatePagination();
+            }
+        }
+
+        // Function to go to specific page
+        function goToPage(page) {
+            const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
+            if (page >= 1 && page <= totalPages) {
+                currentPage = page;
+                updatePagination();
+            }
+        }
+
+        // Clear filters function
+        function clearFilters() {
+            searchInput.value = '';
+            scholarshipFilter.value = 'ทั้งหมด';
+            statusFilter.value = 'ทั้งหมด';
+            filterTable();
+        }
+
+        // Add event listeners
+        searchInput.addEventListener('input', filterTable);
+        scholarshipFilter.addEventListener('change', filterTable);
+        statusFilter.addEventListener('change', filterTable);
+        
+        // Add clear filters button event listener
+        const clearFiltersButton = document.getElementById('clearFilters');
+        if (clearFiltersButton) {
+            clearFiltersButton.addEventListener('click', clearFilters);
+        }
+
+        // Add click handler for summary cards to filter
+        document.querySelectorAll('.summary-card').forEach((card, index) => {
+            card.addEventListener('click', function() {
+                const statusMap = ['ทั้งหมด', 'รอตรวจสอบ', 'กำลังตรวจสอบ', 'เรียกสัมภาษณ์', 'ผ่าน'];
+                statusFilter.value = statusMap[index];
+                filterTable();
+            });
+        });
+
+        // Base URL for Flask detail route (placeholder APP_ID will be replaced in JS)
+        const detailBaseUrl = "{{ url_for('officer.verify_application_detail', application_id='APP_ID_PLACEHOLDER') }}";
+
+        // Function to view application detail
+        function viewDetail(studentId, studentName, status) {
+            const appId = 'APP' + studentId.slice(-3);
+            const detailUrl = detailBaseUrl.replace('APP_ID_PLACEHOLDER', appId);
+            window.location.href = `${detailUrl}?studentId=${studentId}&name=${encodeURIComponent(studentName)}&status=${encodeURIComponent(status)}`;
+        }
+
+        // Add click handlers to view links
+        document.querySelectorAll('.view-link').forEach(link => {
+            link.addEventListener('click', function() {
+                const row = this.closest('tr');
+                const studentId = row.getAttribute('data-id');
+                const studentName = row.getAttribute('data-name');
+                const status = row.getAttribute('data-status');
+                viewDetail(studentId, studentName, status);
+            });
+        });
+        
+        // Update scholarship filter dropdown from localStorage
+        function updateScholarshipFilter() {
+            const scholarships = JSON.parse(localStorage.getItem('scholarships') || '{}');
+            const scholarshipFilter = document.getElementById('scholarshipFilter');
+            
+            // Get current selected value to check if it still exists
+            const currentValue = scholarshipFilter.value;
+            
+            // Keep the "ทั้งหมด" option
+            scholarshipFilter.innerHTML = '<option value="ทั้งหมด">ทั้งหมด</option>';
+            
+            // Helper function to build full scholarship name (same format as in edit-scholarship.html)
+            function buildFullScholarshipName(scholarship) {
+                let baseName = scholarship.name || '';
+                
+                // Extract base name if it already contains "ทุนการศึกษา"
+                if (baseName.includes('ทุนการศึกษา')) {
+                    const nameMatch = baseName.match(/ทุนการศึกษา\s*"([^"]+)"/);
+                    if (nameMatch) {
+                        baseName = nameMatch[1];
+                    } else {
+                        const nameMatch2 = baseName.match(/ทุนการศึกษา\s+(.+?)(?:\s+จำนวน|$)/);
+                        if (nameMatch2) {
+                            baseName = nameMatch2[1].trim();
+                        }
+                    }
+                }
+                
+                // Build full name from details
+                if (scholarship.details) {
+                    const detailsText = scholarship.details.trim();
+                    const numberOfScholarshipsMatch = detailsText.match(/จำนวนทุน\s*:\s*([^\n]+)/);
+                    const amountMatch = detailsText.match(/เงินทุนละ\s*:\s*([^\n]+)/);
+                    
+                    if (numberOfScholarshipsMatch && amountMatch) {
+                        return `ทุนการศึกษา "${baseName}" จำนวน ${numberOfScholarshipsMatch[1].trim()} ๆ ละ ${amountMatch[1].trim()}`;
+                    }
+                }
+                
+                // Return base name if details don't have the expected format
+                return baseName;
+            }
+            
+            // Add all scholarship names from localStorage (build full names to match table format)
+            const scholarshipList = Object.values(scholarships);
+            const scholarshipNames = [];
+            scholarshipList.forEach(scholarship => {
+                if (scholarship.name) {
+                    const fullName = buildFullScholarshipName(scholarship);
+                    const option = document.createElement('option');
+                    option.value = fullName; // Use full name as value to match data-scholarship in table
+                    option.textContent = fullName; // Display full name
+                    scholarshipFilter.appendChild(option);
+                    scholarshipNames.push(fullName);
+                }
+            });
+            
+            // If current value no longer exists or doesn't match any scholarship, reset to "ทั้งหมด"
+            if (currentValue && currentValue !== 'ทั้งหมด') {
+                const stillExists = scholarshipNames.some(name => name === currentValue);
+                if (!stillExists) {
+                    scholarshipFilter.value = 'ทั้งหมด';
+                    filterTable(); // Refresh table when value changes
+                }
+            }
+        }
+
+        // Helper function to build full scholarship name
+        function buildFullScholarshipName(scholarship) {
+            let baseName = scholarship.name || '';
+            
+            if (baseName.includes('ทุนการศึกษา')) {
+                const nameMatch = baseName.match(/ทุนการศึกษา\s*"([^"]+)"/);
+                if (nameMatch) {
+                    baseName = nameMatch[1];
+                } else {
+                    const nameMatch2 = baseName.match(/ทุนการศึกษา\s+(.+?)(?:\s+จำนวน|$)/);
+                    if (nameMatch2) {
+                        baseName = nameMatch2[1].trim();
+                    }
+                }
+            }
+            
+            if (scholarship.details) {
+                const detailsText = scholarship.details.trim();
+                const numberOfScholarshipsMatch = detailsText.match(/จำนวนทุน\s*:\s*([^\n]+)/);
+                const amountMatch = detailsText.match(/เงินทุนละ\s*:\s*([^\n]+)/);
+                
+                if (numberOfScholarshipsMatch && amountMatch) {
+                    return `ทุนการศึกษา "${baseName}" จำนวน ${numberOfScholarshipsMatch[1].trim()} ๆ ละ ${amountMatch[1].trim()}`;
+                }
+            }
+            
+            return baseName || scholarship.name;
+        }
+        
+        // Load applications from localStorage and populate table
+        function loadApplicationsFromStorage() {
+            // Get data from localStorage only (no sample data)
+            const applications = JSON.parse(localStorage.getItem('applications') || '[]');
+            const applicationStatuses = JSON.parse(localStorage.getItem('applicationStatuses') || '{}');
+            const scholarships = JSON.parse(localStorage.getItem('scholarships') || '{}');
+            
+            // Always clear existing rows to ensure fresh data
+            tableBody.innerHTML = '';
+            
+            if (applications.length === 0) {
+                // If no applications, update allRows and filteredRows to empty arrays
+                allRows = [];
+                filteredRows = [];
+                console.log('No applications found in localStorage');
+                return;
+            }
+            
+            // Filter out rejected applications AND applications with deleted scholarships
+            const filteredApplications = applications.filter(app => {
+                const status = applicationStatuses[app.studentId] || app.status || 'รอตรวจสอบ';
+                
+                // Skip rejected applications
+                if (status === 'ปฏิเสธ') {
+                    return false;
+                }
+                
+                // Check if scholarship still exists
+                if (app.scholarshipId) {
+                    // If scholarshipId exists, check if scholarship is still in localStorage
+                    if (!scholarships[app.scholarshipId]) {
+                        console.log(`Skipping application ${app.studentId}: Scholarship ${app.scholarshipId} not found`);
+                        return false;
+                    }
+                } else if (app.scholarshipName) {
+                    // If no scholarshipId, check by scholarship name
+                    // Extract base name from scholarshipName for matching
+                    let baseScholarshipName = app.scholarshipName;
+                    if (baseScholarshipName.includes('ทุนการศึกษา')) {
+                        const nameMatch = baseScholarshipName.match(/ทุนการศึกษา\s*"([^"]+)"/);
+                        if (nameMatch) {
+                            baseScholarshipName = nameMatch[1];
+                        }
+                    }
+                    
+                    // Check if any scholarship in localStorage matches
+                    const scholarshipExists = Object.values(scholarships).some(scholarship => {
+                        if (!scholarship || !scholarship.name) return false;
+                        return scholarship.name.includes(baseScholarshipName) || 
+                               baseScholarshipName.includes(scholarship.name) ||
+                               app.scholarshipName.includes(scholarship.name);
+                    });
+                    
+                    if (!scholarshipExists) {
+                        console.log(`Skipping application ${app.studentId}: Scholarship "${app.scholarshipName}" not found`);
+                        return false;
+                    }
+                }
+                
+                return true;
+            });
+            
+            console.log('✅ Filtering completed');
+            console.log(`📊 Filtered applications count: ${filteredApplications.length}`);
+            console.log('Filtered applications:', filteredApplications.map(app => ({
+                studentId: app.studentId,
+                name: app.name,
+                scholarshipId: app.scholarshipId,
+                scholarshipName: app.scholarshipName
+            })));
+            
+            if (filteredApplications.length === 0) {
+                console.warn('⚠️ No applications after filtering!');
+                console.warn('Original applications:', applications.length);
+                console.warn('Scholarships available:', Object.keys(scholarships).length);
+                tableBody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 40px; color: #666;">ไม่พบข้อมูลผู้สมัคร</td></tr>';
+                allRows = [];
+                filteredRows = [];
+                return;
+            }
+            
+            console.log(`🔄 Creating rows for ${filteredApplications.length} applications...`);
+            
+            // Create rows from localStorage data
+            filteredApplications.forEach((app, index) => {
+                const status = applicationStatuses[app.studentId] || app.status || 'รอตรวจสอบ';
+                const row = document.createElement('tr');
+                // Use updated scholarshipName from localStorage
+                const scholarshipName = app.scholarshipName || '';
+                row.setAttribute('data-scholarship', scholarshipName);
+                row.setAttribute('data-status', status);
+                row.setAttribute('data-name', app.name || '');
+                row.setAttribute('data-id', app.studentId || '');
+                
+                // Format date
+                const appDate = app.applicationDate || app.createdAt || new Date().toLocaleDateString('th-TH');
+                const formattedDate = appDate instanceof Date ? appDate.toLocaleDateString('th-TH') : appDate;
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${app.studentId || ''}</td>
+                    <td>${app.name || ''}</td>
+                    <td>${app.faculty || ''}</td>
+                    <td>${scholarshipName}</td>
+                    <td>${app.gpa || ''}</td>
+                    <td>${formattedDate}</td>
+                    <td><span class="status-badge">${status}</span></td>
+                    <td><span class="view-link">ดูรายละเอียด</span></td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // Update allRows and filteredRows
+            allRows = Array.from(tableBody.querySelectorAll('tr'));
+            filteredRows = allRows;
+            
+            // Re-attach view link click handlers
+            document.querySelectorAll('.view-link').forEach(link => {
+                link.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    const studentId = row.getAttribute('data-id');
+                    const studentName = row.getAttribute('data-name');
+                    const status = row.getAttribute('data-status');
+                    viewDetail(studentId, studentName, status);
+                });
+            });
+        }
+
+        // Update status from localStorage when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                console.log('=== DOMContentLoaded event fired ===');
+                console.log('tableBody element:', tableBody);
+                console.log('tableBody.innerHTML length:', tableBody.innerHTML.length);
+                
+                // Always load from localStorage first (this will clear static HTML rows)
+                console.log('Calling loadApplicationsFromStorage()...');
+                loadApplicationsFromStorage();
+            
+                // Update scholarship filter dropdown
+                updateScholarshipFilter();
+                
+                updateStatusFromStorage();
+                // Initialize pagination
+                filteredRows = Array.from(tableBody.querySelectorAll('tr'));
+                updatePagination();
+                
+                // Load username from sessionStorage
+                const username = sessionStorage.getItem('currentUsername');
+                if (username) {
+                    const usernameDisplay = document.getElementById('usernameDisplay');
+                    if (usernameDisplay) {
+                        usernameDisplay.textContent = `${username} (เจ้าหน้าที่)`;
+                    }
+                }
+            
+            // Also update when page becomes visible (when returning from detail page)
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    updateScholarshipFilter();
+                    loadApplicationsFromStorage();
+                    updateStatusFromStorage();
+                    filteredRows = Array.from(tableBody.querySelectorAll('tr'));
+                    updatePagination();
+                }
+            });
+            } catch (error) {
+                console.error('❌ Error in DOMContentLoaded:', error);
+                console.error('Error stack:', error.stack);
+                // Show error message to user
+                if (tableBody) {
+                    tableBody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 40px; color: #e74c3c;">⚠️ เกิดข้อผิดพลาดในการโหลดข้อมูล กรุณารีเฟรชหน้าเว็บ (F5)</td></tr>';
+                }
+            }
+        });
+        
+        // Update when page is shown (handles browser back/forward navigation)
+        window.addEventListener('pageshow', function(event) {
+            // event.persisted is true when page is loaded from cache (e.g., back button)
+            // Always reload data when page is shown
+            console.log('=== applications.html: pageshow event triggered ===', event.persisted);
+            updateScholarshipFilter();
+            loadApplicationsFromStorage();
+            updateStatusFromStorage();
+            filteredRows = Array.from(tableBody.querySelectorAll('tr'));
+            updatePagination();
+        });
+        
+        // Update status when page is focused (when returning from detail page)
+        window.addEventListener('focus', function() {
+            console.log('=== applications.html: focus event triggered ===');
+            updateScholarshipFilter();
+            loadApplicationsFromStorage();
+            updateStatusFromStorage();
+            filteredRows = Array.from(tableBody.querySelectorAll('tr'));
+            updatePagination();
+        });
+        
+        // Listen for scholarship update events from other tabs
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'scholarships' || e.key === 'applications') {
+                updateScholarshipFilter();
+                loadApplicationsFromStorage();
+                updateStatusFromStorage();
+                filteredRows = Array.from(tableBody.querySelectorAll('tr'));
+                updatePagination();
+            }
+        });
+        
+        // Listen for custom scholarship updated event (works in same tab)
+        window.addEventListener('scholarshipUpdated', function(e) {
+            console.log('=== applications.html: scholarshipUpdated event received ===');
+            console.log('Event detail:', e.detail);
+            updateScholarshipFilter();
+            loadApplicationsFromStorage();
+            updateStatusFromStorage();
+            filteredRows = Array.from(tableBody.querySelectorAll('tr'));
+            updatePagination();
+        });
+        
+        // Also listen on window object for custom events (to catch events from other pages)
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'scholarshipUpdated') {
+                updateScholarshipFilter();
+                loadApplicationsFromStorage();
+                updateStatusFromStorage();
+                filteredRows = Array.from(tableBody.querySelectorAll('tr'));
+                updatePagination();
+            }
+        });
+
+        // Function to update application status from committee (external system)
+        // This function will be called by the committee system when they send approved list
+        // approvedList should be an array of student IDs that passed
+        // Example: updateApprovedApplications(['6512345678', '6523456789'])
+        window.updateApprovedApplications = function(approvedList) {
+            if (!approvedList || !Array.isArray(approvedList) || approvedList.length === 0) {
+                return;
+            }
+            
+            const applicationStatuses = JSON.parse(localStorage.getItem('applicationStatuses') || '{}');
+            const rows = tableBody.querySelectorAll('tr');
+            
+            approvedList.forEach(studentId => {
+                // Update status to "ผ่าน"
+                applicationStatuses[studentId] = 'ผ่าน';
+                
+                // Update row in table if exists
+                rows.forEach(row => {
+                    if (row.getAttribute('data-id') === studentId) {
+                        row.setAttribute('data-status', 'ผ่าน');
+                        const statusBadge = row.querySelector('.status-badge');
+                        if (statusBadge) {
+                            statusBadge.textContent = 'ผ่าน';
+                        }
+                    }
+                });
+            });
+            
+            localStorage.setItem('applicationStatuses', JSON.stringify(applicationStatuses));
+            
+            // Refresh display
+            updateStatusFromStorage();
+            filteredRows = Array.from(tableBody.querySelectorAll('tr'));
+            updatePagination();
+            updateSummaryCountsFromFiltered();
+        };
+
+        // Function to check for approved applications from committee system
+        // This checks localStorage for data sent from committee system
+        // In real app, this would check API/webhook from committee system
+        function checkForApprovedApplications() {
+            // Check for approved applications from committee system
+            // Committee system will store data in localStorage with key 'committeeApproved'
+            const committeeApproved = JSON.parse(localStorage.getItem('committeeApproved') || '[]');
+            
+            if (committeeApproved.length > 0) {
+                // Update statuses
+                window.updateApprovedApplications(committeeApproved);
+                
+                // Clear the list after processing
+                localStorage.removeItem('committeeApproved');
+            }
+        }
+
+        // Check for approved applications periodically
+        // This allows the staff system to automatically receive updates from committee system
+        setInterval(checkForApprovedApplications, 5000); // Check every 5 seconds
+
+    </script>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-main">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>สำนักงานพัฒนานักศึกษา</h3>
+                    <p>มหาวิทยาลัยอุบลราชธานี</p>
+                    <p>85 ถนนสถลมาร์ค ตำบลเมืองศรีไค</p>
+                    <p>อำเภอวารินชำราบ</p>
+                    <p>จังหวัดอุบลราชธานี 34190</p>
+                </div>
+                <div class="footer-column">
+                    <h3>ติดต่อเรา</h3>
+                    <p>Email: ubustudent.d@ubu.ac.th</p>
+                    <p>โทรศัพท์: 045-353000 ต่อ 1210</p>
+                </div>
+                <div class="footer-column">
+                    <h3>ติดตามข่าวสาร</h3>
+                    <p>Facebook</p>
+                    <p>Website</p>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            Ubon Ratchathani University มหาวิทยาลัยอุบลราชธานี
+        </div>
+    </footer>
+</body>
+</html>
+

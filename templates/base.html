@@ -47,6 +47,48 @@
         </div>
     </header>
 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div id="flash-container" class="fixed top-20 right-8 z-50 space-y-2">
+                {% for category, message in messages %}
+                <div class="flash-message bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 animate-slide-in" role="alert">
+                    <span class="text-lg">✓</span>
+                    <span>{{ message }}</span>
+                    <button onclick="this.parentElement.remove()" class="ml-4 text-white hover:text-gray-200 font-bold text-xl leading-none">&times;</button>
+                </div>
+                {% endfor %}
+            </div>
+            <script>
+                setTimeout(() => {
+                    const flashContainer = document.getElementById('flash-container');
+                    if (flashContainer) {
+                        flashContainer.querySelectorAll('.flash-message').forEach(msg => {
+                            msg.style.transition = 'opacity 0.5s, transform 0.5s';
+                            msg.style.opacity = '0';
+                            msg.style.transform = 'translateX(100%)';
+                            setTimeout(() => msg.remove(), 500);
+                        });
+                    }
+                }, 3000);
+            </script>
+            <style>
+                @keyframes slide-in {
+                    from {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+                .animate-slide-in {
+                    animation: slide-in 0.3s ease-out;
+                }
+            </style>
+        {% endif %}
+    {% endwith %}
+
     <main class="flex-grow w-full px-8 py-10">
         {% block content %}{% endblock %}
     </main>

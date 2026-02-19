@@ -1,0 +1,50 @@
+{% extends "base_director.html" %} {% block content %}
+<div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-sm mt-10">
+  <nav class="text-sm text-gray-500 mb-4">
+    พิจารณาทุน > รายชื่อทุน > ทุนอาหารกลางวัน >
+    <span class="text-blue-600">ให้คะแนน</span>
+  </nav>
+
+  <div class="flex gap-8 border-b pb-6 mb-6">
+    <div
+      class="w-32 h-40 bg-gray-200 border-2 border-dashed flex items-center justify-center"
+    >
+      <span class="text-gray-400">รูปถ่าย</span>
+    </div>
+    <div class="space-y-2">
+      <p><strong>รหัสนักศึกษา:</strong> {{ student.student_id }}</p>
+      <p><strong>ชื่อ-นามสกุล:</strong> {{ student.student_name }}</p>
+      <p><strong>GPA:</strong> {{ student.gpa }}</p>
+      <p>
+        <strong>สถานะเอกสาร:</strong>
+        <span class="text-green-600">ผ่านแล้ว</span>
+      </p>
+    </div>
+  </div>
+
+  <form method="POST">
+    {% for c in criteria %}
+    <div class="mb-4">
+      <label class="block text-sm font-medium text-gray-700">
+        {{ c.name }} (คะแนนเต็ม {{ c.max_score }})
+      </label>
+      <input type="number" name="score_{{ c.id }}" required />
+    </div>
+    {% endfor %}
+    <div class="flex gap-2">
+      <button
+        type="submit"
+        class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+      >
+        บันทึกผลคะแนน
+      </button>
+      <a
+        href="{{ url_for('director.scholarship_students', scholarship_id=student.scholarship_id) }}"
+        class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+      >
+        ยกเลิก
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}

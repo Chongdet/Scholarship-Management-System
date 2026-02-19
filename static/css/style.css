@@ -1,0 +1,12 @@
+/* นำเข้าฟอนต์ Kanit จาก Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');
+
+/* บังคับให้ทั้งเว็บใช้ฟอนต์ Kanit */
+body {
+    font-family: 'Kanit', sans-serif;
+}
+
+/* ถ้าอยากเขียน CSS อะไรเพิ่มเติมที่ Tailwind ทำไม่ได้ ให้เขียนลงในไฟล์นี้ได้เลยครับ */
+.custom-shadow {
+    box-shadow: 0 4px 14px 0 rgba(0, 118, 255, 0.39);
+}

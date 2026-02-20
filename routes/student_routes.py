@@ -60,34 +60,87 @@ def allowed_file(filename):
 @student_bp.route('/apply', methods=['GET', 'POST'])
 def apply_scholarship():
     """ฟอร์มสมัครทุน (Application Form & Auto-Fill)
-    
+
     GET  – แสดงฟอร์ม พร้อม Auto-Fill ข้อมูลจากใบสมัครล่าสุดของนักศึกษา (ถ้ามี)
     POST – บันทึกใบสมัครใหม่ลงฐานข้อมูล
     """
-    # ดึงรายชื่อทุนทั้งหมดเพื่อแสดงใน dropdown
     scholarships = Scholarship.query.all()
 
     if request.method == 'POST':
-        student_id   = request.form.get('student_id', '').strip()
-        student_name = request.form.get('student_name', '').strip()
-        faculty      = request.form.get('faculty', '').strip()
-        gpa          = request.form.get('gpa', '').strip()
+        # --- ข้อมูลส่วนตัว ---
+        title        = request.form.get('title', '').strip()
+        first_name   = request.form.get('first_name', '').strip()
+        last_name    = request.form.get('last_name', '').strip()
+        first_name_en = request.form.get('first_name_en', '').strip()
+        last_name_en  = request.form.get('last_name_en', '').strip()
+        national_id  = request.form.get('national_id', '').strip()
+        birth_date   = request.form.get('birth_date', '').strip()
+        gender       = request.form.get('gender', '').strip()
+        nationality  = request.form.get('nationality', '').strip()
+        religion     = request.form.get('religion', '').strip()
+        phone        = request.form.get('phone', '').strip()
+        email        = request.form.get('email', '').strip()
+
+        # --- ที่อยู่ ---
+        address      = request.form.get('address', '').strip()
+        sub_district = request.form.get('sub_district', '').strip()
+        district     = request.form.get('district', '').strip()
+        province     = request.form.get('province', '').strip()
+        postal_code  = request.form.get('postal_code', '').strip()
+
+        # --- การศึกษา ---
+        student_id     = request.form.get('student_id', '').strip()
+        faculty        = request.form.get('faculty', '').strip()
+        major          = request.form.get('major', '').strip()
+        year_level     = request.form.get('year_level', '').strip()
+        gpa            = request.form.get('gpa', '').strip()
+        academic_year  = request.form.get('academic_year', '').strip()
+
+        # --- ผู้ปกครอง ---
+        father_name       = request.form.get('father_name', '').strip()
+        father_occupation = request.form.get('father_occupation', '').strip()
+        father_income     = request.form.get('father_income', '').strip()
+        father_phone      = request.form.get('father_phone', '').strip()
+        father_status     = request.form.get('father_status', '').strip()
+        mother_name       = request.form.get('mother_name', '').strip()
+        mother_occupation = request.form.get('mother_occupation', '').strip()
+        mother_income     = request.form.get('mother_income', '').strip()
+        mother_phone      = request.form.get('mother_phone', '').strip()
+        mother_status     = request.form.get('mother_status', '').strip()
+
+        # --- รายได้ครอบครัว ---
+        family_income  = request.form.get('family_income', '').strip()
+        siblings       = request.form.get('siblings', '').strip()
+        birth_order    = request.form.get('birth_order', '').strip()
+        housing_type   = request.form.get('housing_type', '').strip()
+        income_note    = request.form.get('income_note', '').strip()
+
+        # --- ข้อมูลเพิ่มเติม ---
+        prev_scholarship        = request.form.get('prev_scholarship', '').strip()
+        prev_scholarship_detail = request.form.get('prev_scholarship_detail', '').strip()
+        activities              = request.form.get('activities', '').strip()
+        reason                  = request.form.get('reason', '').strip()
+
         scholarship_id = request.form.get('scholarship_id', type=int)
 
-        # ---- ตรวจสอบข้อมูลเบื้องต้น ----
+        # ชื่อเต็มสำหรับบันทึกลงฐานข้อมูล
+        student_name = f"{title}{first_name} {last_name}".strip()
+
+        # ---- ตรวจสอบข้อมูล ----
         errors = []
         if not student_id:
             errors.append('กรุณากรอกรหัสนักศึกษา')
-        if not student_name:
-            errors.append('กรุณากรอกชื่อ-นามสกุล')
+        if not first_name or not last_name:
+            errors.append('กรุณากรอกชื่อและนามสกุล')
         if not faculty:
-            errors.append('กรุณากรอกคณะ')
+            errors.append('กรุณาเลือกคณะ')
         if not gpa:
             errors.append('กรุณากรอกเกรดเฉลี่ย (GPA)')
         if not scholarship_id:
             errors.append('กรุณาเลือกทุนการศึกษาที่ต้องการสมัคร')
+        if not reason:
+            errors.append('กรุณาระบุเหตุผลที่ต้องการสมัครทุน')
 
-        # ตรวจสอบว่านักศึกษาเคยสมัครทุนนี้ไปแล้วหรือยัง
         if student_id and scholarship_id:
             existing = Application.query.filter_by(
                 student_id=student_id,
@@ -99,19 +152,13 @@ def apply_scholarship():
         if errors:
             for err in errors:
                 flash(err, 'error')
-            # ส่งข้อมูลที่กรอกไปแล้วกลับมาด้วย (เพื่อไม่ให้กรอกใหม่ทั้งหมด)
-            prefill = {
-                'student_id': student_id,
-                'student_name': student_name,
-                'faculty': faculty,
-                'gpa': gpa,
-                'scholarship_id': scholarship_id,
-            }
+            prefill = request.form.to_dict()
+            prefill['scholarship_id'] = scholarship_id
             return render_template('student/apply.html',
                                    scholarships=scholarships,
                                    prefill=prefill)
 
-        # ---- บันทึกใบสมัครใหม่ ----
+        # ---- บันทึกใบสมัคร ----
         today = datetime.today().strftime('%Y-%m-%d')
         new_application = Application(
             student_id=student_id,
@@ -128,16 +175,17 @@ def apply_scholarship():
         flash(f'สมัครทุนสำเร็จแล้ว! รหัสการสมัคร: #{new_application.id}', 'success')
         return redirect(url_for('student.track_status'))
 
-    # ---- GET: Auto-Fill จากใบสมัครล่าสุด (ถ้ามี) ----
-    # ในระบบจริงจะดึง student_id จาก session; ที่นี่ใช้ข้อมูล dummy เพื่อสาธิต
+    # ---- GET: Auto-Fill ----
     prefill = {}
     last_app = Application.query.order_by(Application.id.desc()).first()
     if last_app:
+        name_parts = last_app.student_name.split(' ', 1) if last_app.student_name else ['', '']
         prefill = {
             'student_id': last_app.student_id,
-            'student_name': last_app.student_name,
-            'faculty': last_app.faculty,
-            'gpa': last_app.gpa,
+            'first_name': name_parts[0] if name_parts else '',
+            'last_name':  name_parts[1] if len(name_parts) > 1 else '',
+            'faculty':    last_app.faculty,
+            'gpa':        last_app.gpa,
         }
 
     return render_template('student/apply.html',

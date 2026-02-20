@@ -17,6 +17,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(
     basedir, "scholarship.db"
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  # จำกัดขนาด request สูงสุด 10 MB
 
 # 3. เริ่มต้นใช้งาน Database ร่วมกับ App
 db.init_app(app)

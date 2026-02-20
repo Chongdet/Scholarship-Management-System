@@ -10,12 +10,18 @@ student_bp = Blueprint('student', __name__)
 @student_bp.route('/dashboard')
 def dashboard():
     """หน้าหลักของนักศึกษา (Student Dashboard)"""
-    return "Student: Dashboard"
+    return render_template('student/dashboard.html')
 
 @student_bp.route('/status')
 def track_status():
     """ระบบติดตามสถานะการสมัคร (Application Status Tracking)"""
-    return "Student: Application Status"
+    return render_template('student/status.html')
+
+@student_bp.route('/scholarships')
+def list_scholarships():
+    """หน้าประกาศทุนการศึกษา (Scholarship Announcement)"""
+    return render_template('student/scholarships.html')
+
 
 
 # ==========================================

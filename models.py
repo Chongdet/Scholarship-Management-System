@@ -6,6 +6,7 @@ db = SQLAlchemy()
 class Scholarship(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
+    amount = db.Column(db.Float, nullable=True)  # จำนวนเงินทุน
     # เชื่อมไปยังเกณฑ์และผู้สมัคร
     criteria = db.relationship('Criterion', backref='scholarship', lazy=True)
     applications = db.relationship('Application', backref='scholarship', lazy=True)
@@ -29,3 +30,4 @@ class Application(db.Model):
     total_score = db.Column(db.Integer, default=0)
     is_scored = db.Column(db.Boolean, default=False)
     status = db.Column(db.String(20), default='pending')  # pending, approved, rejected
+

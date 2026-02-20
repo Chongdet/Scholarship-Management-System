@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบทุนการศึกษา - Ubon Ratchathani University</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-sky-50 min-h-screen flex flex-col m-0 p-0">
+    
+    <header class="bg-blue-900 text-white shadow-md w-full">
+        <div class="px-8 py-4 flex justify-between items-center w-full">
+            
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 flex items-center justify-center">
+                    <img src="{{ url_for('static', filename='images/ubu_logo.png') }}" alt="UBU Logo" class="w-full h-full object-contain">
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-yellow-400 tracking-wide">ระบบทุนการศึกษา</h1>
+                    <p class="text-sm text-blue-200">Ubon Ratchathani University</p>
+                </div>
+            </div>
+            
+            <nav class="flex items-center gap-6">
+                {% block nav_links %}{% endblock %}
+                
+                <div class="bg-blue-800 px-4 py-2 rounded-full text-sm border border-blue-700 flex items-center gap-2 text-yellow-100">
+                    👤 {% block role_name %}ผู้ใช้งาน{% endblock %}
+                </div>
+                
+                <a href="/logout" class="bg-yellow-400 text-blue-900 px-5 py-2.5 rounded-full font-bold hover:bg-yellow-300 transition-all shadow-md hover:shadow-lg">
+                    ออกจากระบบ 🚪
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div id="flash-container" class="fixed top-20 right-8 z-50 space-y-2">
+                {% for category, message in messages %}
+                <div class="flash-message bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 animate-slide-in" role="alert">
+                    <span class="text-lg">✓</span>
+                    <span>{{ message }}</span>
+                    <button onclick="this.parentElement.remove()" class="ml-4 text-white hover:text-gray-200 font-bold text-xl leading-none">&times;</button>
+                </div>
+                {% endfor %}
+            </div>
+            <script>
+                setTimeout(() => {
+                    const flashContainer = document.getElementById('flash-container');
+                    if (flashContainer) {
+                        flashContainer.querySelectorAll('.flash-message').forEach(msg => {
+                            msg.style.transition = 'opacity 0.5s, transform 0.5s';
+                            msg.style.opacity = '0';
+                            msg.style.transform = 'translateX(100%)';
+                            setTimeout(() => msg.remove(), 500);
+                        });
+                    }
+                }, 3000);
+            </script>
+            <style>
+                @keyframes slide-in {
+                    from {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+                .animate-slide-in {
+                    animation: slide-in 0.3s ease-out;
+                }
+            </style>
+        {% endif %}
+    {% endwith %}
+
+    <main class="flex-grow w-full px-8 py-10">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-blue-950 text-blue-200 py-8 px-8 w-full text-sm mt-auto">
+        <div class="flex justify-between items-start">
+            <div>
+                <strong class="text-yellow-400 text-base">สำนักงานพัฒนานักศึกษา</strong><br>
+                มหาวิทยาลัยอุบลราชธานี<br>
+                85 ถนนสถลมาร์ค ตำบลเมืองศรีไค อำเภอวารินชำราบ จังหวัดอุบลราชธานี 34190
+            </div>
+            <div class="text-right">
+                <strong class="text-yellow-400 text-base">ติดต่อเรา</strong><br>
+                Email: ubustudent.d@ubu.ac.th<br>
+                โทรศัพท์: 045-353000 ต่อ 1210
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

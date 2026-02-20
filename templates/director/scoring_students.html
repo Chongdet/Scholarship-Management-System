@@ -1,0 +1,131 @@
+{% extends "base_director.html" %} {% block content %}
+<div class="max-w-6xl mx-auto font-prompt p-6">
+  <div class="mb-6 flex items-center text-sm text-gray-500">
+    <a
+      href="{{ url_for('director.scoring') }}"
+      class="hover:text-blue-600 transition"
+      >พิจารณาทุน</a
+    >
+    <span class="mx-2">></span>
+    <a
+      href="{{ url_for('director.scoring') }}"
+      class="hover:text-blue-600 transition"
+      >รายชื่อทุน</a
+    >
+    <span class="mx-2">></span>
+    <span class="font-bold text-gray-800">{{ scholarship_name }}</span>
+  </div>
+
+  <h2 class="text-2xl font-bold mb-6 text-gray-800">
+    ผู้สมัคร: {{ scholarship_name }}
+  </h2>
+
+  <div
+    class="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden"
+  >
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th
+            class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase"
+          >
+            รหัสนักศึกษา
+          </th>
+          <th
+            class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase"
+          >
+            ชื่อ-นามสกุล
+          </th>
+          <th
+            class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase"
+          >
+            GPA
+          </th>
+          <th
+            class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase"
+          >
+            สถานะเอกสาร
+          </th>
+          <th
+            class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase"
+          >
+            สถานะคะแนน
+          </th>
+          <th
+            class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase"
+          >
+            การจัดการ
+          </th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-100">
+        {% for student in candidates %}
+        <tr class="hover:bg-gray-50 transition">
+          <td
+            class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium"
+          >
+            {{ student.student_id }} {# แก้จาก student.id เป็น
+            student.student_id #}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+            {{ student.student_name }} {# แก้จาก student.name เป็น
+            student.student_name #}
+          </td>
+          <td
+            class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-700"
+          >
+            {{ student.gpa }}
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+            <span
+              class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700"
+            >
+              ผ่านแล้ว
+            </span>
+          </td>
+
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+            {% if student.is_scored %}
+            <span class="text-blue-600 font-bold"
+              >{{ student.total_score }} คะแนน</span
+            >
+            {% else %}
+            <span class="text-gray-400 italic">ยังไม่ให้คะแนน</span>
+            {% endif %}
+          </td>
+
+          <td
+            class="px-6 py-4 whitespace-nowrap text-center text-xs font-medium space-x-2"
+          >
+            {# แก้ไขให้ส่ง app_id ให้ถูกต้อง #}
+            <a
+              href="{{ url_for('director.candidate_detail', app_id=student.id) }}"
+              class="inline-block bg-gray-400 text-white px-3 py-1.5 rounded-md hover:bg-gray-500"
+            >
+              ดูรายละเอียด
+            </a>
+
+            {% if student.is_scored %}
+            <button
+              disabled
+              class="bg-gray-200 text-gray-500 px-3 py-1.5 rounded-md cursor-not-allowed border border-gray-300"
+            >
+              สำเร็จ
+            </button>
+            {% else %} {# แก้ไข syntax ของปุ่มให้ถูกต้อง ไม่ให้มีการซ้อนทับกัน
+            #}
+            <a
+              href="{{ url_for('director.give_score', app_id=student.id) }}"
+              class="inline-block bg-gray-800 text-white px-3 py-1.5 rounded-md hover:bg-black transition shadow-sm"
+            >
+              ให้คะแนน
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

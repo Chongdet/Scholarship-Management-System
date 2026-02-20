@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block nav_links %}
+    <a href="{{ url_for('officer.applications') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ตรวจสอบเอกสาร</a>
+    <a href="{{ url_for('officer.audit_log') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">บันทึกการทำงาน</a>
+{% endblock %}
+
+{% block role_name %}เจ้าหน้าที่{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto p-6">
+    <!-- Breadcrumb -->
+    <div class="mb-6 flex items-center text-sm text-gray-500">
+        <a href="{{ url_for('officer.home') }}" class="hover:text-blue-600 transition">หน้าแรก</a>
+        <span class="mx-2">></span>
+        <span class="font-bold text-gray-800">จัดการใบสมัคร</span>
+    </div>
+
+    <!-- Header -->
+    <div class="mb-8 pb-4 border-b border-gray-300">
+        <h1 class="text-2xl font-bold text-gray-800 mb-2">จัดการใบสมัครทุนการศึกษา</h1>
+        <p class="text-gray-500">ตรวจสอบและจัดการใบสมัครทุนการศึกษาของนักศึกษา</p>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6">
+        <h2 class="text-lg font-bold text-gray-800 mb-4">ค้นหาและกรอง</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">ค้นหา</label>
+                <input type="text" placeholder="ชื่อ-นามสกุล หรือรหัสนักศึกษา" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition" />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">ทุน</label>
+                <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
+                    <option>ทั้งหมด</option>
+                    {% for scholarship in scholarships %}
+                    <option>{{ scholarship.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">สถานะ</label>
+                <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
+                    <option>ทั้งหมด</option>
+                    <option>รอการตรวจสอบ</option>
+                    <option>กำลังตรวจสอบ</option>
+                    <option>เรียกสัมภาษณ์</option>
+                    <option>ผ่าน</option>
+                </select>
+            </div>
+        </div>
+        <div class="mt-4 flex justify-end">
+            <a href="{{ url_for('officer.applications') }}" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">ล้างการกรอง</a>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <a href="{{ url_for('officer.applications') }}" class="block bg-blue-50 border-l-4 border-blue-600 rounded-lg p-4 transition hover:shadow-sm{% if not selected_status %} ring-2 ring-blue-200{% endif %}">
+            <p class="text-sm text-gray-600 font-medium">รวมทั้งหมด</p>
+            <h3 class="text-3xl font-bold text-gray-800 mt-2">{{ total_count }}</h3>
+        </a>
+        <a href="{{ url_for('officer.applications', status='pending') }}" class="block bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-4 transition hover:shadow-sm{% if selected_status == 'pending' %} ring-2 ring-yellow-200{% endif %}">
+            <p class="text-sm text-gray-600 font-medium">รอการตรวจสอบ</p>
+            <h3 class="text-3xl font-bold text-gray-800 mt-2">{{ pending_count }}</h3>
+        </a>
+        <a href="{{ url_for('officer.applications', status='interview') }}" class="block bg-purple-50 border-l-4 border-purple-600 rounded-lg p-4 transition hover:shadow-sm{% if selected_status == 'interview' %} ring-2 ring-purple-200{% endif %}">
+            <p class="text-sm text-gray-600 font-medium">เรียกสัมภาษณ์</p>
+            <h3 class="text-3xl font-bold text-gray-800 mt-2">{{ interview_count }}</h3>
+        </a>
+        <a href="{{ url_for('officer.applications', status='approved') }}" class="block bg-green-50 border-l-4 border-green-600 rounded-lg p-4 transition hover:shadow-sm{% if selected_status == 'approved' %} ring-2 ring-green-200{% endif %}">
+            <p class="text-sm text-gray-600 font-medium">ผ่านแล้ว</p>
+            <h3 class="text-3xl font-bold text-gray-800 mt-2">{{ approved_count }}</h3>
+        </a>
+    </div>
+
+    <!-- Applications Table -->
+    <div class="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden">
+        <div class="overflow-hidden">
+            <table class="w-full table-auto divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">ลำดับ</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">รหัสนักศึกษา</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase whitespace-nowrap">ชื่อ-นามสกุล</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase whitespace-nowrap">คณะ</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase whitespace-nowrap">ชื่อทุน</th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase">GPAX</th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase">วันที่สมัคร</th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase w-40 min-w-[160px]">สถานะ</th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase min-w-[120px]">การจัดการ</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-100">
+                    {% for application in applications %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">{{ loop.index }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ application.student_id }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ application.student_name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ application.faculty }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ application.scholarship.name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-700">{{ application.gpa }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-700">{{ application.application_date }}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-center w-40 min-w-[160px]">
+                            {% if application.status == 'pending' %}
+                            <span class="block w-full px-2 py-1 text-[11px] font-semibold rounded-lg bg-yellow-100 text-yellow-800 truncate">รอการตรวจสอบ</span>
+                            {% elif application.status == 'reviewing' %}
+                            <span class="block w-full px-2 py-1 text-[11px] font-semibold rounded-lg bg-blue-100 text-blue-800 truncate">กำลังตรวจสอบ</span>
+                            {% elif application.status == 'interview' %}
+                            <span class="block w-full px-2 py-1 text-[11px] font-semibold rounded-lg bg-purple-100 text-purple-800 truncate">เรียกสัมภาษณ์</span>
+                            {% elif application.status == 'approved' %}
+                            <span class="block w-full px-2 py-1 text-[11px] font-semibold rounded-lg bg-green-100 text-green-800 truncate">ผ่านแล้ว</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center text-xs font-medium min-w-[120px]">
+                            <a href="{{ url_for('officer.view_application', application_id=application.id) }}" class="text-blue-600 hover:text-blue-800 font-medium">ดูรายละเอียด</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-8 text-center text-gray-500">ไม่พบข้อมูล</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="bg-white px-6 py-4 border-t border-gray-200 flex justify-between items-center">
+            <div class="text-sm text-gray-600">
+                แสดง {{ start_index }} ถึง {{ end_index }} จากทั้งหมด {{ applications|length }} รายการ
+            </div>
+            <div class="flex gap-2">
+                {% if page > 1 %}
+                <a href="?page=1" class="px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">ก่อนหน้า</a>
+                {% else %}
+                <button disabled class="px-3 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">ก่อนหน้า</button>
+                {% endif %}
+                
+                <button class="px-3 py-2 border border-blue-600 bg-blue-600 text-white rounded-lg transition">{{ page }}</button>
+                
+                {% if page < total_pages %}
+                <a href="?page={{ page + 1 }}" class="px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">ถัดไป</a>
+                {% else %}
+                <button disabled class="px-3 py-2 border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">ถัดไป</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+

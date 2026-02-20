@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block nav_links %}
+    <a href="{{ url_for('officer.list_scholarships') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">จัดการทุน</a>
     <a href="{{ url_for('officer.applications') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ตรวจสอบเอกสาร</a>
     <a href="{{ url_for('officer.audit_log') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">บันทึกการทำงาน</a>
 {% endblock %}

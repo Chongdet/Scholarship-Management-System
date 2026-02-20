@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, redirect, url_for, render_template
 from routes.director_routes import director_bp
 from routes.officer_routes import officer_bp
 from routes.student_routes import student_bp
@@ -8,6 +8,7 @@ from models import db, Scholarship, Criterion, Application
 import os
 
 app = Flask(__name__)
+app.config["SECRET_KEY"] = "your-secret-key-here-change-in-production"
 
 # 2. ตั้งค่า Database (SQLite)
 # สร้างไฟล์ชื่อ scholarship.db ไว้ในโฟลเดอร์โครงการ
@@ -68,64 +69,94 @@ with app.app_context():
         Application(
             student_id="68114540214",
             student_name="นาย ทรงเดช จำปาเทศ",
+            faculty="คณะวิศวกรรมศาสตร์",
             gpa="3.94",
+            application_date="2026-02-01",
             scholarship_id=sch1.id,
+            status="approved",
         ),
         Application(
             student_id="68114540101",
             student_name="นางสาว สวยใส ใจชื่น",
+            faculty="คณะวิทยาศาสตร์",
             gpa="3.20",
+            application_date="2026-02-02",
             scholarship_id=sch1.id,
+            status="pending",
         ),
         Application(
             student_id="68114540102",
             student_name="นาย มานะ อดทน",
+            faculty="คณะบริหารศาสตร์",
             gpa="2.85",
+            application_date="2026-02-03",
             scholarship_id=sch1.id,
+            status="reviewing",
         ),
         Application(
             student_id="68114540103",
             student_name="นางสาว ขยัน เรียนดี",
+            faculty="คณะศิลปศาสตร์",
             gpa="3.15",
+            application_date="2026-02-03",
             scholarship_id=sch1.id,
+            status="interview",
         ),
         # ทุนเรียนดี (4 คน)
         Application(
             student_id="68114540215",
             student_name="นาย ปกรณ์เกียรติ มั่นคง",
+            faculty="คณะวิศวกรรมศาสตร์",
             gpa="3.98",
+            application_date="2026-02-04",
             scholarship_id=sch2.id,
+            status="approved",
         ),
         Application(
             student_id="68114540104",
             student_name="นางสาว ปัญญา เลิศล้ำ",
+            faculty="คณะวิทยาศาสตร์",
             gpa="4.00",
+            application_date="2026-02-04",
             scholarship_id=sch2.id,
+            status="reviewing",
         ),
         Application(
             student_id="68114540105",
             student_name="นาย ฉลาด รอบรู้",
+            faculty="คณะบริหารศาสตร์",
             gpa="3.85",
+            application_date="2026-02-05",
             scholarship_id=sch2.id,
+            status="pending",
         ),
         Application(
             student_id="68114540106",
             student_name="นางสาว สมองไว ใจสู้",
+            faculty="คณะศิลปศาสตร์",
             gpa="3.92",
+            application_date="2026-02-05",
             scholarship_id=sch2.id,
+            status="interview",
         ),
         # ทุนกิจกรรม (2 คน)
         Application(
             student_id="68114540107",
             student_name="นาย กล้าหาญ ชาญชัย",
+            faculty="คณะนิติศาสตร์",
             gpa="2.50",
+            application_date="2026-02-06",
             scholarship_id=sch3.id,
+            status="pending",
         ),
         Application(
             student_id="68114540108",
             student_name="นางสาว ร่าเริง แจ่มใส",
+            faculty="คณะศิลปศาสตร์",
             gpa="3.45",
+            application_date="2026-02-06",
             scholarship_id=sch3.id,
+            status="reviewing",
         ),
     ]
 
@@ -136,7 +167,19 @@ with app.app_context():
 
 @app.route("/")
 def home():
-    return "หน้าแรกของระบบ Scholarship Management (Database Ready)"
+    return redirect(url_for('login'))
+
+
+@app.route("/login")
+def login():
+    """หน้าเข้าสู่ระบบ - เลือกระบบเจ้าหน้าที่ กรรมการ หรือนักศึกษา"""
+    return render_template('login.html')
+
+
+@app.route("/logout")
+def logout():
+    """ออกจากระบบไปยังหน้า login"""
+    return redirect(url_for('login'))
 
 
 if __name__ == "__main__":

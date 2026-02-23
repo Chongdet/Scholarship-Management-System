@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block nav_links %}
+    <a href="{{ url_for('officer.list_scholarships') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">จัดการทุน</a>
+    <a href="{{ url_for('officer.applications') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ตรวจสอบเอกสาร</a>
+    <a href="{{ url_for('officer.audit_log') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">บันทึกการทำงาน</a>
+{% endblock %}
+
+{% block role_name %}เจ้าหน้าที่{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="fw-bold">จัดการทุนการศึกษา</h3>
+            <small class="text-muted">จัดการทุนและดูจำนวนผู้สมัคร</small>
+        </div>
+        <a href="{{ url_for('officer.add_scholarship') }}" class="btn btn-primary">
+            + เพิ่มทุนใหม่
+        </a>
+    </div>
+
+    <!-- Summary -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-primary">
+                <div class="card-body">
+                    <h6 class="text-muted">ทุนทั้งหมด</h6>
+                    <h4 class="fw-bold">{{ scholarships|length }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>ชื่อทุน</th>
+                            <th>จำนวนเกณฑ์</th>
+                            <th>จำนวนเงิน</th>
+                            <th>จำนวนผู้สมัคร</th>
+                            <th>การจัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for scholarship in scholarships %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+
+                            <td class="fw-semibold">
+                                {{ scholarship.name }}
+                            </td>
+
+                            <td>
+                                {{ scholarship.criteria|length }} เกณฑ์
+                            </td>
+
+                            <td>
+                                {{ scholarship.applications|length }} คน
+                            </td>
+
+                            <td>
+                                <a href="{{ url_for('officer.view_applications_by_scholarship', id=scholarship.id) }}"
+                                   class="btn btn-sm btn-outline-primary">
+                                   ผู้สมัคร
+                                </a>
+
+                                <a href="{{ url_for('officer.edit_scholarship', id=scholarship.id) }}"
+                                   class="btn btn-sm btn-outline-warning">
+                                   แก้ไข
+                                </a>
+
+                                <form action="{{ url_for('officer.delete_scholarship', id=scholarship.id) }}"
+                                      method="POST"
+                                      style="display:inline;">
+                                    <button type="submit"
+                                            class="btn btn-sm btn-outline-danger"
+                                            onclick="return confirm('ยืนยันการลบทุนนี้?')">
+                                        ลบ
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">
+                                ยังไม่มีทุนในระบบ
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

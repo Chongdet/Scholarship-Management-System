@@ -16,47 +16,55 @@
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600 min-h-screen flex items-center justify-center p-4">
+<body class="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600 min-h-screen flex items-center justify-center p-4 py-12">
     
     <div class="w-full max-w-md">
-        <!-- Header -->
-        <div class="text-center mb-12">
+        <div class="text-center mb-10">
             <div class="flex justify-center mb-6">
-                <img src="{{ url_for('static', filename='images/ubu_logo.png') }}" alt="UBU Logo" class="w-24 h-24">
+                <img src="{{ url_for('static', filename='images/ubu_logo.png') }}" alt="UBU Logo" class="w-24 h-24 drop-shadow-lg">
             </div>
             <h1 class="text-4xl font-bold text-white mb-2">ระบบทุนการศึกษา</h1>
             <p class="text-blue-100 text-lg">Ubon Ratchathani University</p>
         </div>
 
-        <!-- Login Cards -->
-        <div class="space-y-4">
-            <!-- Director Login -->
-            <a href="{{ url_for('director.home') }}" class="block group">
-                <div class="bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all p-8 text-center hover:scale-105 transform">
-                    <div class="text-5xl mb-4">👨‍💼</div>
-                    <h2 class="text-2xl font-bold text-gray-800 mb-2">ระบบกรรมการ</h2>
-                    <p class="text-gray-600 text-sm mb-4">สำหรับคณะกรรมการให้ทุนการศึกษา</p>
-                    <div class="bg-blue-600 text-white px-6 py-2 rounded-lg inline-block font-medium group-hover:bg-blue-700 transition">
+        <div class="space-y-5">
+            
+            <a href="{{ url_for('student.login') }}" class="block group">
+                <div class="bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all p-6 text-center hover:scale-105 transform border-b-4 border-transparent hover:border-yellow-400">
+                    <div class="text-5xl mb-3">🎓</div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">ระบบนักศึกษา</h2>
+                    <p class="text-gray-600 text-sm mb-4">สำหรับนักศึกษายื่นสมัครและติดตามสถานะทุน</p>
+                    <div class="bg-yellow-500 text-blue-900 px-6 py-2 rounded-lg inline-block font-bold group-hover:bg-yellow-400 transition shadow-md">
+                        เข้าสู่ระบบนักศึกษา →
+                    </div>
+                </div>
+            </a>
+
+            <a href="{{ url_for('officer.applications') }}" class="block group">
+                <div class="bg-white/95 rounded-2xl shadow-lg hover:shadow-xl transition-all p-6 text-center hover:scale-105 transform">
+                    <div class="text-4xl mb-3">👩‍💻</div>
+                    <h2 class="text-xl font-bold text-gray-800 mb-2">ระบบเจ้าหน้าที่</h2>
+                    <p class="text-gray-600 text-sm mb-4">สำหรับเจ้าหน้าที่ตรวจสอบเอกสาร</p>
+                    <div class="bg-blue-600 text-white px-5 py-2 rounded-lg inline-block font-medium group-hover:bg-blue-700 transition">
                         เข้าระบบ →
                     </div>
                 </div>
             </a>
 
-            <!-- Officer Login -->
-            <a href="{{ url_for('officer.applications') }}" class="block group">
-                <div class="bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all p-8 text-center hover:scale-105 transform">
-                    <div class="text-5xl mb-4">👩‍💻</div>
-                    <h2 class="text-2xl font-bold text-gray-800 mb-2">ระบบเจ้าหน้าที่</h2>
-                    <p class="text-gray-600 text-sm mb-4">สำหรับเจ้าหน้าที่ตรวจสอบเอกสาร</p>
-                    <div class="bg-blue-600 text-white px-6 py-2 rounded-lg inline-block font-medium group-hover:bg-blue-700 transition">
+            <a href="{{ url_for('director.home') }}" class="block group">
+                <div class="bg-white/95 rounded-2xl shadow-lg hover:shadow-xl transition-all p-6 text-center hover:scale-105 transform">
+                    <div class="text-4xl mb-3">👨‍💼</div>
+                    <h2 class="text-xl font-bold text-gray-800 mb-2">ระบบกรรมการ</h2>
+                    <p class="text-gray-600 text-sm mb-4">สำหรับคณะกรรมการพิจารณาทุน</p>
+                    <div class="bg-blue-600 text-white px-5 py-2 rounded-lg inline-block font-medium group-hover:bg-blue-700 transition">
                         เข้าระบบ →
                     </div>
                 </div>
             </a>
+            
         </div>
 
-        <!-- Footer Info -->
-        <div class="mt-12 text-center text-blue-100 text-sm">
+        <div class="mt-10 text-center text-blue-200 text-sm">
             <p>ระบบทุนการศึกษา มหาวิทยาลัยอุบลราชธานี</p>
             <p>© 2567 สำนักงานพัฒนานักศึกษา</p>
         </div>

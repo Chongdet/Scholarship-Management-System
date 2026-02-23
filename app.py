@@ -167,8 +167,11 @@ with app.app_context():
 
 
 @app.route("/")
-def home():
-    return redirect(url_for('login'))
+def index():
+    """หน้าแรกสุด (Landing Page) ก่อนเข้าสู่ระบบ"""
+    # ดึงข้อมูลทุนทั้งหมดจาก Database มาแสดงบนหน้าเว็บ
+    scholarships = Scholarship.query.all()
+    return render_template('index.html', scholarships=scholarships)
 
 
 @app.route("/login")

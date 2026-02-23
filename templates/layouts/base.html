@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบทุนการศึกษา - Ubon Ratchathani University</title>
+    <title>{% block title %}ระบบทุนการศึกษา - Ubon Ratchathani University{% endblock %}</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,6 +17,8 @@
             font-family: 'Prompt', sans-serif;
         }
     </style>
+    
+    {% block extra_styles %}{% endblock %}
 </head>
 <body class="bg-sky-50 min-h-screen flex flex-col m-0 p-0">
     

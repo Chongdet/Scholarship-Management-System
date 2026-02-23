@@ -1,108 +1,75 @@
-{% extends "base.html" %}
-
-{% block nav_links %}
-    <a href="{{ url_for('officer.list_scholarships') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">จัดการทุน</a>
-    <a href="{{ url_for('officer.applications') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ตรวจสอบเอกสาร</a>
-    <a href="{{ url_for('officer.audit_log') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">บันทึกการทำงาน</a>
-{% endblock %}
-
-{% block role_name %}เจ้าหน้าที่{% endblock %}
+{% extends "layouts/base_officer.html" %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="max-w-7xl mx-auto p-6">
 
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-gray-200 pb-4">
         <div>
-            <h3 class="fw-bold">จัดการทุนการศึกษา</h3>
-            <small class="text-muted">จัดการทุนและดูจำนวนผู้สมัคร</small>
+            <h1 class="text-3xl font-bold text-gray-800">จัดการทุนการศึกษา</h1>
+            <p class="text-gray-500 text-sm mt-2">จัดการข้อมูลทุนและดูจำนวนผู้สมัครในระบบ</p>
         </div>
-        <a href="{{ url_for('officer.add_scholarship') }}" class="btn btn-primary">
-            + เพิ่มทุนใหม่
+        <a href="{{ url_for('officer.add_scholarship') }}" class="mt-4 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-5 rounded-xl transition shadow-md flex items-center gap-2 transform hover:-translate-y-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+            </svg>
+            เพิ่มทุนใหม่
         </a>
     </div>
 
-    <!-- Summary -->
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card shadow-sm border-primary">
-                <div class="card-body">
-                    <h6 class="text-muted">ทุนทั้งหมด</h6>
-                    <h4 class="fw-bold">{{ scholarships|length }}</h4>
-                </div>
-            </div>
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-gray-600">
+                <thead class="bg-blue-50 text-blue-900 font-bold border-b border-blue-100">
+                    <tr>
+                        <th class="px-6 py-4">#</th>
+                        <th class="px-6 py-4">ชื่อทุนการศึกษา</th>
+                        <th class="px-6 py-4">จำนวนเงิน (บาท)</th>
+                        <th class="px-6 py-4 text-center">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% for scholarship in scholarships %}
+                    <tr class="hover:bg-blue-50/50 transition duration-150">
+                        <td class="px-6 py-4">{{ loop.index }}</td>
+                        <td class="px-6 py-4 font-bold text-gray-800">{{ scholarship.name }}</td>
+                        <td class="px-6 py-4 text-green-600 font-medium">
+                            {{ "{:,.2f}".format(scholarship.amount) if scholarship.amount else "-" }} ฿
+                        </td>
+                        <td class="px-6 py-4 text-center space-x-2">
+                            
+                            <a href="{{ url_for('officer.applications', scholarship_id=scholarship.id) }}" 
+                               class="inline-block text-blue-600 border border-blue-600 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded-lg transition text-xs font-bold">
+                                👥 ผู้สมัคร
+                            </a>
+
+                            <a href="{{ url_for('officer.edit_scholarship', id=scholarship.id) }}" 
+                               class="inline-block text-yellow-500 border border-yellow-500 hover:bg-yellow-500 hover:text-white px-3 py-1.5 rounded-lg transition text-xs font-bold">
+                                ✏️ แก้ไข
+                            </a>
+
+                            <form action="{{ url_for('officer.delete_scholarship', id=scholarship.id) }}" method="POST" class="inline-block">
+                                <button type="submit" onclick="return confirm('ยืนยันการลบทุน {{ scholarship.name }} นี้ใช่หรือไม่?')" 
+                                        class="text-red-500 border border-red-500 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-lg transition text-xs font-bold">
+                                    🗑️ ลบ
+                                </button>
+                            </form>
+
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="px-6 py-12 text-center text-gray-400">
+                            <div class="flex flex-col items-center justify-center">
+                                <span class="text-4xl mb-3">📭</span>
+                                <p class="text-lg font-medium">ยังไม่มีทุนในระบบ</p>
+                                <p class="text-sm">กดปุ่ม "เพิ่มทุนใหม่" ด้านบนเพื่อเริ่มต้นใช้งาน</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
-
-    <!-- Table -->
-    <div class="card shadow-sm">
-        <div class="card-body">
-
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>#</th>
-                            <th>ชื่อทุน</th>
-                            <th>จำนวนเกณฑ์</th>
-                            <th>จำนวนเงิน</th>
-                            <th>จำนวนผู้สมัคร</th>
-                            <th>การจัดการ</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for scholarship in scholarships %}
-                        <tr>
-                            <td>{{ loop.index }}</td>
-
-                            <td class="fw-semibold">
-                                {{ scholarship.name }}
-                            </td>
-
-                            <td>
-                                {{ scholarship.criteria|length }} เกณฑ์
-                            </td>
-
-                            <td>
-                                {{ scholarship.applications|length }} คน
-                            </td>
-
-                            <td>
-                                <a href="{{ url_for('officer.view_applications_by_scholarship', id=scholarship.id) }}"
-                                   class="btn btn-sm btn-outline-primary">
-                                   ผู้สมัคร
-                                </a>
-
-                                <a href="{{ url_for('officer.edit_scholarship', id=scholarship.id) }}"
-                                   class="btn btn-sm btn-outline-warning">
-                                   แก้ไข
-                                </a>
-
-                                <form action="{{ url_for('officer.delete_scholarship', id=scholarship.id) }}"
-                                      method="POST"
-                                      style="display:inline;">
-                                    <button type="submit"
-                                            class="btn btn-sm btn-outline-danger"
-                                            onclick="return confirm('ยืนยันการลบทุนนี้?')">
-                                        ลบ
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="6" class="text-center text-muted">
-                                ยังไม่มีทุนในระบบ
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-        </div>
-    </div>
-
 </div>
-
 {% endblock %}

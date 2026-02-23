@@ -10,14 +10,79 @@ officer_bp = Blueprint('officer', __name__)
 
 @officer_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    """ระบบเข้าสู่ระบบของเจ้าหน้าที่ (Officer Login)"""
     return "Officer: Login Page"
 
-@officer_bp.route('/scholarships', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def manage_scholarships():
-    """ระบบจัดการทุนการศึกษา (Scholarship Management)"""
-    return "Officer: Scholarship Management System"
 
+# =========================
+# แสดงรายการใบสมัครของทุน
+# =========================
+@officer_bp.route('/scholarships/<int:id>/applications')
+def view_applications_by_scholarship(id):
+    applications = Application.query.filter_by(scholarship_id=id).all()
+    return render_template('officer/applications.html', applications=applications)
+
+
+# =========================
+# เพิ่มทุน
+# =========================
+@officer_bp.route('/scholarships/add', methods=['GET', 'POST'])
+def add_scholarship():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        amount = request.form.get('amount')
+
+        if not name or not amount:
+            flash('กรุณากรอกข้อมูลให้ครบ', 'danger')
+            return redirect(url_for('officer.add_scholarship'))
+
+        new_scholarship = Scholarship(
+            name=name,
+            amount=float(amount)
+        )
+
+        db.session.add(new_scholarship)
+        db.session.commit()
+
+        flash('เพิ่มทุนสำเร็จ', 'success')
+        return redirect(url_for('officer.list_scholarships'))
+
+    return render_template('officer/add_scholarship.html')
+
+@officer_bp.route('/scholarships')
+def list_scholarships():
+    """แสดงรายการทุนทั้งหมด (List all scholarships)"""
+    scholarships = Scholarship.query.all()
+    return render_template('officer/scholarships.html', scholarships=scholarships)
+
+@officer_bp.route('/scholarships/<int:id>/edit', methods=['GET', 'POST'])
+def edit_scholarship(id):
+    """แก้ไขทุน (Edit scholarship)"""
+    scholarship = Scholarship.query.get_or_404(id)
+    if request.method == 'POST':
+        name = request.form.get('name')
+        amount = request.form.get('amount')
+
+        if not name or not amount:
+            flash('กรุณากรอกข้อมูลให้ครบ', 'danger')
+            return redirect(url_for('officer.edit_scholarship', id=id))
+
+        scholarship.name = name
+        scholarship.amount = float(amount)
+        db.session.commit()
+
+        flash('แก้ไขทุนสำเร็จ', 'success')
+        return redirect(url_for('officer.list_scholarships'))
+
+    return render_template('officer/edit_scholarship.html', scholarship=scholarship)
+
+@officer_bp.route('/scholarships/<int:id>/delete', methods=['POST'])
+def delete_scholarship(id):
+    """ลบทุน (Delete scholarship)"""
+    scholarship = Scholarship.query.get_or_404(id)
+    db.session.delete(scholarship)
+    db.session.commit()
+    flash('ลบทุนสำเร็จ', 'success')
+    return redirect(url_for('officer.list_scholarships'))
 
 # ==========================================
 # ผู้รับผิดชอบ: นาย ธีรภัทร พิกุลศรี

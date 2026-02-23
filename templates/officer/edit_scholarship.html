@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block nav_links %}
+    <a href="{{ url_for('officer.list_scholarships') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">จัดการทุน</a>
+    <a href="{{ url_for('officer.applications') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ตรวจสอบเอกสาร</a>
+    <a href="{{ url_for('officer.audit_log') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">บันทึกการทำงาน</a>
+{% endblock %}
+
+{% block role_name %}เจ้าหน้าที่{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3>แก้ไขทุนการศึกษา</h3>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="name" class="form-label">ชื่อทุน</label>
+            <input type="text" class="form-control" id="name" name="name" value="{{ scholarship.name }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="amount" class="form-label">จำนวนเงิน (บาท)</label>
+            <input type="number" step="0.01" class="form-control" id="amount" name="amount" value="{{ scholarship.amount or '' }}">
+        </div>
+        <button type="submit" class="btn btn-primary">บันทึก</button>
+        <a href="{{ url_for('officer.list_scholarships') }}" class="btn btn-secondary">ยกเลิก</a>
+    </form>
+</div>
+{% endblock %}

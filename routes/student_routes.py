@@ -1,13 +1,15 @@
-from flask import Blueprint, render_template, request, session, redirect, url_for, flash
-from models import db, Student, Scholarship  # 🌟 1. เพิ่ม Scholarship เข้ามาที่นี่
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, session
+from models import db, Scholarship, Application, Student
+import os
 import json
+from werkzeug.utils import secure_filename
+from datetime import datetime
 
 student_bp = Blueprint("student", __name__)
 
 # ==========================================
-# ผู้รับผิดชอบ: นางสาว ปัญญาพร มูลดับ
+# ฟีเจอร์: Dashboard
 # ==========================================
-
 @student_bp.route("/dashboard")
 def dashboard():
     # ตรวจสอบการ Login
@@ -15,7 +17,7 @@ def dashboard():
         flash("กรุณาเข้าสู่ระบบ", "error")
         return redirect(url_for("login"))
 
-    # ดึงข้อมูลนักศึกษาที่ Login
+    # ดึงข้อมูลนักศึกษาที่ Login จากฐานข้อมูลจริง
     current_student_id = session["user_id"]
     student = Student.query.filter_by(student_id=current_student_id).first()
 
@@ -23,36 +25,16 @@ def dashboard():
         flash("ไม่พบข้อมูลนักศึกษา", "error")
         return redirect(url_for("login"))
 
-    # 🌟 2. ดึงข้อมูลทุนทั้งหมดจาก Database มาแสดงให้นักศึกษาเห็น
+    # ดึงข้อมูลทุนทั้งหมดมาแสดง
     all_scholarships = Scholarship.query.all()
 
-    # 🌟 3. ส่ง scholarships=all_scholarships ไปที่ Template
     return render_template("student/dashboard.html", 
                            student=student, 
                            scholarships=all_scholarships)
 
-
-@student_bp.route("/status")
-def track_status():
-    """ระบบติดตามสถานะการสมัคร (Application Status Tracking)"""
-    return "Student: Application Status"
-
-
 # ==========================================
-# ผู้รับผิดชอบ: นาย กิตติพงษ์ เลี้ยงหิรัญถาวร
+# ฟีเจอร์: Profile Management (จัดการข้อมูลส่วนตัว)
 # ==========================================
-
-@student_bp.route("/login", methods=["GET", "POST"])
-def login():
-    return redirect(url_for("login"))
-
-
-@student_bp.route("/auto-match")
-def auto_match():
-    """ระบบจับคู่ทุนอัตโนมัติ (Scholarship Auto-Matching)"""
-    return "Student: Scholarship Auto-Matching Results"
-
-
 @student_bp.route("/profile", methods=["GET", "POST"])
 def profile():
     if "user_id" not in session or session.get("role") != "student":
@@ -66,37 +48,33 @@ def profile():
         return redirect(url_for("login"))
 
     if request.method == "POST":
-        # อัปเดตข้อมูลส่วนตัว
+        # 1. อัปเดตข้อมูลการติดต่อ
         student_record.mobile = request.form.get("mobile", student_record.mobile)
         student_record.facebook = request.form.get("facebook", student_record.facebook)
         student_record.line_id = request.form.get("line_id", student_record.line_id)
         student_record.address_current = request.form.get("address_current", student_record.address_current)
 
-        # ข้อมูลกู้ยืม
+        # 2. ข้อมูลสถานะการกู้ยืมและครอบครัว
         student_record.loan_student_fund = True if request.form.get("loan_student_fund") == "TRUE" else False
         student_record.loan_type = request.form.get("loan_type", "")
-
-        # รายได้และอาชีพ
+        student_record.parents_status = request.form.get("parents_status", student_record.parents_status)
+        
+        # 3. ข้อมูลรายได้ (รองรับทศนิยม)
         student_record.inc_father = request.form.get("inc_father", type=float, default=0.0)
         student_record.inc_mother = request.form.get("inc_mother", type=float, default=0.0)
         student_record.inc_guardian = request.form.get("inc_guardian", type=float, default=0.0)
-        student_record.father_job = request.form.get("father_job", student_record.father_job)
-        student_record.mother_job = request.form.get("mother_job", student_record.mother_job)
-        student_record.parents_status = request.form.get("parents_status", student_record.parents_status)
-        student_record.housing_status = request.form.get("housing_status", student_record.housing_status)
-        student_record.land_status = request.form.get("land_status", student_record.land_status)
-        student_record.land_size = request.form.get("land_size", type=float, default=0.0)
 
-        # จัดการข้อมูล JSON
-        siblings_data = request.form.get("siblings_json")
-        if siblings_data:
-            try: student_record.siblings_list = json.loads(siblings_data)
-            except: pass
-
-        scholarships_data = request.form.get("scholarships_json")
-        if scholarships_data:
-            try: student_record.scholarship_history = json.loads(scholarships_data)
-            except: pass
+        # 4. จัดการข้อมูล JSON (พี่น้อง และ ประวัติทุน)
+        try:
+            siblings_data = request.form.get("siblings_json")
+            if siblings_data:
+                student_record.siblings_list = json.loads(siblings_data)
+            
+            scholarships_data = request.form.get("scholarships_json")
+            if scholarships_data:
+                student_record.scholarship_history = json.loads(scholarships_data)
+        except Exception as e:
+            print(f"JSON Error: {e}")
 
         db.session.commit()
         flash("อัปเดตข้อมูลส่วนตัวเรียบร้อยแล้ว", "success")
@@ -104,17 +82,29 @@ def profile():
 
     return render_template("student/profile.html", student=student_record)
 
+# ==========================================
+# ฟีเจอร์: การสมัครทุนและจัดการไฟล์
+# ==========================================
+ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
 
-# ==========================================
-# ผู้รับผิดชอบ: นาย จารุวัฒน์ บุญสาร
-# ==========================================
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @student_bp.route("/apply", methods=["GET", "POST"])
 def apply_scholarship():
-    """ฟอร์มสมัครทุน"""
-    return "Student: Application Form (Auto-Fill enabled)"
+    if request.method == "POST":
+        # โครงสร้างการสมัครทุน (Logic จากคุณจารุวัฒน์)
+        return "สมัครทุนสำเร็จ (Logic ในการสร้าง Application Record)"
+    
+    scholarships = Scholarship.query.all()
+    return render_template("student/apply.html", scholarships=scholarships)
 
-@student_bp.route("/upload", methods=["POST"])
-def upload_documents():
-    """อัปโหลดเอกสาร"""
-    return "Student: Document Upload endpoint"
+@student_bp.route("/status")
+def track_status():
+    """ระบบติดตามสถานะการสมัคร"""
+    return render_template("student/status.html")
+
+@student_bp.route("/auto-match")
+def auto_match():
+    """ระบบจับคู่ทุนอัตโนมัติ"""
+    return render_template("student/auto_match.html")

@@ -1,27 +1,71 @@
-{% extends "base.html" %}
+{% extends "layouts/base_officer.html" %} {% block content %}
+<div class="max-w-3xl mx-auto p-6">
+  <div class="mb-6 flex items-center text-sm text-gray-500">
+    <a
+      href="{{ url_for('officer.list_scholarships') }}"
+      class="hover:text-blue-600 transition"
+      >จัดการทุน</a
+    >
+    <span class="mx-2">></span>
+    <span class="font-bold text-gray-800">เพิ่มทุนการศึกษา</span>
+  </div>
 
-{% block nav_links %}
-    <a href="{{ url_for('officer.list_scholarships') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">จัดการทุน</a>
-    <a href="{{ url_for('officer.applications') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ตรวจสอบเอกสาร</a>
-    <a href="{{ url_for('officer.audit_log') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">บันทึกการทำงาน</a>
-{% endblock %}
+  <div
+    class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden p-8"
+  >
+    <div class="mb-6 border-b border-gray-200 pb-4">
+      <h2 class="text-2xl font-bold text-gray-800">เพิ่มทุนการศึกษาใหม่</h2>
+      <p class="text-gray-500 text-sm mt-1">
+        กรอกข้อมูลรายละเอียดของทุนการศึกษาที่ต้องการเพิ่มเข้าสู่ระบบ
+      </p>
+    </div>
 
-{% block role_name %}เจ้าหน้าที่{% endblock %}
+    <form method="POST" class="space-y-6">
+      <div>
+        <label for="name" class="block text-sm font-semibold text-gray-700 mb-2"
+          >ชื่อทุนการศึกษา <span class="text-red-500">*</span></label
+        >
+        <input
+          type="text"
+          id="name"
+          name="name"
+          required
+          class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none bg-gray-50 focus:bg-white"
+          placeholder="เช่น ทุนเรียนดี, ทุนขาดแคลนทุนทรัพย์"
+        />
+      </div>
 
-{% block content %}
-<div class="container mt-4">
-    <h3>เพิ่มทุนการศึกษา</h3>
-    <form method="POST">
-        <div class="mb-3">
-            <label for="name" class="form-label">ชื่อทุน</label>
-            <input type="text" class="form-control" id="name" name="name" required>
-        </div>
-        <div class="mb-3">
-            <label for="amount" class="form-label">จำนวนเงิน (บาท)</label>
-            <input type="number" step="0.01" class="form-control" id="amount" name="amount">
-        </div>
-        <button type="submit" class="btn btn-primary">เพิ่มทุน</button>
-        <a href="{{ url_for('officer.list_scholarships') }}" class="btn btn-secondary">ยกเลิก</a>
+      <div>
+        <label
+          for="amount"
+          class="block text-sm font-semibold text-gray-700 mb-2"
+          >จำนวนเงิน (บาท)</label
+        >
+        <input
+          type="number"
+          step="0.01"
+          id="amount"
+          name="amount"
+          class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none bg-gray-50 focus:bg-white"
+          placeholder="เช่น 15000"
+        />
+      </div>
+
+      <div class="flex items-center gap-4 pt-4 mt-6 border-t border-gray-100">
+        <button
+          type="submit"
+          class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl transition shadow-md transform hover:-translate-y-1"
+        >
+          💾 บันทึกข้อมูล
+        </button>
+        <a
+          href="{{ url_for('officer.list_scholarships') }}"
+          class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 px-8 rounded-xl transition"
+        >
+          ยกเลิก
+        </a>
+      </div>
     </form>
+  </div>
 </div>
 {% endblock %}

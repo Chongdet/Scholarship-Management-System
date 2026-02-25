@@ -1,79 +1,89 @@
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
 
-# 1. ข้อมูลรายชื่อทุน
-class Scholarship(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    amount = db.Column(db.Float, nullable=True)  # จำนวนเงินทุน
-    # เชื่อมไปยังเกณฑ์และผู้สมัคร
-    criteria = db.relationship('Criterion', backref='scholarship', lazy=True)
-    applications = db.relationship('Application', backref='scholarship', lazy=True)
+# ==========================================
+# ส่วนที่ 1: ระบบผู้ใช้งาน (แยก 3 ตาราง)
+# ==========================================
 
-# 2. เกณฑ์การให้คะแนน (แยกตามแต่ละทุน)
-class Criterion(db.Model):
+# 1.1 ข้อมูลเจ้าหน้าที่ (Officer)
+class Officer(db.Model):
+    __tablename__ = 'officer'
     id = db.Column(db.Integer, primary_key=True)
-    scholarship_id = db.Column(db.Integer, db.ForeignKey('scholarship.id'))
-    name = db.Column(db.String(100))  # เช่น 'คะแนนสัมภาษณ์', 'จิตอาสา'
-    max_score = db.Column(db.Integer) # คะแนนเต็มของหัวข้อนั้น
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password_hash = db.Column(db.String(200), nullable=False)
+    name = db.Column(db.String(100), nullable=True) # ชื่อ-นามสกุลเจ้าหน้าที่
 
-# 3. ข้อมูลผู้สมัครและการให้คะแนน
-class Application(db.Model):
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+# 1.2 ข้อมูลกรรมการ (Director)
+class Director(db.Model):
+    __tablename__ = 'director'
     id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.String(20), nullable=False)
-    student_name = db.Column(db.String(100))
-    faculty = db.Column(db.String(100))
-    gpa = db.Column(db.String(10)) 
-    application_date = db.Column(db.String(20))
-    scholarship_id = db.Column(db.Integer, db.ForeignKey('scholarship.id'))
-    total_score = db.Column(db.Integer, default=0)
-    is_scored = db.Column(db.Boolean, default=False)
-    status = db.Column(db.String(20), default='pending')  # pending, approved, rejected
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password_hash = db.Column(db.String(200), nullable=False)
+    name = db.Column(db.String(100), nullable=True) # ชื่อ-นามสกุลกรรมการ
 
-# 4. ข้อมูลนักศึกษา (เพิ่มโดยทีมงานจาก Feature Login)
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+# 1.3 ข้อมูลนักศึกษา (Student)
 class Student(db.Model):
     __tablename__ = 'student'
     id = db.Column(db.Integer, primary_key=True)
-    
-    # --- ข้อมูลระบุตัวตนและการติดต่อ (Contact Info) ---
-    name = db.Column(db.String(100), nullable=False)
-    citizen_id = db.Column(db.String(20))
-    mobile = db.Column(db.String(20))
-    email = db.Column(db.String(100))
-    facebook = db.Column(db.String(100))
-    line_id = db.Column(db.String(100))
-    address_domicile = db.Column(db.Text)
-    address_current = db.Column(db.Text)
-
-    # --- ข้อมูลการศึกษา (Academic) ---
     student_id = db.Column(db.String(20), unique=True, nullable=False)
+    password_hash = db.Column(db.String(200), nullable=True) # เพิ่มไว้สำหรับ Login
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100))
     faculty = db.Column(db.String(100))
-    year = db.Column(db.Integer)
     gpax = db.Column(db.Float)
-    advisor_name = db.Column(db.String(100))
-    disciplinary_status = db.Column(db.String(50)) 
+    
+    # ... (สามารถเพิ่มฟิลด์อื่นๆ ตามที่คุณมีในไฟล์เดิมได้เลย) ...
 
-    # --- ประวัติการขอทุนและกู้ยืม ---
-    loan_student_fund = db.Column(db.Boolean, default=False)
-    loan_type = db.Column(db.String(50))
-    scholarship_history = db.Column(db.JSON) 
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
 
-    # --- ข้อมูลการทำงานและรายได้ ---
-    inc_father = db.Column(db.Float, default=0.0)
-    inc_mother = db.Column(db.Float, default=0.0)
-    inc_guardian = db.Column(db.Float, default=0.0)
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
-    # --- ข้อมูลครอบครัว (Family Info) ---
-    father_name = db.Column(db.String(100))
-    father_job = db.Column(db.String(100))
-    father_income = db.Column(db.Float, default=0.0)
-    father_health = db.Column(db.String(200))
-    mother_name = db.Column(db.String(100))
-    mother_job = db.Column(db.String(100))
-    mother_income = db.Column(db.Float, default=0.0)
-    parents_status = db.Column(db.String(50))
-    housing_status = db.Column(db.String(50))
-    land_status = db.Column(db.String(50))
-    land_size = db.Column(db.Float, default=0.0)
-    siblings_list = db.Column(db.JSON)
+
+# ==========================================
+# ส่วนที่ 2: ระบบทุนการศึกษา
+# ==========================================
+
+# 2.1 ข้อมูลทุนการศึกษา
+class Scholarship(db.Model):
+    __tablename__ = 'scholarship'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    amount = db.Column(db.Float, nullable=True)
+    criteria = db.relationship('Criterion', backref='scholarship', lazy=True)
+    applications = db.relationship('Application', backref='scholarship', lazy=True)
+
+# 2.2 ข้อมูลใบสมัคร
+class Application(db.Model):
+    __tablename__ = 'application'
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.String(20), nullable=False)
+    student_name = db.Column(db.String(100))
+    faculty = db.Column(db.String(100)) # <--- คงไว้ตามที่คุณเพิ่มมา
+    scholarship_id = db.Column(db.Integer, db.ForeignKey('scholarship.id'))
+    status = db.Column(db.String(20), default='pending')
+    reviewing_by = db.Column(db.String(50))
+    reviewing_at = db.Column(db.DateTime)
+
+# 2.3 เกณฑ์คะแนน
+class Criterion(db.Model):
+    __tablename__ = 'criterion'
+    id = db.Column(db.Integer, primary_key=True)
+    scholarship_id = db.Column(db.Integer, db.ForeignKey('scholarship.id'))
+    name = db.Column(db.String(100))
+    max_score = db.Column(db.Integer)

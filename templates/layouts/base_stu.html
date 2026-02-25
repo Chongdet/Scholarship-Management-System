@@ -1,0 +1,10 @@
+{% extends "layouts/base.html" %}
+
+{% block role_name %}นักศึกษา{% endblock %}
+
+{% block nav_links %}
+    <a href="{{ url_for('student.dashboard') }}" class="text-white hover:text-yellow-400 font-medium transition-colors border-b-2 border-transparent hover:border-yellow-400">หน้าแรก</a>
+    <a href="{{ url_for('student.apply_scholarship') }}" class="text-white hover:text-yellow-400 font-medium transition-colors border-b-2 border-transparent hover:border-yellow-400">สมัครทุนการศึกษา</a>
+    <a href="{{ url_for('student.track_status') }}" class="text-white hover:text-yellow-400 font-medium transition-colors border-b-2 border-transparent hover:border-yellow-400">ติดตามสถานะ</a>
+    <a href="{{ url_for('student.profile') }}" class="text-white hover:text-yellow-400 font-medium transition-colors border-b-2 border-transparent hover:border-yellow-400">ข้อมูลส่วนตัว</a>
+{% endblock %}

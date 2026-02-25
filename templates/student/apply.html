@@ -1,505 +1,64 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>สมัครทุนการศึกษา - Ubon Ratchathani University</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <style>
-        body { font-family: 'Prompt', sans-serif; }
-        #drop-zone { border: 2px dashed #93c5fd; transition: border-color 0.2s, background-color 0.2s; }
-        #drop-zone.drag-over { border-color: #1e3a8a; background-color: #eff6ff; }
-        .form-input:focus { outline: none; box-shadow: 0 0 0 3px rgba(250,204,21,0.4); border-color: #1e3a8a; }
-        @keyframes slide-in { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
-        .animate-slide-in { animation: slide-in 0.3s ease-out; }
-        .section-card { background:#fff; border-radius:1rem; border:1px solid #f0f4f8; padding:2rem; margin-bottom:1.5rem; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
-        .section-header { display:flex; align-items:center; gap:0.75rem; margin-bottom:1.25rem; padding-bottom:0.75rem; border-bottom:2px solid #eff6ff; }
-        .section-num { width:2.25rem; height:2.25rem; background:#1e3a8a; color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.9rem; flex-shrink:0; }
-    </style>
-</head>
-<body class="bg-sky-50 min-h-screen flex flex-col m-0 p-0">
+{% extends "layouts/base_stu.html" %}
 
-<!-- HEADER -->
-<header class="bg-blue-900 text-white shadow-md w-full">
-    <div class="px-8 py-4 flex justify-between items-center w-full">
-        <div class="flex items-center gap-4">
-            <div class="w-14 h-14 flex items-center justify-center">
-                <img src="{{ url_for('static', filename='images/ubu_logo.png') }}" alt="UBU Logo" class="w-full h-full object-contain">
-            </div>
-            <div>
-                <h1 class="text-2xl font-bold text-yellow-400 tracking-wide">ระบบทุนการศึกษา</h1>
-                <p class="text-sm text-blue-200">Ubon Ratchathani University</p>
-            </div>
-        </div>
-        <nav class="flex items-center gap-6">
-            <div class="flex gap-2">
-                <a href="/student/dashboard" class="text-white hover:text-yellow-400 px-5 py-2 rounded-full text-sm font-medium transition-all">ทุนการศึกษา</a>
-                <a href="/student/scholarships" class="text-white hover:text-yellow-400 px-5 py-2 rounded-full text-sm font-medium transition-all">ระเบียบ/ประกาศ</a>
-                <a href="/student/status" class="text-white hover:text-yellow-400 px-5 py-2 rounded-full text-sm font-medium transition-all">ติดตามสถานะ</a>
-                <a href="/student/apply" class="text-white border-b-4 border-yellow-400 px-1 py-2 text-sm font-bold">สมัครทุน</a>
-            </div>
-            <div class="bg-blue-800 px-4 py-2 rounded-full text-sm border border-blue-700 flex items-center gap-2 text-yellow-100">👤 นักศึกษา</div>
-            <a href="/logout" class="bg-yellow-400 text-blue-900 px-5 py-2.5 rounded-full font-bold hover:bg-yellow-300 transition-all shadow-md">ออกจากระบบ 🚪</a>
-        </nav>
-    </div>
-</header>
+{% block content %}
+<style>
+    /* CSS เฉพาะหน้าสมัครทุน */
+    #drop-zone { border: 2px dashed #93c5fd; transition: border-color 0.2s, background-color 0.2s; }
+    #drop-zone.drag-over { border-color: #1e3a8a; background-color: #eff6ff; }
+    .form-input:focus { outline: none; box-shadow: 0 0 0 3px rgba(250,204,21,0.4); border-color: #1e3a8a; }
+    .section-card { background:#fff; border-radius:1rem; border:1px solid #f0f4f8; padding:2rem; margin-bottom:1.5rem; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .section-header { display:flex; align-items:center; gap:0.75rem; margin-bottom:1.25rem; padding-bottom:0.75rem; border-bottom:2px solid #eff6ff; }
+    .section-num { width:2.25rem; height:2.25rem; background:#1e3a8a; color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.9rem; flex-shrink:0; }
+</style>
 
-<!-- FLASH MESSAGES -->
-<div id="flash-container" class="fixed top-20 right-8 z-50 space-y-2 w-96">
-    
-    <div class="flash-message animate-slide-in flex items-start gap-3 px-5 py-4 rounded-xl shadow-lg {{ 'bg-green-500' if category == 'success' else 'bg-red-500' }} text-white">
-        <span class="text-xl mt-0.5">{{ '✓' if category == 'success' else '✕' }}</span>
-        <span class="flex-1 text-sm leading-relaxed">{{ message }}</span>
-        <button onclick="this.parentElement.remove()" class="ml-2 text-white hover:text-gray-200 font-bold text-xl leading-none">&times;</button>
-    </div>
-    
-</div>
-<script>
-    setTimeout(()=>{const fc=document.getElementById('flash-container');if(fc){fc.querySelectorAll('.flash-message').forEach(m=>{m.style.transition='opacity 0.5s,transform 0.5s';m.style.opacity='0';m.style.transform='translateX(100%)';setTimeout(()=>m.remove(),500)});}},4000);
-</script>
-
-
-<!-- MAIN -->
-<main class="flex-grow w-full px-4 py-10 max-w-5xl mx-auto">
-
-    <!-- Heading -->
+<div class="max-w-5xl mx-auto py-10">
     <div class="mb-6 text-center">
         <h2 class="text-3xl font-extrabold text-blue-900 mb-1">📝 ฟอร์มสมัครทุนการศึกษา</h2>
         <p class="text-gray-500 text-sm">กรอกข้อมูลให้ครบถ้วนแล้วแนบเอกสารประกอบการสมัคร</p>
-        
-        <span class="inline-block mt-2 bg-yellow-100 text-yellow-700 text-xs font-semibold px-3 py-1 rounded-full border border-yellow-200">✨ Auto-Fill แล้ว</span>
-        
     </div>
 
-    <form id="apply-form" method="POST" action="{{ url_for('student.apply_scholarship') }}" enctype="multipart/form-data" class="space-y-0">
-
-    <!-- ===== ทุนที่ต้องการสมัคร ===== -->
-    <div class="section-card">
-        <div class="section-header">
-            <div class="section-num">★</div>
-            <div>
+    <form id="apply-form" method="POST" action="{{ url_for('student.apply_scholarship') }}" enctype="multipart/form-data">
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-num">★</div>
                 <h3 class="text-base font-bold text-blue-900">ทุนการศึกษาที่ต้องการสมัคร</h3>
             </div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div class="md:col-span-2">
-                <label class="block text-sm font-semibold text-gray-700 mb-1">ทุนการศึกษา <span class="text-red-500">*</span></label>
-                <select name="scholarship_id" required class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm bg-white transition-all">
-                    <option value="">-- เลือกทุนการศึกษา --</option>
-                   
-                    <option value="{{ sch.id }}" {{ 'selected' if prefill.get('scholarship_id') == sch.id else '' }}>{{ sch.name }}</option>
-                  
-                </select>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===== 1. ข้อมูลส่วนตัว ===== -->
-    <div class="section-card">
-        <div class="section-header">
-            <div class="section-num">1</div>
-            <div>
-                <h3 class="text-base font-bold text-blue-900">ข้อมูลส่วนตัว</h3>
-                <p class="text-xs text-gray-400">Personal Information</p>
-            </div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">คำนำหน้า <span class="text-red-500">*</span></label>
-                <select name="title" required class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm bg-white transition-all">
-                    <option value="">-- เลือก --</option>
-                    
-                    <option value="{{ t }}" {{ 'selected' if prefill.get('title') == t else '' }}>{{ t }}</option>
-                    
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">ชื่อ <span class="text-red-500">*</span></label>
-                <input type="text" name="first_name" value="{{ prefill.get('first_name', '') }}" placeholder="ชื่อ" required class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">นามสกุล <span class="text-red-500">*</span></label>
-                <input type="text" name="last_name" value="{{ prefill.get('last_name', '') }}" placeholder="นามสกุล" required class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">ชื่อ (ภาษาอังกฤษ)</label>
-                <input type="text" name="first_name_en" value="{{ prefill.get('first_name_en', '') }}" placeholder="First Name" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">นามสกุล (ภาษาอังกฤษ)</label>
-                <input type="text" name="last_name_en" value="{{ prefill.get('last_name_en', '') }}" placeholder="Last Name" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">เลขบัตรประชาชน <span class="text-red-500">*</span></label>
-                <input type="text" name="national_id" value="{{ prefill.get('national_id', '') }}" placeholder="x-xxxx-xxxxx-xx-x" maxlength="13" required class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">วันเดือนปีเกิด <span class="text-red-500">*</span></label>
-                <input type="date" name="birth_date" value="{{ prefill.get('birth_date', '') }}" required class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">เพศ <span class="text-red-500">*</span></label>
-                <select name="gender" required class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm bg-white transition-all">
-                    <option value="">-- เลือก --</option>
-                    
-                    <option value="{{ g }}" {{ 'selected' if prefill.get('gender') == g else '' }}>{{ g }}</option>
-                    
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">สัญชาติ</label>
-                <input type="text" name="nationality" value="{{ prefill.get('nationality', 'ไทย') }}" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">ศาสนา</label>
-                <input type="text" name="religion" value="{{ prefill.get('religion', '') }}" placeholder="เช่น พุทธ" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">เบอร์โทรศัพท์ <span class="text-red-500">*</span></label>
-                <input type="tel" name="phone" value="{{ prefill.get('phone', '') }}" placeholder="0xx-xxx-xxxx" required class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">อีเมล</label>
-                <input type="email" name="email" value="{{ prefill.get('email', '') }}" placeholder="example@ubu.ac.th" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-        </div>
-    </div>
-
-    <!-- ===== 2. ที่อยู่ปัจจุบัน ===== -->
-    <div class="section-card">
-        <div class="section-header">
-            <div class="section-num">2</div>
-            <div>
-                <h3 class="text-base font-bold text-blue-900">ที่อยู่ปัจจุบัน</h3>
-                <p class="text-xs text-gray-400">Current Address</p>
-            </div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="md:col-span-3">
-                <label class="block text-sm font-semibold text-gray-700 mb-1">บ้านเลขที่ / หมู่ที่ / ถนน <span class="text-red-500">*</span></label>
-                <input type="text" name="address" value="{{ prefill.get('address', '') }}" placeholder="เช่น 99 หมู่ 5 ถนนเจริญราษฎร์" required class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">ตำบล/แขวง <span class="text-red-500">*</span></label>
-                <input type="text" name="sub_district" value="{{ prefill.get('sub_district', '') }}" placeholder="ตำบล" required class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">อำเภอ/เขต <span class="text-red-500">*</span></label>
-                <input type="text" name="district" value="{{ prefill.get('district', '') }}" placeholder="อำเภอ" required class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">จังหวัด <span class="text-red-500">*</span></label>
-                <input type="text" name="province" value="{{ prefill.get('province', '') }}" placeholder="จังหวัด" required class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">รหัสไปรษณีย์</label>
-                <input type="text" name="postal_code" value="{{ prefill.get('postal_code', '') }}" placeholder="xxxxx" maxlength="5" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-        </div>
-    </div>
-
-    <!-- ===== 3. ข้อมูลการศึกษา ===== -->
-    <div class="section-card">
-        <div class="section-header">
-            <div class="section-num">3</div>
-            <div>
-                <h3 class="text-base font-bold text-blue-900">ข้อมูลการศึกษา</h3>
-                <p class="text-xs text-gray-400">Academic Information</p>
-            </div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">รหัสนักศึกษา <span class="text-red-500">*</span></label>
-                <input type="text" id="student_id" name="student_id" value="{{ prefill.get('student_id', '') }}" placeholder="เช่น 68114540001" maxlength="20" required class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">คณะ <span class="text-red-500">*</span></label>
-                <select id="faculty" name="faculty" required class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm bg-white transition-all">
-                    <option value="">-- เลือกคณะ --</option>
-                    
-                    <option value="{{ f }}" {{ 'selected' if prefill.get('faculty') == f else '' }}>{{ f }}</option>
-                    
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">สาขาวิชา <span class="text-red-500">*</span></label>
-                <input type="text" name="major" value="{{ prefill.get('major', '') }}" placeholder="สาขาวิชา" required class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">ชั้นปีที่ <span class="text-red-500">*</span></label>
-                <select name="year_level" required class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm bg-white transition-all">
-                    <option value="">-- เลือก --</option>
-                  
-                    <option value="{{ y }}" {{ 'selected' if prefill.get('year_level')|string == y|string else '' }}>ปีที่ {{ y }}</option>
-                 
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">เกรดเฉลี่ยสะสม (GPA) <span class="text-red-500">*</span></label>
-                <input type="number" name="gpa" value="{{ prefill.get('gpa', '') }}" placeholder="เช่น 3.50" step="0.01" min="0.00" max="4.00" required class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">ปีการศึกษา</label>
-                <input type="text" name="academic_year" value="{{ prefill.get('academic_year', '') }}" placeholder="เช่น 2567" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-        </div>
-    </div>
-
-    <!-- ===== 4. ข้อมูลผู้ปกครอง ===== -->
-    <div class="section-card">
-        <div class="section-header">
-            <div class="section-num">4</div>
-            <div>
-                <h3 class="text-base font-bold text-blue-900">ข้อมูลผู้ปกครอง / บิดา-มารดา</h3>
-                <p class="text-xs text-gray-400">Parent / Guardian Information</p>
-            </div>
+            <select name="scholarship_id" required class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm">
+                <option value="">-- เลือกทุนการศึกษา --</option>
+                {% for sch in scholarships %}
+                <option value="{{ sch.id }}">{{ sch.name }}</option>
+                {% endfor %}
+            </select>
         </div>
 
-        <!-- บิดา -->
-        <p class="text-sm font-bold text-blue-800 mb-3">👨 บิดา</p>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">ชื่อ-นามสกุลบิดา</label>
-                <input type="text" name="father_name" value="{{ prefill.get('father_name', '') }}" placeholder="ชื่อ-นามสกุล" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
+        <div class="section-card">
+            <div id="drop-zone" class="rounded-2xl p-10 text-center cursor-pointer mb-4" onclick="document.getElementById('file-input').click()">
+                <div class="text-5xl mb-3">📂</div>
+                <p class="font-semibold text-gray-600 text-sm">คลิกหรือลากไฟล์มาวางที่นี่ (ไม่เกิน 5MB)</p>
             </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">อาชีพ</label>
-                <input type="text" name="father_occupation" value="{{ prefill.get('father_occupation', '') }}" placeholder="อาชีพ" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">รายได้ต่อปี (บาท)</label>
-                <input type="number" name="father_income" value="{{ prefill.get('father_income', '') }}" placeholder="0" min="0" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">เบอร์โทรศัพท์</label>
-                <input type="tel" name="father_phone" value="{{ prefill.get('father_phone', '') }}" placeholder="0xx-xxx-xxxx" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">สถานะ</label>
-                <select name="father_status" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm bg-white transition-all">
-                    <option value="">-- เลือก --</option>
-                    
-                    <option value="{{ s }}" {{ 'selected' if prefill.get('father_status') == s else '' }}>{{ s }}</option>
-                    
-                </select>
-            </div>
-        </div>
+            <input type="file" id="file-input" name="documents" multiple class="hidden">
+            <ul id="file-list" class="space-y-2 mb-5"></ul>
 
-        <!-- มารดา -->
-        <p class="text-sm font-bold text-blue-800 mb-3">👩 มารดา</p>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">ชื่อ-นามสกุลมารดา</label>
-                <input type="text" name="mother_name" value="{{ prefill.get('mother_name', '') }}" placeholder="ชื่อ-นามสกุล" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">อาชีพ</label>
-                <input type="text" name="mother_occupation" value="{{ prefill.get('mother_occupation', '') }}" placeholder="อาชีพ" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">รายได้ต่อปี (บาท)</label>
-                <input type="number" name="mother_income" value="{{ prefill.get('mother_income', '') }}" placeholder="0" min="0" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">เบอร์โทรศัพท์</label>
-                <input type="tel" name="mother_phone" value="{{ prefill.get('mother_phone', '') }}" placeholder="0xx-xxx-xxxx" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">สถานะ</label>
-                <select name="mother_status" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm bg-white transition-all">
-                    <option value="">-- เลือก --</option>
-                    
-                    <option value="{{ s }}" {{ 'selected' if prefill.get('mother_status') == s else '' }}>{{ s }}</option>
-                    
-                </select>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===== 5. รายได้ครอบครัว ===== -->
-    <div class="section-card">
-        <div class="section-header">
-            <div class="section-num">5</div>
-            <div>
-                <h3 class="text-base font-bold text-blue-900">รายได้ครอบครัว</h3>
-                <p class="text-xs text-gray-400">Family Income</p>
-            </div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">รายได้รวมทั้งครอบครัวต่อปี (บาท) <span class="text-red-500">*</span></label>
-                <input type="number" name="family_income" value="{{ prefill.get('family_income', '') }}" placeholder="0" min="0" required class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">จำนวนพี่น้อง</label>
-                <input type="number" name="siblings" value="{{ prefill.get('siblings', '') }}" placeholder="0" min="0" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">เป็นบุตรคนที่</label>
-                <input type="number" name="birth_order" value="{{ prefill.get('birth_order', '') }}" placeholder="เช่น 2" min="1" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div class="md:col-span-3">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">ที่อยู่อาศัยปัจจุบัน</label>
-                <div class="flex flex-wrap gap-4">
-                    
-                    <label class="flex items-center gap-2 text-sm cursor-pointer">
-                        <input type="radio" name="housing_type" value="{{ ht }}" {{ 'checked' if prefill.get('housing_type') == ht else '' }} class="accent-blue-800"> {{ ht }}
-                    </label>
-                    {% endfor %}
-                </div>
-            </div>
-            <div class="md:col-span-3">
-                <label class="block text-sm font-semibold text-gray-700 mb-1">หมายเหตุ / ข้อมูลเพิ่มเติมด้านรายได้ครอบครัว</label>
-                <textarea name="income_note" rows="2" placeholder="ระบุรายละเอียดเพิ่มเติม (ถ้ามี)" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">{{ prefill.get('income_note', '') }}</textarea>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===== 6. ข้อมูลเพิ่มเติม ===== -->
-    <div class="section-card">
-        <div class="section-header">
-            <div class="section-num">6</div>
-            <div>
-                <h3 class="text-base font-bold text-blue-900">ข้อมูลเพิ่มเติม</h3>
-                <p class="text-xs text-gray-400">Additional Information</p>
-            </div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="md:col-span-2">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">เคยได้รับทุนการศึกษามาก่อนหรือไม่?</label>
-                <div class="flex gap-6">
-                    <label class="flex items-center gap-2 text-sm cursor-pointer">
-                        <input type="radio" name="prev_scholarship" value="yes" {{ 'checked' if prefill.get('prev_scholarship') == 'yes' else '' }} class="accent-blue-800"> เคย
-                    </label>
-                    <label class="flex items-center gap-2 text-sm cursor-pointer">
-                        <input type="radio" name="prev_scholarship" value="no" {{ 'checked' if prefill.get('prev_scholarship') == 'no' else '' }} class="accent-blue-800"> ไม่เคย
-                    </label>
-                </div>
-            </div>
-            <div class="md:col-span-2">
-                <label class="block text-sm font-semibold text-gray-700 mb-1">ระบุชื่อทุนและปีที่ได้รับ (ถ้าเคย)</label>
-                <input type="text" name="prev_scholarship_detail" value="{{ prefill.get('prev_scholarship_detail', '') }}" placeholder="เช่น ทุน กสศ. ปี 2565" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div class="md:col-span-2">
-                <label class="block text-sm font-semibold text-gray-700 mb-1">กิจกรรมที่เคยเข้าร่วม / ความสามารถพิเศษ</label>
-                <textarea name="activities" rows="3" placeholder="ระบุกิจกรรม หรือความสามารถพิเศษ (ถ้ามี)" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">{{ prefill.get('activities', '') }}</textarea>
-            </div>
-            <div class="md:col-span-2">
-                <label class="block text-sm font-semibold text-gray-700 mb-1">เหตุผลที่ต้องการสมัครทุน <span class="text-red-500">*</span></label>
-                <textarea name="reason" rows="3" placeholder="อธิบายเหตุผลและความจำเป็นในการสมัครทุน" required class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">{{ prefill.get('reason', '') }}</textarea>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===== 7. แนบเอกสาร ===== -->
-    <div class="section-card">
-        <div class="section-header">
-            <div class="section-num">7</div>
-            <div>
-                <h3 class="text-base font-bold text-blue-900">แนบเอกสารประกอบการสมัคร</h3>
-                <p class="text-xs text-gray-400">รองรับ PDF, PNG, JPG — ขนาดไม่เกิน 5 MB ต่อไฟล์</p>
-            </div>
-        </div>
-
-        <input type="hidden" name="upload_student_id" id="upload-student-id" value="{{ prefill.get('student_id', '') }}">
-
-        <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-5">
-            <p class="text-sm font-semibold text-blue-800 mb-2">📋 เอกสารที่ต้องแนบ</p>
-            <ul class="list-disc list-inside text-sm text-blue-700 space-y-1">
-                <li>สำเนาบัตรประชาชน (1 ฉบับ)</li>
-                <li>สำเนาทะเบียนบ้าน (1 ฉบับ)</li>
-                <li>ใบผลการเรียน (Transcript) ล่าสุด</li>
-                <li>หนังสือรับรองความประพฤติ (จากอาจารย์ที่ปรึกษา)</li>
-                <li>เอกสารอื่นๆ ที่เกี่ยวข้อง (ถ้ามี)</li>
-            </ul>
-        </div>
-
-        <div id="drop-zone" class="rounded-2xl p-10 text-center cursor-pointer mb-4 transition-all" onclick="document.getElementById('file-input').click()">
-            <div class="text-5xl mb-3">📂</div>
-            <p class="font-semibold text-gray-600 text-sm">คลิกหรือลากไฟล์มาวางที่นี่</p>
-            <p class="text-xs text-gray-400 mt-1">PDF, PNG, JPG, JPEG — สูงสุด 5 MB ต่อไฟล์</p>
-        </div>
-
-        <input type="file" id="file-input" name="documents" accept=".pdf,.png,.jpg,.jpeg" multiple class="hidden">
-        <ul id="file-list" class="space-y-2 mb-5"></ul>
-
-        <!-- Submit Buttons -->
-        <div class="flex justify-between items-center pt-4 border-t border-gray-100">
-            <a href="/student/dashboard" class="text-gray-500 hover:text-blue-900 text-sm font-medium transition-all">← ยกเลิก</a>
-            <div class="flex gap-3">
-                <button type="submit" name="action" value="save_draft" class="bg-gray-100 text-gray-700 font-semibold px-6 py-3 rounded-xl hover:bg-gray-200 transition-all text-sm flex items-center gap-2">
-                    💾 บันทึกร่าง
-                </button>
-                <button type="submit" name="action" value="submit" class="bg-blue-900 text-white font-bold px-8 py-3 rounded-xl hover:bg-yellow-400 hover:text-blue-900 transition-all shadow-md hover:shadow-lg flex items-center gap-2">
+            <div class="flex justify-end gap-3 pt-4 border-t">
+                <button type="submit" class="bg-blue-900 text-white font-bold px-8 py-3 rounded-xl hover:bg-yellow-400 hover:text-blue-900 transition-all">
                     📨 ยืนยันการสมัคร
                 </button>
             </div>
         </div>
-    </div>
-
     </form>
-</main>
-
-<!-- FOOTER -->
-<footer class="bg-blue-950 text-blue-200 py-8 px-8 w-full text-sm mt-auto">
-    <div class="flex justify-between items-start">
-        <div>
-            <strong class="text-yellow-400 text-base">สำนักงานพัฒนานักศึกษา</strong><br>
-            มหาวิทยาลัยอุบลราชธานี<br>
-            85 ถนนสถลมาร์ค ตำบลเมืองศรีไค อำเภอวารินชำราบ จังหวัดอุบลราชธานี 34190
-        </div>
-        <div class="text-right">
-            <strong class="text-yellow-400 text-base">ติดต่อเรา</strong><br>
-            Email: ubustudent.d@ubu.ac.th<br>
-            โทรศัพท์: 045-353000 ต่อ 1210
-        </div>
-    </div>
-</footer>
+</div>
 
 <script>
-    /* Sync student_id to upload hidden field */
-    document.getElementById('student_id').addEventListener('input', function () {
-        document.getElementById('upload-student-id').value = this.value;
-    });
-
-    /* Drop Zone */
-    const dropZone  = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-input');
-    const fileList  = document.getElementById('file-list');
-
-    function updateFileList(files) {
+    const fileList = document.getElementById('file-list');
+    fileInput.addEventListener('change', () => {
         fileList.innerHTML = '';
-        Array.from(files).forEach(file => {
-            const sizeMB = (file.size / (1024*1024)).toFixed(2);
-            const isOk   = file.size <= 5*1024*1024;
-            const ext    = file.name.split('.').pop().toLowerCase();
-            const typeOk = ['pdf','png','jpg','jpeg'].includes(ext);
-            const icon   = file.type.startsWith('image/') ? '🖼️' : '📄';
+        Array.from(fileInput.files).forEach(file => {
             const li = document.createElement('li');
-            li.className = `flex items-center justify-between px-4 py-3 rounded-xl text-sm border ${isOk && typeOk ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-700'}`;
-            li.innerHTML = `
-                <span class="flex items-center gap-2 flex-1 truncate"><span>${icon}</span><span class="font-medium truncate">${file.name}</span></span>
-                <span class="ml-4 shrink-0 font-semibold">${sizeMB} MB</span>
-                ${!typeOk ? '<span class="ml-2 text-xs text-red-600">ไม่รองรับชนิดไฟล์นี้</span>' : ''}
-                ${typeOk && !isOk ? '<span class="ml-2 text-xs text-red-600">ไฟล์ใหญ่เกิน 5 MB</span>' : ''}
-            `;
+            li.className = "p-2 bg-blue-50 text-blue-800 rounded-lg text-xs border border-blue-100 flex justify-between";
+            li.innerHTML = `<span>📄 ${file.name}</span> <span>${(file.size/1024/1024).toFixed(2)} MB</span>`;
             fileList.appendChild(li);
         });
-    }
-
-    fileInput.addEventListener('change', () => updateFileList(fileInput.files));
-    dropZone.addEventListener('dragover',  e  => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-    dropZone.addEventListener('drop', e => {
-        e.preventDefault();
-        dropZone.classList.remove('drag-over');
-        fileInput.files = e.dataTransfer.files;
-        updateFileList(e.dataTransfer.files);
     });
 </script>
-</body>
-</html>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends "layouts/base.html" %}
+
+{% block nav_links %}
+    <a href="{{ url_for('officer.list_scholarships') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">จัดการทุน</a>
+    <a href="{{ url_for('officer.applications') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ตรวจสอบใบสมัคร</a>
+    <a href="{{ url_for('officer.audit_log') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">บันทึกการทำงาน</a>
+{% endblock %}
+
+{% block role_name %}เจ้าหน้าที่{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto p-6">
+    <!-- Breadcrumb -->
+    <div class="mb-6 flex items-center text-sm text-gray-500">
+        <a href="{{ url_for('officer.home') }}" class="hover:text-blue-600 transition">หน้าแรก</a>
+        <span class="mx-2">></span>
+        <span class="font-bold text-gray-800">บันทึกการทำงาน</span>
+    </div>
+
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-gray-200 pb-4">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">บันทึกการทำงาน (Audit Log)</h1>
+            <p class="text-gray-500 text-sm mt-2">ติดตามและตรวจสอบประวัติการทำงานในระบบ</p>
+        </div>
+    </div>
+
+    <!-- Content Section -->
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+        <div class="text-center py-12">
+            <div class="mb-6">
+                <svg class="mx-auto h-24 w-24 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-3">ระบบบันทึกการทำงาน</h2>
+            <p class="text-gray-600 mb-6">ฟีเจอร์นี้อยู่ระหว่างการพัฒนา</p>
+            
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-2xl mx-auto">
+                <h3 class="font-bold text-blue-900 mb-3">ความสามารถที่กำลังจะมี:</h3>
+                <ul class="text-left text-blue-800 space-y-2">
+                    <li class="flex items-start">
+                        <span class="mr-2">🔍</span>
+                        <span>ติดตามการแก้ไขข้อมูลใบสมัคร</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="mr-2">⏰</span>
+                        <span>บันทึกเวลาและผู้ดำเนินการ</span>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Preview Section (Optional - for future use) -->
+    <div class="mt-8 bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+        <h3 class="text-xl font-bold text-gray-800 mb-4">ตัวอย่างรายการบันทึก (Mock Data)</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-blue-50 text-blue-900 font-bold border-b border-blue-100">
+                    <tr>
+                        <th class="px-4 py-3">วันที่/เวลา</th>
+                        <th class="px-4 py-3">ผู้ดำเนินการ</th>
+                        <th class="px-4 py-3">การกระทำ</th>
+                        <th class="px-4 py-3">รายละเอียด</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 text-gray-600">2026-02-24 14:30:25</td>
+                        <td class="px-4 py-3 font-medium">officer01</td>
+                        <td class="px-4 py-3">
+                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold">อนุมัติ</span>
+                        </td>
+                        <td class="px-4 py-3 text-gray-600">อนุมัติใบสมัคร #12345</td>
+                    </tr>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 text-gray-600">2026-02-24 13:15:10</td>
+                        <td class="px-4 py-3 font-medium">officer02</td>
+                        <td class="px-4 py-3">
+                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-bold">เข้าสู่ระบบ</span>
+                        </td>
+                        <td class="px-4 py-3 text-gray-600">เข้าสู่ระบบสำเร็จ</td>
+                    </tr>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 text-gray-600">2026-02-24 12:45:33</td>
+                        <td class="px-4 py-3 font-medium">officer01</td>
+                        <td class="px-4 py-3">
+                            <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-bold">แก้ไข</span>
+                        </td>
+                        <td class="px-4 py-3 text-gray-600">แก้ไขข้อมูลทุนการศึกษา "ทุนเรียนดี 2026"</td>
+                    </tr>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 text-gray-600">2026-02-24 11:20:15</td>
+                        <td class="px-4 py-3 font-medium">officer03</td>
+                        <td class="px-4 py-3">
+                            <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-bold">ปฏิเสธ</span>
+                        </td>
+                        <td class="px-4 py-3 text-gray-600">ปฏิเสธใบสมัคร #12340 (เอกสารไม่ครบ)</td>
+                    </tr>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 text-gray-600">2026-02-24 10:05:42</td>
+                        <td class="px-4 py-3 font-medium">officer01</td>
+                        <td class="px-4 py-3">
+                            <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-bold">ดาวน์โหลด</span>
+                        </td>
+                        <td class="px-4 py-3 text-gray-600">ดาวน์โหลดรายงานใบสมัคร PDF</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-4 text-center">
+            <p class="text-sm text-gray-500 italic">* ข้อมูลด้านบนเป็นตัวอย่างเท่านั้น ยังไม่มีการบันทึกจริง</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -51,12 +51,13 @@
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <div id="flash-container" class="fixed top-20 right-8 z-50 space-y-2">
+            <div id="flash-container" class="fixed inset-0 z-50 flex items-center justify-center px-4">
                 {% for category, message in messages %}
-                <div class="flash-message bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 animate-slide-in" role="alert">
-                    <span class="text-lg">✓</span>
-                    <span>{{ message }}</span>
-                    <button onclick="this.parentElement.remove()" class="ml-4 text-white hover:text-gray-200 font-bold text-xl leading-none">&times;</button>
+                <div class="flash-message relative w-72 h-72 bg-gradient-to-br from-slate-50 via-white to-sky-50 text-slate-800 px-6 py-6 rounded-2xl border border-slate-200 shadow-[0_20px_60px_rgba(15,23,42,0.18)] flex flex-col items-center justify-center gap-4 text-center animate-slide-in" role="alert">
+                    <span class="text-3xl w-14 h-14 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center">✓</span>
+                    <span class="text-lg font-semibold text-slate-800">{{ message }}</span>
+                    <span class="text-xs text-slate-500">ระบบแจ้งเตือน</span>
+                    <button onclick="this.parentElement.remove()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-2xl leading-none">&times;</button>
                 </div>
                 {% endfor %}
             </div>
@@ -67,7 +68,7 @@
                         flashContainer.querySelectorAll('.flash-message').forEach(msg => {
                             msg.style.transition = 'opacity 0.5s, transform 0.5s';
                             msg.style.opacity = '0';
-                            msg.style.transform = 'translateX(100%)';
+                            msg.style.transform = 'translateY(-20px)';
                             setTimeout(() => msg.remove(), 500);
                         });
                     }
@@ -76,11 +77,11 @@
             <style>
                 @keyframes slide-in {
                     from {
-                        transform: translateX(100%);
+                        transform: translateY(-16px);
                         opacity: 0;
                     }
                     to {
-                        transform: translateX(0);
+                        transform: translateY(0);
                         opacity: 1;
                     }
                 }

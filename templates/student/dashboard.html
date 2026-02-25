@@ -6,8 +6,10 @@
     <div class="swiper mySwiper mb-12 shadow-2xl rounded-3xl overflow-hidden border-4 border-yellow-400 relative">
         <div class="swiper-wrapper">
             {% for item in scholarships[:3] %} 
-            <div class="swiper-slide relative h-[400px]"> <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1200" 
-                     class="w-full h-full object-cover" alt="Banner"> <div class="absolute inset-0 bg-gradient-to-r from-blue-900 via-blue-900/60 to-transparent flex flex-col justify-center px-12 md:px-20 text-white">
+            <div class="swiper-slide relative h-[450px]">
+                <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1200" 
+                     class="w-full h-full object-cover" alt="Banner">
+                <div class="absolute inset-0 bg-gradient-to-r from-blue-900 via-blue-900/60 to-transparent flex flex-col justify-center px-12 md:px-20 text-white">
                     <span class="bg-yellow-400 text-blue-900 px-4 py-1 rounded-full text-xs font-bold w-fit mb-4 shadow-lg"> 
                         🔥 กำลังเปิดรับสมัคร 
                     </span>
@@ -15,7 +17,7 @@
                         {{ item.name }}
                     </h2>
                     <p class="text-xl mb-6 text-blue-50 max-w-md leading-relaxed">
-                        มอบโอกาสทางการศึกษาเพื่ออนาคตที่ดีกว่าของนักศึกษา ม.อุบลฯ
+                        สนับสนุนนักศึกษาที่มีผลการเรียนยอดเยี่ยม และมอบโอกาสเพื่ออนาคตที่ดีกว่า
                     </p>
                     <div class="flex items-center gap-6 text-lg font-medium border-l-4 border-yellow-400 pl-6">
                         <div>
@@ -52,7 +54,7 @@
                      class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Scholarship">
                 <div class="absolute bottom-4 left-4 z-20">
                     <span class="bg-white/90 backdrop-blur text-blue-900 px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
-                        {{ item.name }}
+                        UBU Scholarship
                     </span>
                 </div>
             </div>
@@ -61,10 +63,13 @@
                 <h3 class="font-bold text-xl text-blue-900 mb-4 line-clamp-2 min-h-[3.5rem]">{{ item.name }}</h3>
                 <div class="space-y-3 text-sm text-gray-600 flex-grow">
                     <div class="flex justify-between items-center p-3 bg-blue-50 rounded-xl">
-                        <span class="text-blue-800">ทุนละ :</span>
+                        <span class="text-blue-800 font-semibold">ทุนละ :</span>
                         <span class="font-black text-blue-700 text-lg">{{ "{:,.0f}".format(item.amount or 0) }} ฿</span>
                     </div>
-                    <p class="flex justify-between px-1"><span>หน่วยงาน :</span> <span class="font-medium text-gray-800">กองพัฒนานักศึกษา</span></p>
+                    <p class="flex justify-between px-1">
+                        <span>หน่วยงาน :</span> 
+                        <span class="font-medium text-gray-800">กองพัฒนานักศึกษา</span>
+                    </p>
                 </div>
 
                 <div class="mt-8">
@@ -85,7 +90,9 @@
 </div>
 
 <style>
+    /* ปรับแต่งสี Pagination ให้เป็นสีเหลืองของ ม.อุบล */
     .swiper-pagination-bullet-active { background: #fbbf24 !important; }
+    .swiper-button-next:after, .swiper-button-prev:after { font-size: 24px !important; font-weight: bold; }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
@@ -93,7 +100,7 @@
     const swiper = new Swiper('.mySwiper', {
         loop: true,
         spaceBetween: 30,
-        effect: 'fade', // เพิ่ม Effect Fade ให้ดูหรูขึ้น
+        effect: 'fade',
         fadeEffect: { crossFade: true },
         pagination: { el: '.swiper-pagination', clickable: true },
         navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },

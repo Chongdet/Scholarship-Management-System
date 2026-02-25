@@ -1,4 +1,6 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from datetime import datetime
+
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from models import db, Application, Scholarship
 
 # สร้าง Blueprint สำหรับ Officer
@@ -72,7 +74,7 @@ def home():
 @officer_bp.route('/applications')
 def applications():
     status_filter = request.args.get('status')
-    allowed_statuses = {'pending', 'reviewing', 'interview', 'approved'}
+    allowed_statuses = {'pending', 'reviewing', 'needs_edit', 'interview', 'approved'}
     if status_filter not in allowed_statuses:
         status_filter = None
 
@@ -85,6 +87,7 @@ def applications():
     pending_count = Application.query.filter_by(status='pending').count()
     approved_count = Application.query.filter_by(status='approved').count()
     interview_count = Application.query.filter_by(status='interview').count()
+    needs_edit_count = Application.query.filter_by(status='needs_edit').count()
     total_count = Application.query.count()
     
     page = 1
@@ -100,13 +103,28 @@ def applications():
                          approved_count=approved_count,
                          interview_count=interview_count,
                          total_count=total_count,
+                         needs_edit_count=needs_edit_count,
                          page=page, per_page=per_page, total_pages=total_pages,
                          start_index=start_index, end_index=end_index,
                          selected_status=status_filter)
 
 @officer_bp.route('/application/<int:application_id>')
 def view_application(application_id):
+    current_officer = session.get("user_id") if session.get("role") == "officer" else None
+    if not current_officer:
+        flash('กรุณาเข้าสู่ระบบเจ้าหน้าที่ก่อน', 'error')
+        return redirect(url_for('login'))
     application = Application.query.get_or_404(application_id)
+    if application.status == 'reviewing' and application.reviewing_by and application.reviewing_by != current_officer:
+        flash(f'ใบสมัครนี้กำลังตรวจสอบโดย {application.reviewing_by}', 'warning')
+        return redirect(url_for('officer.applications'))
+
+    if application.status in {'pending', 'needs_edit', 'reviewing'}:
+        if application.reviewing_by != current_officer or application.status != 'reviewing':
+            application.status = 'reviewing'
+            application.reviewing_by = current_officer
+            application.reviewing_at = datetime.utcnow()
+            db.session.commit()
     return render_template('officer/application-detail.html', application=application)
 
 @officer_bp.route('/application/<int:application_id>/decision', methods=['POST'])
@@ -115,17 +133,22 @@ def decide_application(application_id):
     decision = request.form.get('decision')
     if decision == 'interview':
         application.status = 'interview'
+        application.reviewing_by = None
+        application.reviewing_at = None
         db.session.commit()
         flash('ทำการยืนยันนัดสัมภาษณ์เรียบร้อยแล้ว', 'success')
-    elif decision == 'pending':
-        application.status = 'pending'
+    elif decision == 'needs_edit':
+        application.status = 'needs_edit'
+        application.reviewing_by = None
+        application.reviewing_at = None
         db.session.commit()
-        flash('ทำการยืนยันปฏิเสธใบสมัครเรียบร้อยแล้ว', 'success')
+        flash('ส่งกลับให้แก้ไขเอกสารเรียบร้อยแล้ว', 'success')
     return redirect(url_for('officer.applications'))
 
 @officer_bp.route('/audit-log')
 def audit_log():
-    return "Officer: Audit Log System"
+    """หน้าบันทึกการทำงาน (Audit Log) ของเจ้าหน้าที่"""
+    return render_template('officer/audit_log.html')
 
 # ==========================================
 # เพิ่มส่วนของกรรมการ (Director) เพื่อให้ Link ใน HTML ทำงานได้

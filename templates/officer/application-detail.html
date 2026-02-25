@@ -1,7 +1,8 @@
-{% extends "base.html" %}
+{% extends "layouts/base.html" %}
 
 {% block nav_links %}
-    <a href="{{ url_for('officer.applications') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ตรวจสอบเอกสาร</a>
+    <a href="{{ url_for('officer.list_scholarships') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">จัดการทุน</a>
+    <a href="{{ url_for('officer.applications') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ตรวจสอบใบสมัคร</a>
     <a href="{{ url_for('officer.audit_log') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">บันทึกการทำงาน</a>
 {% endblock %}
 
@@ -33,12 +34,21 @@
                         รอตรวจสอบ
                         {% elif application.status == 'reviewing' %}
                         กำลังตรวจสอบ
+                        {% elif application.status == 'needs_edit' %}
+                        รอแก้ไข
                         {% elif application.status == 'interview' %}
                         เรียกสัมภาษณ์
                         {% elif application.status == 'approved' %}
                         ผ่านแล้ว
+                        {% elif application.status == 'needs_edit' %}
+                        รอแก้ไข
                         {% endif %}
                     </div>
+                    {% if application.status == 'reviewing' and application.reviewing_by %}
+                    <div class="mt-2 text-xs text-gray-600">
+                        ผู้กำลังตรวจสอบ: {{ application.reviewing_by }}
+                    </div>
+                    {% endif %}
                 </div>
 
                 <div class="text-sm text-gray-700 space-y-2 mb-4 border border-gray-200 bg-gray-50 rounded-lg p-4">
@@ -118,18 +128,18 @@
         </div>
         {% else %}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 border-t border-gray-300 bg-gray-50">
-            <button type="button" id="openRejectModal" class="w-full text-center py-3 rounded-full bg-red-500 hover:bg-red-600 text-white font-medium transition shadow-sm hover:shadow-md">ปฏิเสธใบสมัคร</button>
+            <button type="button" id="openRejectModal" class="w-full text-center py-3 rounded-full bg-red-500 hover:bg-red-600 text-white font-medium transition shadow-sm hover:shadow-md">ส่งกลับให้แก้ไข</button>
             <button type="button" id="openInterviewModal" class="w-full text-center py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium transition shadow-sm hover:shadow-md">อนุมัติและนัดสัมภาษณ์</button>
         </div>
         {% endif %}
 
         <div id="rejectModal" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
             <div class="bg-white w-full max-w-2xl rounded-2xl shadow-lg p-6">
-                <div class="text-lg font-semibold text-gray-800">ปฏิเสธใบสมัคร</div>
-                <div class="text-sm text-gray-600 mt-1">กรุณาระบุเหตุผลในการปฏิเสธใบสมัครของ {{ application.student_name }}</div>
+                <div class="text-lg font-semibold text-gray-800">ส่งกลับให้แก้ไข</div>
+                <div class="text-sm text-gray-600 mt-1">กรุณาระบุเหตุผลที่ต้องแก้ไขเอกสารของ {{ application.student_name }}</div>
 
                 <div class="mt-5">
-                    <label class="text-sm font-medium text-gray-700">เหตุผลในการปฏิเสธ *</label>
+                    <label class="text-sm font-medium text-gray-700">เหตุผลที่ต้องแก้ไข *</label>
                     <textarea name="reject_reason" rows="5" class="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg" required></textarea>
                 </div>
 
@@ -137,7 +147,7 @@
 
                 <div class="mt-6 flex justify-between gap-3">
                     <button type="button" id="closeRejectModal" class="px-4 py-2 rounded-full bg-gray-200 text-gray-700">ยกเลิก</button>
-                    <button type="button" id="confirmRejectButton" class="px-4 py-2 rounded-full bg-gray-300 text-gray-800">ยืนยันการปฏิเสธ</button>
+                    <button type="button" id="confirmRejectButton" class="px-4 py-2 rounded-full bg-gray-300 text-gray-800">ยืนยันการส่งแก้ไข</button>
                 </div>
             </div>
         </div>
@@ -341,7 +351,7 @@
         }
         rejectModal.classList.add('hidden');
         rejectModal.classList.remove('flex');
-        openConfirm('ยืนยันการปฏิเสธ', 'คุณต้องการยืนยันการปฏิเสธใบสมัครหรือไม่', 'pending');
+        openConfirm('ยืนยันการส่งแก้ไข', 'คุณต้องการส่งกลับให้แก้ไขเอกสารหรือไม่', 'needs_edit');
     });
 
     confirmInterviewButton.addEventListener('click', () => {

@@ -1,187 +1,122 @@
-from flask import Flask, redirect, url_for, render_template
+from flask import Flask, redirect, url_for, render_template, request, session, flash
+from sqlalchemy import inspect, text
+# นำเข้า Blueprint (ตรวจสอบให้แน่ใจว่า path ไฟล์ถูกต้อง)
+# หากคุณรวมไว้ในไฟล์เดียวกัน ให้เปลี่ยนเป็น from officer_routes import officer_bp, director_bp
 from routes.director_routes import director_bp
 from routes.officer_routes import officer_bp
 from routes.student_routes import student_bp
 
-# 1. นำเข้า db และ Models (ต้องสร้างไฟล์ models.py ไว้ด้วย)
-from models import db, Scholarship, Criterion, Application
+# 1. นำเข้า db และ Models
+from models import db, Scholarship, Criterion, Application, Student, Officer, Director
 import os
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "your-secret-key-here-change-in-production"
+app.config["SECRET_KEY"] = "ubu-scholarship-secret-key"
 
-# 2. ตั้งค่า Database (SQLite)
-# สร้างไฟล์ชื่อ scholarship.db ไว้ในโฟลเดอร์โครงการ
+# 2. ตั้งค่า Database
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(
     basedir, "scholarship.db"
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  # จำกัดขนาด request สูงสุด 10 MB
 
-# 3. เริ่มต้นใช้งาน Database ร่วมกับ App
 db.init_app(app)
 
-# 4. ลงทะเบียน Blueprint
+# 3. ลงทะเบียน Blueprint
+# เชื่อมต่อส่วนของ Officer และ Director เข้ากับ URL Prefix ที่กำหนด
 app.register_blueprint(director_bp, url_prefix="/director")
 app.register_blueprint(officer_bp, url_prefix="/officer")
 app.register_blueprint(student_bp, url_prefix="/student")
 
-# 5. สร้าง Database และข้อมูลจำลอง (จะทำเฉพาะตอนรันครั้งแรก)
+# 4. การจัดการ Database และสร้างบัญชีทดสอบ
 with app.app_context():
-    db.drop_all()  # ล้างตารางเดิม (ถ้ามี)
-    db.create_all()  # สร้างตารางใหม่
+    db.create_all()
 
-    # 1. สร้างรายชื่อทุน (Scholarships)
-    sch1 = Scholarship(name="ทุนอาหารกลางวัน")
-    sch2 = Scholarship(name="ทุนเรียนดี (GPA สูง)")
-    sch3 = Scholarship(name="ทุนกิจกรรมเด่น")
-    db.session.add_all([sch1, sch2, sch3])
+    inspector = inspect(db.engine)
+    existing_columns = {col["name"] for col in inspector.get_columns("application")}
+    if "reviewing_by" not in existing_columns:
+        db.session.execute(text("ALTER TABLE application ADD COLUMN reviewing_by VARCHAR(50)"))
+        db.session.commit()
+    if "reviewing_at" not in existing_columns:
+        db.session.execute(text("ALTER TABLE application ADD COLUMN reviewing_at DATETIME"))
+        db.session.commit()
+
+    # สร้างบัญชี Admin (Officer) พื้นฐาน
+    if not Officer.query.filter_by(username="admin").first():
+        admin = Officer(username="admin", name="ผู้ดูแลระบบหลัก (Officer)")
+        admin.set_password("ubu123456") 
+        db.session.add(admin)
+        
+    # 🌟 เพิ่มบัญชี กรรมการ (Director) สำหรับทดสอบระบบ
+    if not Director.query.filter_by(username="director").first():
+        director_test = Director(username="director", name="กรรมการพิจารณาทุน")
+        director_test.set_password("ubu123456")
+        db.session.add(director_test)
+        
     db.session.commit()
+    print("--- 🚀 System Ready: สร้างบัญชี 'admin' และ 'director' สำเร็จ ---")
 
-    # 2. สร้างเกณฑ์คะแนนแยกตามทุน (Criteria)
-    # เกณฑ์สำหรับทุนอาหารกลางวัน
-    db.session.add_all(
-        [
-            Criterion(name="สถานะความขาดแคลน", max_score=50, scholarship_id=sch1.id),
-            Criterion(name="ความประพฤติ", max_score=30, scholarship_id=sch1.id),
-            Criterion(name="สัมภาษณ์", max_score=20, scholarship_id=sch1.id),
-        ]
-    )
-    # เกณฑ์สำหรับทุนเรียนดี
-    db.session.add_all(
-        [
-            Criterion(name="ผลการเรียนสะสม (GPA)", max_score=70, scholarship_id=sch2.id),
-            Criterion(name="เรียงความเป้าหมายชีวิต", max_score=30, scholarship_id=sch2.id),
-        ]
-    )
-    # เกณฑ์สำหรับทุนกิจกรรม
-    db.session.add_all(
-        [
-            Criterion(name="ผลงาน/เกียรติบัตร", max_score=60, scholarship_id=sch3.id),
-            Criterion(name="การมีส่วนร่วมในวิทยาลัย", max_score=40, scholarship_id=sch3.id),
-        ]
-    )
-    db.session.commit()
 
-    # 3. สร้างรายชื่อผู้สมัคร 10 คน (Applications) กระจายตามทุน
-    students = [
-        # ทุนอาหารกลางวัน (4 คน)
-        Application(
-            student_id="68114540214",
-            student_name="นาย ทรงเดช จำปาเทศ",
-            faculty="คณะวิศวกรรมศาสตร์",
-            gpa="3.94",
-            application_date="2026-02-01",
-            scholarship_id=sch1.id,
-            status="approved",
-        ),
-        Application(
-            student_id="68114540101",
-            student_name="นางสาว สวยใส ใจชื่น",
-            faculty="คณะวิทยาศาสตร์",
-            gpa="3.20",
-            application_date="2026-02-02",
-            scholarship_id=sch1.id,
-            status="pending",
-        ),
-        Application(
-            student_id="68114540102",
-            student_name="นาย มานะ อดทน",
-            faculty="คณะบริหารศาสตร์",
-            gpa="2.85",
-            application_date="2026-02-03",
-            scholarship_id=sch1.id,
-            status="reviewing",
-        ),
-        Application(
-            student_id="68114540103",
-            student_name="นางสาว ขยัน เรียนดี",
-            faculty="คณะศิลปศาสตร์",
-            gpa="3.15",
-            application_date="2026-02-03",
-            scholarship_id=sch1.id,
-            status="interview",
-        ),
-        # ทุนเรียนดี (4 คน)
-        Application(
-            student_id="68114540215",
-            student_name="นาย ปกรณ์เกียรติ มั่นคง",
-            faculty="คณะวิศวกรรมศาสตร์",
-            gpa="3.98",
-            application_date="2026-02-04",
-            scholarship_id=sch2.id,
-            status="approved",
-        ),
-        Application(
-            student_id="68114540104",
-            student_name="นางสาว ปัญญา เลิศล้ำ",
-            faculty="คณะวิทยาศาสตร์",
-            gpa="4.00",
-            application_date="2026-02-04",
-            scholarship_id=sch2.id,
-            status="reviewing",
-        ),
-        Application(
-            student_id="68114540105",
-            student_name="นาย ฉลาด รอบรู้",
-            faculty="คณะบริหารศาสตร์",
-            gpa="3.85",
-            application_date="2026-02-05",
-            scholarship_id=sch2.id,
-            status="pending",
-        ),
-        Application(
-            student_id="68114540106",
-            student_name="นางสาว สมองไว ใจสู้",
-            faculty="คณะศิลปศาสตร์",
-            gpa="3.92",
-            application_date="2026-02-05",
-            scholarship_id=sch2.id,
-            status="interview",
-        ),
-        # ทุนกิจกรรม (2 คน)
-        Application(
-            student_id="68114540107",
-            student_name="นาย กล้าหาญ ชาญชัย",
-            faculty="คณะนิติศาสตร์",
-            gpa="2.50",
-            application_date="2026-02-06",
-            scholarship_id=sch3.id,
-            status="pending",
-        ),
-        Application(
-            student_id="68114540108",
-            student_name="นางสาว ร่าเริง แจ่มใส",
-            faculty="คณะศิลปศาสตร์",
-            gpa="3.45",
-            application_date="2026-02-06",
-            scholarship_id=sch3.id,
-            status="reviewing",
-        ),
-    ]
+# 5. Route สำหรับหน้า Login หลัก (แยกตารางค้นหาตาม Role)
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        role_target = request.form.get("role") # 'officer' หรือ 'director'
 
-    db.session.add_all(students)
-    db.session.commit()
-    print("--- ฐานข้อมูลถูกรีเซ็ตและเพิ่มข้อมูลชุดใหญ่ 10 คน เรียบร้อยแล้ว ---")
+        if not username or not password:
+            flash("กรุณากรอกทั้งชื่อผู้ใช้งานและรหัสผ่าน", "error")
+            return render_template("login.html")
+
+        # --- กรณี Login นักศึกษา ---
+        if not role_target:
+            student = Student.query.filter_by(student_id=username).first()
+            if student and student.check_password(password):
+                session.clear()
+                session["user_id"] = student.student_id
+                session["role"] = "student"
+                return redirect(url_for("student.dashboard"))
+
+        # --- กรณี Login เจ้าหน้าที่/กรรมการ ---
+        else:
+            user = None
+            if role_target == "officer":
+                user = Officer.query.filter_by(username=username).first()
+            elif role_target == "director":
+                user = Director.query.filter_by(username=username).first()
+
+            if user and user.check_password(password):
+                session.clear()
+                session["user_id"] = user.username
+                session["role"] = role_target
+                flash(f"ยินดีต้อนรับคุณ {user.name}", "success")
+                
+                # แยกทางไปตาม Role
+                if role_target == "officer":
+                    return redirect(url_for("officer.list_scholarships"))
+                elif role_target == "director":
+                    # ชี้ไปยังหน้าแรกของกรรมการ (ที่ชื่อฟังก์ชัน home ใน director_bp)
+                    return redirect(url_for("director.home"))
+            
+        flash("ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง", "error")
+
+    return render_template("login.html")
 
 
 @app.route("/")
-def home():
-    return redirect(url_for('login'))
-
-
-@app.route("/login")
-def login():
-    """หน้าเข้าสู่ระบบ - เลือกระบบเจ้าหน้าที่ กรรมการ หรือนักศึกษา"""
-    return render_template('login.html')
+def index():
+    all_scholarships = Scholarship.query.all()
+    return render_template("index.html", scholarships=all_scholarships)
 
 
 @app.route("/logout")
 def logout():
-    """ออกจากระบบไปยังหน้า login"""
-    return redirect(url_for('login'))
+    session.clear()
+    flash("ออกจากระบบเรียบร้อยแล้ว", "success")
+    return redirect(url_for("index"))
 
 
 if __name__ == "__main__":
-    # รันแอปพลิเคชัน
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True)

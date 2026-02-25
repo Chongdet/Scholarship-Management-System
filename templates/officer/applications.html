@@ -1,7 +1,8 @@
-{% extends "base.html" %}
+{% extends "layouts/base.html" %}
 
 {% block nav_links %}
-    <a href="{{ url_for('officer.applications') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ตรวจสอบเอกสาร</a>
+    <a href="{{ url_for('officer.list_scholarships') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">จัดการทุน</a>
+    <a href="{{ url_for('officer.applications') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ตรวจสอบใบสมัคร</a>
     <a href="{{ url_for('officer.audit_log') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">บันทึกการทำงาน</a>
 {% endblock %}
 
@@ -45,6 +46,7 @@
                     <option>ทั้งหมด</option>
                     <option>รอการตรวจสอบ</option>
                     <option>กำลังตรวจสอบ</option>
+                    <option>รอแก้ไข</option>
                     <option>เรียกสัมภาษณ์</option>
                     <option>ผ่าน</option>
                 </select>
@@ -56,7 +58,7 @@
     </div>
 
     <!-- Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
         <a href="{{ url_for('officer.applications') }}" class="block bg-blue-50 border-l-4 border-blue-600 rounded-lg p-4 transition hover:shadow-sm{% if not selected_status %} ring-2 ring-blue-200{% endif %}">
             <p class="text-sm text-gray-600 font-medium">รวมทั้งหมด</p>
             <h3 class="text-3xl font-bold text-gray-800 mt-2">{{ total_count }}</h3>
@@ -64,6 +66,10 @@
         <a href="{{ url_for('officer.applications', status='pending') }}" class="block bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-4 transition hover:shadow-sm{% if selected_status == 'pending' %} ring-2 ring-yellow-200{% endif %}">
             <p class="text-sm text-gray-600 font-medium">รอการตรวจสอบ</p>
             <h3 class="text-3xl font-bold text-gray-800 mt-2">{{ pending_count }}</h3>
+        </a>
+        <a href="{{ url_for('officer.applications', status='needs_edit') }}" class="block bg-orange-50 border-l-4 border-orange-400 rounded-lg p-4 transition hover:shadow-sm{% if selected_status == 'needs_edit' %} ring-2 ring-orange-200{% endif %}">
+            <p class="text-sm text-gray-600 font-medium">รอแก้ไข</p>
+            <h3 class="text-3xl font-bold text-gray-800 mt-2">{{ needs_edit_count }}</h3>
         </a>
         <a href="{{ url_for('officer.applications', status='interview') }}" class="block bg-purple-50 border-l-4 border-purple-600 rounded-lg p-4 transition hover:shadow-sm{% if selected_status == 'interview' %} ring-2 ring-purple-200{% endif %}">
             <p class="text-sm text-gray-600 font-medium">เรียกสัมภาษณ์</p>
@@ -107,6 +113,8 @@
                             <span class="block w-full px-2 py-1 text-[11px] font-semibold rounded-lg bg-yellow-100 text-yellow-800 truncate">รอการตรวจสอบ</span>
                             {% elif application.status == 'reviewing' %}
                             <span class="block w-full px-2 py-1 text-[11px] font-semibold rounded-lg bg-blue-100 text-blue-800 truncate">กำลังตรวจสอบ</span>
+                            {% elif application.status == 'needs_edit' %}
+                            <span class="block w-full px-2 py-1 text-[11px] font-semibold rounded-lg bg-orange-100 text-orange-800 truncate">รอแก้ไข</span>
                             {% elif application.status == 'interview' %}
                             <span class="block w-full px-2 py-1 text-[11px] font-semibold rounded-lg bg-purple-100 text-purple-800 truncate">เรียกสัมภาษณ์</span>
                             {% elif application.status == 'approved' %}

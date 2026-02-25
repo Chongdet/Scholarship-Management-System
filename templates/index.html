@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบทุนการศึกษา - Ubon Ratchathani University</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    
+    <style>
+        body { font-family: 'Prompt', sans-serif; }
+        
+        /* สไตล์สำหรับ Slider: แก้ปัญหาภาพยืด/ขยายกว้าง */
+        .swiper { width: 100%; height: 420px; border-radius: 1.5rem; }
+        .swiper-slide img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; /* ล็อคสัดส่วนภาพให้พอดีพื้นที่ ไม่ยืด */
+        }
+        
+        /* ส่วนรูปภาพหัวการ์ดทุน */
+        .scholarship-card-img-wrapper {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+        }
+        .scholarship-card-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .group:hover .scholarship-card-img-wrapper img {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="bg-sky-50 min-h-screen flex flex-col m-0 p-0">
+    
+    <header class="bg-blue-900 text-white shadow-md w-full sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-8 py-4 flex justify-between items-center w-full">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12">
+                    <img src="{{ url_for('static', filename='images/ubu_logo.png') }}" alt="UBU Logo" class="w-full h-full object-contain">
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-yellow-400">ระบบทุนการศึกษา</h1>
+                    <p class="text-xs text-blue-200 uppercase tracking-tighter">Ubon Ratchathani University</p>
+                </div>
+            </div>
+            
+            <nav class="hidden md:flex items-center gap-4">
+                <a href="/" class="text-white border-b-2 border-yellow-400 px-2 py-1 text-sm font-bold">หน้าแรก</a>
+                <a href="#" class="text-blue-100 hover:text-yellow-400 text-sm transition-all">ประกาศ/ระเบียบ</a>
+                <a href="/login" class="ml-4 bg-yellow-400 text-blue-900 px-6 py-2 rounded-full font-bold hover:bg-yellow-300 transition-all shadow-md">
+                    เข้าสู่ระบบ 🔐
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="flex-grow w-full px-4 md:px-8 py-10 max-w-7xl mx-auto">
+        
+        <div class="swiper mySwiper mb-12 shadow-2xl border-4 border-yellow-400 relative">
+            <div class="swiper-wrapper">
+                {% for item in scholarships[:3] %}
+                <div class="swiper-slide relative">
+                    <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1200" alt="Banner">
+                    <div class="absolute inset-0 bg-gradient-to-r from-blue-900/90 via-blue-900/40 to-transparent flex flex-col justify-center px-12 md:px-20 text-white">
+                        <span class="bg-yellow-400 text-blue-900 px-3 py-1 rounded-full text-xs font-bold w-fit mb-4"> 🔥 เปิดรับสมัคร</span>
+                        <h2 class="text-4xl font-bold text-yellow-400 mb-2">{{ item.name }}</h2>
+                        <p class="text-lg mb-6 text-blue-50 max-w-lg">เปิดโอกาสทางการศึกษาให้นักศึกษา ม.อุบลฯ</p>
+                        <div class="border-l-4 border-yellow-400 pl-6">
+                            <p class="text-sm text-blue-200">มูลค่าทุนการศึกษา</p>
+                            <p class="text-2xl font-bold font-mono">{{ "{:,.0f}".format(item.amount or 0) }} บาท</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="swiper-button-next !text-white"></div>
+            <div class="swiper-button-prev !text-white"></div>
+            <div class="swiper-pagination"></div>
+        </div>
+
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-extrabold text-blue-900 inline-block relative">
+                รายการทุนการศึกษา
+                <div class="h-1.5 w-full bg-yellow-400 mt-2 rounded-full"></div>
+            </h2>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+        
+        {% for item in scholarships %}
+        <div class="group bg-white rounded-3xl shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 overflow-hidden flex flex-col h-full transform hover:-translate-y-2">
+            
+            <div class="scholarship-card-img-wrapper relative">
+                <div class="absolute inset-0 bg-blue-900/20 group-hover:bg-transparent transition-colors"></div>
+                <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=400" alt="Scholarship Cover">
+                <div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-blue-900 shadow-sm uppercase">
+                    UBU Scholarship
+                </div>
+            </div>
+            
+            <div class="p-8 flex flex-col flex-grow">
+                <h3 class="font-bold text-xl text-blue-900 mb-4 line-clamp-2 min-h-[3.5rem]">{{ item.name }}</h3>
+                
+                <div class="space-y-3 text-sm flex-grow">
+                    <div class="flex justify-between items-center p-3 bg-blue-50 rounded-2xl">
+                        <span class="text-blue-700">ทุนละ :</span>
+                        <span class="font-bold text-blue-900 text-lg">{{ "{:,.0f}".format(item.amount or 0) }} บาท</span>
+                    </div>
+                    <p class="flex justify-between px-2 text-gray-500">
+                        <span>หน่วยงาน :</span> 
+                        <span class="font-medium text-gray-700">สำนักงานพัฒนานักศึกษา</span>
+                    </p>
+                </div>
+
+                <div class="mt-8">
+                    <a href="/login" class="block w-full bg-blue-900 text-white text-center font-bold py-3 rounded-2xl hover:bg-yellow-400 hover:text-blue-900 transition-all shadow-lg active:scale-95">
+                        เข้าสู่ระบบเพื่อสมัคร
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-span-full text-center py-20 bg-white rounded-3xl border-2 border-dashed border-gray-200">
+            <p class="text-gray-400 text-lg">ขณะนี้ยังไม่มีทุนการศึกษาเปิดให้สมัครในระบบ</p>
+        </div>
+        {% endfor %}
+
+        </div>
+    </main>
+
+    <footer class="bg-blue-950 text-blue-200 py-12 px-8 w-full text-sm mt-auto border-t-8 border-yellow-400">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+                <strong class="text-yellow-400 text-lg mb-4 block">สำนักงานพัฒนานักศึกษา ม.อุบลฯ</strong>
+                <p class="leading-relaxed opacity-80">
+                    85 ถนนสถลมาร์ค ตำบลเมืองศรีไค อำเภอวารินชำราบ <br>
+                    จังหวัดอุบลราชธานี 34190
+                </p>
+            </div>
+            <div class="md:text-right">
+                <strong class="text-yellow-400 text-lg mb-4 block">ช่องทางการติดต่อ</strong>
+                <p class="opacity-80">Email: ubustudent.d@ubu.ac.th</p>
+                <p class="opacity-80 font-bold mt-2">โทรศัพท์: 045-353000 ต่อ 1210</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        const swiper = new Swiper('.mySwiper', {
+            loop: true,
+            effect: 'fade', // เปลี่ยนเป็น Fade เพื่อความสวยงามและลดปัญหารูปกระตุก
+            fadeEffect: { crossFade: true },
+            pagination: { el: '.swiper-pagination', clickable: true },
+            navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+            autoplay: { delay: 5000, disableOnInteraction: false }
+        });
+    </script>
+</body>
+</html>

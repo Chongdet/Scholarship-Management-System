@@ -1,4 +1,5 @@
 from flask import Flask, redirect, url_for, render_template, request, session, flash
+from sqlalchemy import inspect, text
 # นำเข้า Blueprint (ตรวจสอบให้แน่ใจว่า path ไฟล์ถูกต้อง)
 # หากคุณรวมไว้ในไฟล์เดียวกัน ให้เปลี่ยนเป็น from officer_routes import officer_bp, director_bp
 from routes.director_routes import director_bp
@@ -30,6 +31,15 @@ app.register_blueprint(student_bp, url_prefix="/student")
 # 4. การจัดการ Database และสร้างบัญชีทดสอบ
 with app.app_context():
     db.create_all()
+
+    inspector = inspect(db.engine)
+    existing_columns = {col["name"] for col in inspector.get_columns("application")}
+    if "reviewing_by" not in existing_columns:
+        db.session.execute(text("ALTER TABLE application ADD COLUMN reviewing_by VARCHAR(50)"))
+        db.session.commit()
+    if "reviewing_at" not in existing_columns:
+        db.session.execute(text("ALTER TABLE application ADD COLUMN reviewing_at DATETIME"))
+        db.session.commit()
 
     # สร้างบัญชี Admin (Officer) พื้นฐาน
     if not Officer.query.filter_by(username="admin").first():

@@ -77,6 +77,8 @@ class Application(db.Model):
     faculty = db.Column(db.String(100)) # <--- คงไว้ตามที่คุณเพิ่มมา
     scholarship_id = db.Column(db.Integer, db.ForeignKey('scholarship.id'))
     status = db.Column(db.String(20), default='pending')
+    reviewing_by = db.Column(db.String(50))
+    reviewing_at = db.Column(db.DateTime)
 
 # 2.3 เกณฑ์คะแนน
 class Criterion(db.Model):

@@ -1,10 +1,21 @@
 from datetime import datetime
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
-from models import db, Application, Scholarship
+from models import db, Application, Scholarship, AuditLog
 
 # สร้าง Blueprint สำหรับ Officer
 officer_bp = Blueprint('officer', __name__)
+
+# helper for audit logging
+def log_action(action, details=""):
+    """Add an entry to the audit_log table using current session data."""
+    user_id = session.get('user_id')
+    user_role = session.get('role')
+    entry = AuditLog(user_id=user_id, user_role=user_role,
+                     action=action, details=details)
+    db.session.add(entry)
+    db.session.commit()
+
 
 # ==========================================
 # ผู้รับผิดชอบ: นาย ยศสรัล ถิระบุตร (Officer ส่วนเดิม)
@@ -16,20 +27,43 @@ def login():
 
 @officer_bp.route('/scholarships/<int:id>/applications')
 def view_applications_by_scholarship(id):
-    applications = Application.query.filter_by(scholarship_id=id).all()
+    status = request.args.get('status')
+    query = Application.query.filter_by(scholarship_id=id)
+    if status:
+        query = query.filter_by(status=status)
+    applications = query.all()
     return render_template('officer/applications.html', applications=applications)
+
+@officer_bp.route('/scholarships/<int:id>/recipients', methods=['GET', 'POST'])
+def scholarship_recipients(id):
+    sch = Scholarship.query.get_or_404(id)
+    if request.method == 'POST':
+        # allow setting announcement date from this page
+        ann = request.form.get('announcement_date')
+        if ann is not None:
+            sch.announcement_date = datetime.strptime(ann, '%Y-%m-%d').date() if ann else None
+            db.session.commit()
+            log_action('set_announcement_date', f'id={id} date={ann}')
+            flash('กำหนดวันประกาศทุนเรียบร้อยแล้ว', 'success')
+            return redirect(url_for('officer.scholarship_recipients', id=id))
+    applications = Application.query.filter_by(scholarship_id=id, status='approved').all()
+    return render_template('officer/recipients.html', scholarship=sch, applications=applications)
 
 @officer_bp.route('/scholarships/add', methods=['GET', 'POST'])
 def add_scholarship():
     if request.method == 'POST':
         name = request.form.get('name')
         amount = request.form.get('amount')
+        ann_date = request.form.get('announcement_date')
         if not name or not amount:
             flash('กรุณากรอกข้อมูลให้ครบ', 'danger')
             return redirect(url_for('officer.add_scholarship'))
-        new_scholarship = Scholarship(name=name, amount=float(amount))
-        db.session.add(new_scholarship)
+        sch = Scholarship(name=name, amount=float(amount))
+        if ann_date:
+            sch.announcement_date = datetime.strptime(ann_date, '%Y-%m-%d').date()
+        db.session.add(sch)
         db.session.commit()
+        log_action('add_scholarship', f'name={name} amount={amount} announcement_date={ann_date}')
         flash('เพิ่มทุนสำเร็จ', 'success')
         return redirect(url_for('officer.list_scholarships'))
     return render_template('officer/add_scholarship.html')
@@ -45,12 +79,15 @@ def edit_scholarship(id):
     if request.method == 'POST':
         name = request.form.get('name')
         amount = request.form.get('amount')
+        ann_date = request.form.get('announcement_date')
         if not name or not amount:
             flash('กรุณากรอกข้อมูลให้ครบ', 'danger')
             return redirect(url_for('officer.edit_scholarship', id=id))
         scholarship.name = name
         scholarship.amount = float(amount)
+        scholarship.announcement_date = datetime.strptime(ann_date, '%Y-%m-%d').date() if ann_date else None
         db.session.commit()
+        log_action('edit_scholarship', f'id={id} name={name} amount={amount} announcement_date={ann_date}')
         flash('แก้ไขทุนสำเร็จ', 'success')
         return redirect(url_for('officer.list_scholarships'))
     return render_template('officer/edit_scholarship.html', scholarship=scholarship)
@@ -60,6 +97,7 @@ def delete_scholarship(id):
     scholarship = Scholarship.query.get_or_404(id)
     db.session.delete(scholarship)
     db.session.commit()
+    log_action('delete_scholarship', f'id={id} name={scholarship.name}')
     flash('ลบทุนสำเร็จ', 'success')
     return redirect(url_for('officer.list_scholarships'))
 
@@ -136,19 +174,58 @@ def decide_application(application_id):
         application.reviewing_by = None
         application.reviewing_at = None
         db.session.commit()
+        log_action('decide_application', f'id={application_id} decision=interview')
         flash('ทำการยืนยันนัดสัมภาษณ์เรียบร้อยแล้ว', 'success')
     elif decision == 'needs_edit':
         application.status = 'needs_edit'
         application.reviewing_by = None
         application.reviewing_at = None
         db.session.commit()
+        log_action('decide_application', f'id={application_id} decision=needs_edit')
         flash('ส่งกลับให้แก้ไขเอกสารเรียบร้อยแล้ว', 'success')
     return redirect(url_for('officer.applications'))
 
 @officer_bp.route('/audit-log')
 def audit_log():
     """หน้าบันทึกการทำงาน (Audit Log) ของเจ้าหน้าที่"""
-    return render_template('officer/audit_log.html')
+    logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).all()
+    return render_template('officer/audit_log.html', logs=logs)
+
+# ==========================================
+# ผู้รับผิดชอบ: นาย อติวิชญ์ สีหนันท์
+# ==========================================
+officer_bp.route('/notify', methods=['POST'])
+def auto_notify():
+    """ระบบแจ้งเตือนผลอัตโนมัติ (Automatic Result Notification)"""
+    # TODO: integrate with notification subsystem later
+    flash('ระบบแจ้งเตือนผลถูกเรียกใช้งานแล้ว', 'info')
+    return redirect(url_for('officer.applications'))
+
+@officer_bp.route('/announcement', methods=['GET', 'POST'])
+def final_announcement():
+    """จัดการประกาศผลรอบสุดท้าย (Final Announcement)"""
+    if request.method == 'POST':
+        # message form
+        if request.form.get('message') is not None:
+            message = request.form.get('message')
+            session['last_announcement'] = message
+            log_action('post_announcement', f'message={message}')
+            flash('ประกาศผลเรียบร้อยแล้ว', 'success')
+            return redirect(url_for('officer.final_announcement'))
+        # scholarship date form
+        sch_id = request.form.get('scholarship_id')
+        if sch_id:
+            ann_date = request.form.get('announcement_date')
+            sch = Scholarship.query.get_or_404(sch_id)
+            sch.announcement_date = datetime.strptime(ann_date, '%Y-%m-%d').date() if ann_date else None
+            db.session.commit()
+            log_action('set_announcement_date', f'id={sch_id} date={ann_date}')
+            flash('กำหนดวันประกาศทุนเรียบร้อยแล้ว', 'success')
+            return redirect(url_for('officer.final_announcement'))
+    # GET -> แสดงฟอร์ม/หน้าประกาศ
+    last_msg = session.get('last_announcement')
+    scholarships = Scholarship.query.all()
+    return render_template('officer/announcement.html', last_message=last_msg, scholarships=scholarships)
 
 # ==========================================
 # เพิ่มส่วนของกรรมการ (Director) เพื่อให้ Link ใน HTML ทำงานได้

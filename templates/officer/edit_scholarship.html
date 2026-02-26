@@ -3,6 +3,7 @@
 {% block nav_links %}
     <a href="{{ url_for('officer.list_scholarships') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">จัดการทุน</a>
     <a href="{{ url_for('officer.applications') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ตรวจสอบใบสมัคร</a>
+    <a href="{{ url_for('officer.final_announcement') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ประกาศทุน</a>
     <a href="{{ url_for('officer.audit_log') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">บันทึกการทำงาน</a>
 {% endblock %}
 
@@ -63,6 +64,22 @@
                     >
                 </div>
                 <p class="text-xs text-gray-400 italic">* เว้นว่างไว้หากไม่มีระบุจำนวนเงินที่แน่นอน</p>
+            </div>
+
+            <div class="space-y-2">
+                <label for="announcement_date" class="block text-sm font-bold text-gray-700">
+                    วันที่ประกาศผล
+                </label>
+                <div class="relative">
+                    <span class="absolute left-4 top-3.5 text-gray-400">📅</span>
+                    <input 
+                        type="date" 
+                        id="announcement_date" 
+                        name="announcement_date" 
+                        value="{{ scholarship.announcement_date if scholarship.announcement_date else '' }}"
+                        class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none bg-gray-50 focus:bg-white text-gray-800"
+                    >
+                </div>
             </div>
 
             <div class="flex flex-col sm:flex-row items-center gap-4 pt-6 border-t border-gray-100">

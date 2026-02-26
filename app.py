@@ -41,6 +41,10 @@ with app.app_context():
     if "reviewing_at" not in existing_columns:
         db.session.execute(text("ALTER TABLE application ADD COLUMN reviewing_at DATETIME"))
         db.session.commit()
+    # add announcement_date column to scholarship if missing
+    if "announcement_date" not in {col["name"] for col in inspector.get_columns("scholarship")}:
+        db.session.execute(text("ALTER TABLE scholarship ADD COLUMN announcement_date DATE"))
+        db.session.commit()
 
     # สร้างบัญชี Admin (Officer) พื้นฐาน
     if not Officer.query.filter_by(username="admin").first():

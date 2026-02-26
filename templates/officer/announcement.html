@@ -1,0 +1,70 @@
+{% extends "layouts/base.html" %}
+
+{% block nav_links %}
+    <a href="{{ url_for('officer.list_scholarships') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">จัดการทุน</a>
+    <a href="{{ url_for('officer.applications') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ตรวจสอบใบสมัคร</a>
+    <a href="{{ url_for('officer.final_announcement') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ประกาศทุน</a>
+    <a href="{{ url_for('officer.audit_log') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">บันทึกการทำงาน</a>
+{% endblock %}
+
+{% block role_name %}เจ้าหน้าที่{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto p-6">
+    <div class="mb-6 flex items-center text-sm text-gray-500">
+        <a href="{{ url_for('officer.home') }}" class="hover:text-blue-600 transition">หน้าแรก</a>
+        <span class="mx-2">></span>
+        <span class="font-bold text-gray-800">ประกาศผลสุดท้าย</span>
+    </div>
+
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-gray-200 pb-4">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">จัดการประกาศทุน</h1>
+        </div>
+    </div>
+
+    <!-- Scholarship cards grouped by announcement status -->
+    {% set announced = scholarships | selectattr('announcement_date') | list %}
+    {% set pending = scholarships | rejectattr('announcement_date') | list %}
+
+    {% if announced %}
+    <div class="mt-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for sch in announced %}
+            <div class="bg-white rounded-2xl shadow-lg p-6 flex flex-col {% if sch.announcement_date %}border border-green-200{% else %}border border-red-200{% endif %}">
+                <div class="h-32 bg-gray-200 rounded-lg mb-4 flex items-center justify-center text-gray-400">รูปภาพ</div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ sch.name }}</h3>
+                <p class="text-sm text-gray-600 mb-1">ทุนละ: {{ "{:,.2f}".format(sch.amount) if sch.amount else '-' }} บาท</p>
+                <p class="text-sm text-gray-600 mb-1">ประกาศเมื่อ: {{ sch.announcement_date.strftime('%Y-%m-%d') }}</p>
+                <div class="mt-auto pt-4 flex justify-between items-center">
+                    <span class="text-xs font-medium text-green-600">ประกาศแล้ว</span>
+                    <a href="{{ url_for('officer.scholarship_recipients', id=sch.id) }}" class="text-blue-600 hover:underline text-sm">ดูประกาศรายชื่อ</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if pending %}
+    <div class="mt-8">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">ทุนที่ยังไม่ประกาศ</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for sch in pending %}
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 flex flex-col">
+                <div class="h-32 bg-gray-200 rounded-lg mb-4 flex items-center justify-center text-gray-400">รูปภาพ</div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ sch.name }}</h3>
+                <p class="text-sm text-gray-600 mb-1">ทุนละ: {{ "{:,.2f}".format(sch.amount) if sch.amount else '-' }} บาท</p>
+                <p class="text-sm text-gray-600 mb-1">ประกาศเมื่อ: ยังไม่กำหนด</p>
+                <div class="mt-auto pt-4 flex justify-between items_center">
+                    <span class="text-xs font-medium text-red-600">ยังไม่ประกาศ</span>
+                    <a href="{{ url_for('officer.scholarship_recipients', id=sch.id) }}" class="text-blue-600 hover:underline text-sm">ดูประกาศรายชื่อ</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

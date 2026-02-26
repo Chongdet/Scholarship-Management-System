@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 
 db = SQLAlchemy()
 
@@ -65,6 +66,7 @@ class Scholarship(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     amount = db.Column(db.Float, nullable=True)
+    announcement_date = db.Column(db.Date, nullable=True)  # วันที่ประกาศผล
     criteria = db.relationship('Criterion', backref='scholarship', lazy=True)
     applications = db.relationship('Application', backref='scholarship', lazy=True)
 
@@ -87,3 +89,16 @@ class Criterion(db.Model):
     scholarship_id = db.Column(db.Integer, db.ForeignKey('scholarship.id'))
     name = db.Column(db.String(100))
     max_score = db.Column(db.Integer)
+
+
+# ==========================================
+# ส่วนที่ 3: ระบบบันทึกการทำงาน (Audit Log)
+# ==========================================
+class AuditLog(db.Model):
+    __tablename__ = 'audit_log'
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, nullable=True)
+    user_role = db.Column(db.String(20))
+    action = db.Column(db.String(200))
+    details = db.Column(db.Text)

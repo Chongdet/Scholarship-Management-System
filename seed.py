@@ -1,5 +1,5 @@
 from app import app
-from models import db, Student, Officer, Director, Scholarship
+from models import db, Student, Officer, Director, Scholarship, AuditLog
 
 def seed_users():
     with app.app_context():
@@ -9,7 +9,8 @@ def seed_users():
         Student.query.delete()
         Officer.query.delete()
         Director.query.delete()
-        Scholarship.query.delete() 
+        Scholarship.query.delete()
+        AuditLog.query.delete()  
 
         # 2. สร้างนักศึกษา 10 คน
         for i in range(1, 11):

@@ -46,6 +46,7 @@ class Student(db.Model):
     faculty = db.Column(db.String(100))
     gpax = db.Column(db.Float)
     
+    
     # ... (สามารถเพิ่มฟิลด์อื่นๆ ตามที่คุณมีในไฟล์เดิมได้เลย) ...
 
     def set_password(self, password):
@@ -76,9 +77,11 @@ class Application(db.Model):
     student_name = db.Column(db.String(100))
     faculty = db.Column(db.String(100)) # <--- คงไว้ตามที่คุณเพิ่มมา
     scholarship_id = db.Column(db.Integer, db.ForeignKey('scholarship.id'))
-    status = db.Column(db.String(20), default='pending')
+    status = db.Column(db.String(20), default='รอตรวจสอบ') # <--- สถานะหลังจากกดส่งใบสมัครเสร็จ
     reviewing_by = db.Column(db.String(50))
     reviewing_at = db.Column(db.DateTime)
+    status_description = db.Column(db.Text) # <--- สำหรับเก็บนัดหมายหรือเหตุผลจากเจ้าหน้าที่
+
 
 # 2.3 เกณฑ์คะแนน
 class Criterion(db.Model):

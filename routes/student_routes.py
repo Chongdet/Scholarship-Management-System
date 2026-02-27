@@ -102,7 +102,66 @@ def apply_scholarship():
 @student_bp.route("/status")
 def track_status():
     """ระบบติดตามสถานะการสมัคร"""
-    return render_template("student/status.html")
+    from datetime import datetime
+    
+    class MockApp:
+        def __init__(self, id, name, type, faculty, status, date, files):
+            self.id = id
+            self.scholarship_name = name
+            self.scholarship_type = type
+            self.faculty = faculty
+            self.status = status
+            self.created_at = datetime.strptime(date, '%Y-%m-%d')
+            self.open_date = datetime(2025, 10, 1)
+            self.close_date = datetime(2025, 10, 31)
+            self.files = files
+
+    # รายการไฟล์จำลอง 5 ไฟล์ที่นักศึกษามักต้องส่ง
+    my_files = [
+        {"name": "1_สำเนาบัตรประชาชน.pdf"},
+        {"name": "2_ระเบียนผลการเรียน_GPAX.pdf"},
+        {"name": "3_รูปถ่ายสภาพบ้านพักปัจจุบัน.pdf"},
+        {"name": "4_สำเนาทะเบียนบ้าน.pdf"},
+        {"name": "5_หนังสือรับรองรายได้ครอบครัว.pdf"}
+    ]
+
+    # จำลองข้อมูล 5 ทุน คละสถานะ
+    applications = [
+        MockApp(1, "ทุนบริษัท ไฮโวลเตจ เทคโนโลยี จำกัด", "ทุนบริจาค", "คณะวิศวกรรมศาสตร์", "รอตรวจสอบ", "2025-10-15", my_files),
+        MockApp(2, "ทุนเรียนดีเพื่ออุดมศึกษา", "ทุนภายใน", "คณะวิทยาศาสตร์", "เรียกสัมภาษณ์", "2025-10-18", my_files),
+        MockApp(3, "ทุนช่วยเหลือค่าครองชีพ กยศ.", "ทุนภายนอก", "ส่วนกลาง", "ปฏิเสธ", "2025-10-20", my_files),
+        MockApp(4, "ทุนนักกิจกรรมตัวอย่าง", "ทุนภายใน", "คณะบริหารศาสตร์", "ได้รับทุน", "2025-10-22", my_files),
+        MockApp(5, "ทุนเยียวยานักศึกษาจากภัยพิบัติ", "ทุนฉุกเฉิน", "ส่วนกลาง", "รอตรวจสอบ", "2025-10-25", my_files)
+    ]
+    
+    return render_template("student/status.html", applications=applications)
+
+@student_bp.route("/status_detail/<int:app_id>")
+def status_detail(app_id):
+    from datetime import datetime
+    # ข้อมูลรายละเอียดสำหรับ 5 ID
+    mock_db = {
+        1: {"name": "ทุนบริษัท ไฮโวลเตจ เทคโนโลยี จำกัด", "status": "รอตรวจสอบ", "desc": "เจ้าหน้าที่กำลังตรวจสอบความถูกต้องของเอกสาร"},
+        2: {"name": "ทุนเรียนดีเพื่ออุดมศึกษา", "status": "เรียกสัมภาษณ์", "desc": "วันที่ 5 ธ.ค. 68 เวลา 09:00 น. ณ ห้องประชุม EN101"},
+        3: {"name": "ทุนช่วยเหลือค่าครองชีพ กยศ.", "status": "ปฏิเสธ", "desc": "เนื่องจากรายได้ครอบครัวเกินเกณฑ์ที่กำหนด"},
+        4: {"name": "ทุนนักกิจกรรมตัวอย่าง", "status": "ได้รับทุน", "desc": "ยินดีด้วย! ท่านได้รับการคัดเลือก กรุณามารายงานตัว"},
+        5: {"name": "ทุนเยียวยานักศึกษาจากภัยพิบัติ", "status": "รอตรวจสอบ", "desc": "อยู่ระหว่างพิจารณาความเร่งด่วน"}
+    }
+    
+    info = mock_db.get(app_id, mock_db[1])
+
+    class MockDetail:
+        def __init__(self, id, data):
+            self.id = id
+            self.scholarship = type('Obj', (object,), {'name': data['name'], 'amount': 20000.0})
+            self.faculty = "คณะวิศวกรรมศาสตร์"
+            self.status = data['status']
+            self.status_description = data['desc']
+            self.created_at = datetime(2025, 10, 15)
+            self.reviewing_at = datetime(2025, 11, 20)
+
+    app_data = MockDetail(app_id, info)
+    return render_template("student/status_detail.html", app=app_data)
 
 @student_bp.route("/auto-match")
 def auto_match():

@@ -1,0 +1,56 @@
+{% extends "layouts/base.html" %}
+
+{% block nav_links %}
+    <a href="{{ url_for('officer.list_scholarships') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">จัดการทุน</a>
+    <a href="{{ url_for('officer.applications') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ตรวจสอบใบสมัคร</a>
+    <a href="{{ url_for('officer.final_announcement') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ประกาศทุน</a>
+    <a href="{{ url_for('officer.audit_log') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">บันทึกการทำงาน</a>
+{% endblock %}
+
+{% block role_name %}เจ้าหน้าที่{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto p-6">
+    <div class="mb-6 flex items-center text-sm text-gray-500">
+        <a href="{{ url_for('officer.final_announcement') }}" class="hover:text-blue-600 transition">ประกาศทุน</a>
+        <span class="mx-2">></span>
+        <span class="font-bold text-gray-800">ผู้ได้รับทุน {{ scholarship.name }}</span>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+        <form method="post" class="mb-6">
+            <label class="block text-sm font-medium text-gray-700">วันที่ประกาศผลทุน</label>
+            <div class="flex items-center gap-2 mt-2">
+                <input type="date" name="announcement_date" value="{{ scholarship.announcement_date if scholarship.announcement_date else '' }}" class="border border-gray-300 rounded px-2 py-1" />
+                <button type="submit" class="px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">บันทึก/แก้ไข</button>
+            </div>
+        </form>
+        {% if applications %}
+        <table class="w-full text-left text-sm">
+            <thead class="bg-blue-50 text-blue-900 font-bold border-b border-blue-100">
+                <tr>
+                    <th class="px-4 py-3">รหัสนักศึกษา</th>
+                    <th class="px-4 py-3">ชื่อ-นามสกุล</th>
+                    <th class="px-4 py-3">คณะ</th>
+                    <th class="px-4 py-3">GPAX</th>
+                    <th class="px-4 py-3">วันที่สมัคร</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for app in applications %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3">{{ app.student_id }}</td>
+                    <td class="px-4 py-3">{{ app.student_name }}</td>
+                    <td class="px-4 py-3">{{ app.faculty }}</td>
+                    <td class="px-4 py-3">{{ app.gpa }}</td>
+                    <td class="px-4 py-3">{{ app.application_date }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-center text-gray-600">ยังไม่มีผู้ได้รับทุนสำหรับทุนนี้</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

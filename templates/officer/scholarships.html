@@ -24,6 +24,7 @@
                         <th class="px-6 py-4">#</th>
                         <th class="px-6 py-4">ชื่อทุนการศึกษา</th>
                         <th class="px-6 py-4">จำนวนเงิน (บาท)</th>
+                        <th class="px-6 py-4">วันที่ประกาศ</th>
                         <th class="px-6 py-4 text-center">จัดการ</th>
                     </tr>
                 </thead>
@@ -34,6 +35,9 @@
                         <td class="px-6 py-4 font-bold text-gray-800">{{ scholarship.name }}</td>
                         <td class="px-6 py-4 text-green-600 font-medium">
                             {{ "{:,.2f}".format(scholarship.amount) if scholarship.amount else "-" }} ฿
+                        </td>
+                        <td class="px-6 py-4">
+                            {{ scholarship.announcement_date.strftime('%Y-%m-%d') if scholarship.announcement_date else '-' }}
                         </td>
                         <td class="px-6 py-4 text-center space-x-2">
                             

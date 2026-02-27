@@ -3,6 +3,7 @@
 {% block nav_links %}
     <a href="{{ url_for('officer.list_scholarships') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">จัดการทุน</a>
     <a href="{{ url_for('officer.applications') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ตรวจสอบใบสมัคร</a>
+    <a href="{{ url_for('officer.final_announcement') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ประกาศทุน</a>
     <a href="{{ url_for('officer.audit_log') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">บันทึกการทำงาน</a>
 {% endblock %}
 
@@ -67,46 +68,22 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
+                    {% if logs %}
+                    {% for log in logs %}
                     <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 text-gray-600">2026-02-24 14:30:25</td>
-                        <td class="px-4 py-3 font-medium">officer01</td>
+                        <td class="px-4 py-3 text-gray-600">{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td class="px-4 py-3 font-medium">{{ log.user_role or 'unknown' }}{{ ' #' ~ log.user_id if log.user_id }}</td>
                         <td class="px-4 py-3">
-                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold">อนุมัติ</span>
+                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-bold">{{ log.action }}</span>
                         </td>
-                        <td class="px-4 py-3 text-gray-600">อนุมัติใบสมัคร #12345</td>
+                        <td class="px-4 py-3 text-gray-600">{{ log.details }}</td>
                     </tr>
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 text-gray-600">2026-02-24 13:15:10</td>
-                        <td class="px-4 py-3 font-medium">officer02</td>
-                        <td class="px-4 py-3">
-                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-bold">เข้าสู่ระบบ</span>
-                        </td>
-                        <td class="px-4 py-3 text-gray-600">เข้าสู่ระบบสำเร็จ</td>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="px-4 py-8 text-center text-gray-500">ยังไม่มีบันทึกการทำงาน</td>
                     </tr>
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 text-gray-600">2026-02-24 12:45:33</td>
-                        <td class="px-4 py-3 font-medium">officer01</td>
-                        <td class="px-4 py-3">
-                            <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-bold">แก้ไข</span>
-                        </td>
-                        <td class="px-4 py-3 text-gray-600">แก้ไขข้อมูลทุนการศึกษา "ทุนเรียนดี 2026"</td>
-                    </tr>
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 text-gray-600">2026-02-24 11:20:15</td>
-                        <td class="px-4 py-3 font-medium">officer03</td>
-                        <td class="px-4 py-3">
-                            <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-bold">ปฏิเสธ</span>
-                        </td>
-                        <td class="px-4 py-3 text-gray-600">ปฏิเสธใบสมัคร #12340 (เอกสารไม่ครบ)</td>
-                    </tr>
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 text-gray-600">2026-02-24 10:05:42</td>
-                        <td class="px-4 py-3 font-medium">officer01</td>
-                        <td class="px-4 py-3">
-                            <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-bold">ดาวน์โหลด</span>
-                        </td>
-                        <td class="px-4 py-3 text-gray-600">ดาวน์โหลดรายงานใบสมัคร PDF</td>
-                    </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>

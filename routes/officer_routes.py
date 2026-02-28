@@ -16,9 +16,10 @@ def login():
 # =========================
 # แสดงรายการใบสมัครของทุน
 # =========================
-@officer_bp.route('/scholarships/<int:id>/applications')
-def view_applications_by_scholarship(id):
-    applications = Application.query.filter_by(scholarship_id=id).all()
+@officer_bp.route('/scholarships/<scholarship_id>/applications')
+def view_applications_by_scholarship(scholarship_id):
+    # scholarship_id is a string primary key
+    applications = Application.query.filter_by(scholarship_id=scholarship_id).all()
     return render_template('officer/applications.html', applications=applications)
 
 
@@ -28,16 +29,41 @@ def view_applications_by_scholarship(id):
 @officer_bp.route('/scholarships/add', methods=['GET', 'POST'])
 def add_scholarship():
     if request.method == 'POST':
-        name = request.form.get('name')
+        scholarship_id = request.form.get('scholarship_id')
+        scholarship_name = request.form.get('scholarship_name')
         amount = request.form.get('amount')
+        min_gpax = request.form.get('min_gpax')
+        faculty_condition = request.form.get('faculty_condition')
+        start_date = request.form.get('start_date')
+        end_date = request.form.get('end_date')
+        status = request.form.get('status')
 
-        if not name or not amount:
-            flash('กรุณากรอกข้อมูลให้ครบ', 'danger')
+        if not scholarship_id or not scholarship_name:
+            flash('กรุณากรอกรหัสและชื่อทุน', 'danger')
             return redirect(url_for('officer.add_scholarship'))
 
+        # convert types
+        try:
+            amt = float(amount) if amount else None
+        except ValueError:
+            amt = None
+        try:
+            min_g = float(min_gpax) if min_gpax else None
+        except ValueError:
+            min_g = None
+        from datetime import datetime
+        sd = datetime.strptime(start_date, '%Y-%m-%d') if start_date else None
+        ed = datetime.strptime(end_date, '%Y-%m-%d') if end_date else None
+
         new_scholarship = Scholarship(
-            name=name,
-            amount=float(amount)
+            scholarship_id=scholarship_id,
+            scholarship_name=scholarship_name,
+            amount=amt,
+            min_gpax=min_g,
+            faculty_condition=faculty_condition or None,
+            start_date=sd,
+            end_date=ed,
+            status=status or 'Open'
         )
 
         db.session.add(new_scholarship)
@@ -54,20 +80,38 @@ def list_scholarships():
     scholarships = Scholarship.query.all()
     return render_template('officer/scholarships.html', scholarships=scholarships)
 
-@officer_bp.route('/scholarships/<int:id>/edit', methods=['GET', 'POST'])
-def edit_scholarship(id):
+@officer_bp.route('/scholarships/<scholarship_id>/edit', methods=['GET', 'POST'])
+def edit_scholarship(scholarship_id):
     """แก้ไขทุน (Edit scholarship)"""
-    scholarship = Scholarship.query.get_or_404(id)
+    scholarship = Scholarship.query.get_or_404(scholarship_id)
     if request.method == 'POST':
-        name = request.form.get('name')
+        scholarship_name = request.form.get('scholarship_name')
         amount = request.form.get('amount')
+        min_gpax = request.form.get('min_gpax')
+        faculty_condition = request.form.get('faculty_condition')
+        start_date = request.form.get('start_date')
+        end_date = request.form.get('end_date')
+        status = request.form.get('status')
 
-        if not name or not amount:
-            flash('กรุณากรอกข้อมูลให้ครบ', 'danger')
-            return redirect(url_for('officer.edit_scholarship', id=id))
+        if not scholarship_name:
+            flash('กรุณากรอกชื่อทุน', 'danger')
+            return redirect(url_for('officer.edit_scholarship', scholarship_id=scholarship_id))
 
-        scholarship.name = name
-        scholarship.amount = float(amount)
+        scholarship.scholarship_name = scholarship_name
+        try:
+            scholarship.amount = float(amount) if amount else None
+        except ValueError:
+            pass
+        try:
+            scholarship.min_gpax = float(min_gpax) if min_gpax else None
+        except ValueError:
+            pass
+        scholarship.faculty_condition = faculty_condition or None
+        from datetime import datetime
+        scholarship.start_date = datetime.strptime(start_date, '%Y-%m-%d') if start_date else None
+        scholarship.end_date = datetime.strptime(end_date, '%Y-%m-%d') if end_date else None
+        scholarship.status = status or scholarship.status
+
         db.session.commit()
 
         flash('แก้ไขทุนสำเร็จ', 'success')
@@ -75,10 +119,10 @@ def edit_scholarship(id):
 
     return render_template('officer/edit_scholarship.html', scholarship=scholarship)
 
-@officer_bp.route('/scholarships/<int:id>/delete', methods=['POST'])
-def delete_scholarship(id):
+@officer_bp.route('/scholarships/<scholarship_id>/delete', methods=['POST'])
+def delete_scholarship(scholarship_id):
     """ลบทุน (Delete scholarship)"""
-    scholarship = Scholarship.query.get_or_404(id)
+    scholarship = Scholarship.query.get_or_404(scholarship_id)
     db.session.delete(scholarship)
     db.session.commit()
     flash('ลบทุนสำเร็จ', 'success')

@@ -32,9 +32,9 @@ with app.app_context():
     db.create_all()  # สร้างตารางใหม่
 
     # 1. สร้างรายชื่อทุน (Scholarships)
-    sch1 = Scholarship(name="ทุนอาหารกลางวัน")
-    sch2 = Scholarship(name="ทุนเรียนดี (GPA สูง)")
-    sch3 = Scholarship(name="ทุนกิจกรรมเด่น")
+    sch1 = Scholarship(scholarship_id="SCH-001", scholarship_name="ทุนอาหารกลางวัน")
+    sch2 = Scholarship(scholarship_id="SCH-002", scholarship_name="ทุนเรียนดี (GPA สูง)")
+    sch3 = Scholarship(scholarship_id="SCH-003", scholarship_name="ทุนกิจกรรมเด่น")
     db.session.add_all([sch1, sch2, sch3])
     db.session.commit()
 
@@ -42,23 +42,23 @@ with app.app_context():
     # เกณฑ์สำหรับทุนอาหารกลางวัน
     db.session.add_all(
         [
-            Criterion(name="สถานะความขาดแคลน", max_score=50, scholarship_id=sch1.id),
-            Criterion(name="ความประพฤติ", max_score=30, scholarship_id=sch1.id),
-            Criterion(name="สัมภาษณ์", max_score=20, scholarship_id=sch1.id),
+            Criterion(name="สถานะความขาดแคลน", max_score=50, scholarship_id=sch1.scholarship_id),
+            Criterion(name="ความประพฤติ", max_score=30, scholarship_id=sch1.scholarship_id),
+            Criterion(name="สัมภาษณ์", max_score=20, scholarship_id=sch1.scholarship_id),
         ]
     )
     # เกณฑ์สำหรับทุนเรียนดี
     db.session.add_all(
         [
-            Criterion(name="ผลการเรียนสะสม (GPA)", max_score=70, scholarship_id=sch2.id),
-            Criterion(name="เรียงความเป้าหมายชีวิต", max_score=30, scholarship_id=sch2.id),
+            Criterion(name="ผลการเรียนสะสม (GPA)", max_score=70, scholarship_id=sch2.scholarship_id),
+            Criterion(name="เรียงความเป้าหมายชีวิต", max_score=30, scholarship_id=sch2.scholarship_id),
         ]
     )
     # เกณฑ์สำหรับทุนกิจกรรม
     db.session.add_all(
         [
-            Criterion(name="ผลงาน/เกียรติบัตร", max_score=60, scholarship_id=sch3.id),
-            Criterion(name="การมีส่วนร่วมในวิทยาลัย", max_score=40, scholarship_id=sch3.id),
+            Criterion(name="ผลงาน/เกียรติบัตร", max_score=60, scholarship_id=sch3.scholarship_id),
+            Criterion(name="การมีส่วนร่วมในวิทยาลัย", max_score=40, scholarship_id=sch3.scholarship_id),
         ]
     )
     db.session.commit()
@@ -72,7 +72,7 @@ with app.app_context():
             faculty="คณะวิศวกรรมศาสตร์",
             gpa="3.94",
             application_date="2026-02-01",
-            scholarship_id=sch1.id,
+            scholarship_id=sch1.scholarship_id,
             status="approved",
         ),
         Application(
@@ -81,7 +81,7 @@ with app.app_context():
             faculty="คณะวิทยาศาสตร์",
             gpa="3.20",
             application_date="2026-02-02",
-            scholarship_id=sch1.id,
+            scholarship_id=sch1.scholarship_id,
             status="pending",
         ),
         Application(
@@ -90,7 +90,7 @@ with app.app_context():
             faculty="คณะบริหารศาสตร์",
             gpa="2.85",
             application_date="2026-02-03",
-            scholarship_id=sch1.id,
+            scholarship_id=sch1.scholarship_id,
             status="reviewing",
         ),
         Application(
@@ -99,7 +99,7 @@ with app.app_context():
             faculty="คณะศิลปศาสตร์",
             gpa="3.15",
             application_date="2026-02-03",
-            scholarship_id=sch1.id,
+            scholarship_id=sch1.scholarship_id,
             status="interview",
         ),
         # ทุนเรียนดี (4 คน)
@@ -109,7 +109,7 @@ with app.app_context():
             faculty="คณะวิศวกรรมศาสตร์",
             gpa="3.98",
             application_date="2026-02-04",
-            scholarship_id=sch2.id,
+            scholarship_id=sch2.scholarship_id,
             status="approved",
         ),
         Application(
@@ -118,7 +118,7 @@ with app.app_context():
             faculty="คณะวิทยาศาสตร์",
             gpa="4.00",
             application_date="2026-02-04",
-            scholarship_id=sch2.id,
+            scholarship_id=sch2.scholarship_id,
             status="reviewing",
         ),
         Application(
@@ -127,7 +127,7 @@ with app.app_context():
             faculty="คณะบริหารศาสตร์",
             gpa="3.85",
             application_date="2026-02-05",
-            scholarship_id=sch2.id,
+            scholarship_id=sch2.scholarship_id,
             status="pending",
         ),
         Application(
@@ -136,7 +136,7 @@ with app.app_context():
             faculty="คณะศิลปศาสตร์",
             gpa="3.92",
             application_date="2026-02-05",
-            scholarship_id=sch2.id,
+            scholarship_id=sch2.scholarship_id,
             status="interview",
         ),
         # ทุนกิจกรรม (2 คน)
@@ -146,7 +146,7 @@ with app.app_context():
             faculty="คณะนิติศาสตร์",
             gpa="2.50",
             application_date="2026-02-06",
-            scholarship_id=sch3.id,
+            scholarship_id=sch3.scholarship_id,
             status="pending",
         ),
         Application(
@@ -155,7 +155,7 @@ with app.app_context():
             faculty="คณะศิลปศาสตร์",
             gpa="3.45",
             application_date="2026-02-06",
-            scholarship_id=sch3.id,
+            scholarship_id=sch3.scholarship_id,
             status="reviewing",
         ),
     ]

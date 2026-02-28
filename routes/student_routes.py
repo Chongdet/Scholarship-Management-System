@@ -97,7 +97,7 @@ def apply_scholarship():
         return "สมัครทุนสำเร็จ (Logic ในการสร้าง Application Record)"
     
     scholarships = Scholarship.query.all()
-    return render_template("student/apply.html", scholarships=scholarships)
+    return render_template("student/scholarships.html", scholarships=scholarships)
 
 @student_bp.route("/status")
 def track_status():
@@ -162,6 +162,7 @@ def status_detail(app_id):
 
     app_data = MockDetail(app_id, info)
     return render_template("student/status_detail.html", app=app_data)
+
 
 @student_bp.route("/auto-match")
 def auto_match():

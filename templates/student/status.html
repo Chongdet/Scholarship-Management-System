@@ -23,13 +23,13 @@
 {% block role_name %}นักศึกษา{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto py-10">
-    <div class="bg-gray-200 rounded-3xl p-8 shadow-sm">
-        <h2 class="text-3xl font-bold text-gray-800 mb-8">ติดตามสถานะการสมัครทุนการศึกษา</h2>
+<div class="max-w-[90%] mx-auto py-10">
+    <div class="bg-gray-200 rounded-3xl shadow-xl p-8 min-h-[570px] flex flex-col">
+        <h2 class="text-3xl font-bold mb-8 text-blue-900">ข้อมูลการยื่นสมัครทุนการศึกษา</h2>
         <div class="overflow-x-auto bg-white rounded-2xl shadow-sm">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-gray-50 text-gray-600 uppercase text-sm font-bold">
+                    <tr class="bg-gray-50 text-gray-600 uppercase text-xl font-bold">
                         <th class="p-4 border-b text-center">ลำดับ</th>
                         <th class="p-4 border-b">ชื่อทุนการศึกษา</th>
                         <th class="p-4 border-b text-center">ประเภททุน</th>
@@ -40,7 +40,7 @@
                         <th class="p-4 border-b text-center">สถานะ</th>
                     </tr>
                 </thead>
-                <tbody class="text-gray-700 text-sm">
+                <tbody class="text-gray-700 text-xls">
                     {% for app in applications %}
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="p-4 border-b text-center font-bold">{{ loop.index }}</td>
@@ -64,10 +64,10 @@
                         <td class="p-4 border-b text-center">{{ app.created_at.strftime('%d/%m/%Y') }}</td>
                         <td class="p-4 border-b text-center">
                             <span class="px-3 py-1 rounded-full font-bold text-[10px] 
-                                {% if app.status == 'รอตรวจสอบ' %} bg-yellow-100 text-yellow-700
-                                {% elif app.status == 'เรียกสัมภาษณ์' %} bg-blue-100 text-blue-700
-                                {% elif app.status == 'ปฏิเสธ' %} bg-red-100 text-red-700
-                                {% elif app.status == 'ได้รับทุน' %} bg-green-100 text-green-700
+                                {% if app.status == 'รอตรวจสอบ' %}  text-yellow-700
+                                {% elif app.status == 'เรียกสัมภาษณ์' %}  text-blue-700
+                                {% elif app.status == 'ปฏิเสธ' %}  text-red-700
+                                {% elif app.status == 'ได้รับทุน' %}  text-green-700
                                 {% else %} bg-gray-100 text-gray-700 {% endif %}">
                                 {{ app.status }}
                             </span>

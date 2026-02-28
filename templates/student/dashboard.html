@@ -28,42 +28,33 @@
 
 ...
 {% block content %}
-<div class="max-w-7xl mx-auto">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
-    <div class="swiper mySwiper mb-12 shadow-2xl rounded-3xl overflow-hidden border-4 border-yellow-400 relative">
+<div class="max-w-7xl mx-auto px-4 pt-6">
+    <div class="swiper mySwiper mb-12 shadow-2xl rounded-3xl overflow-hidden border-4 border-yellow-400 relative h-[450px]">
         <div class="swiper-wrapper">
             {% for item in scholarships[:3] %} 
-            <div class="swiper-slide relative h-[450px]">
+            <div class="swiper-slide relative">
                 <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1200" 
-                     class="w-full h-full object-cover" alt="Banner">
+                     class="absolute inset-0 w-full h-full object-cover" alt="Banner">
                 <div class="absolute inset-0 bg-gradient-to-r from-blue-900 via-blue-900/60 to-transparent flex flex-col justify-center px-12 md:px-20 text-white">
-                    <span class="bg-yellow-400 text-blue-900 px-4 py-1 rounded-full text-xs font-bold w-fit mb-4 shadow-lg"> 
-                        🔥 กำลังเปิดรับสมัคร 
-                    </span>
-                    <h2 class="text-4xl md:text-5xl font-bold text-yellow-400 mb-3 drop-shadow-md">
-                        {{ item.name }}
-                    </h2>
-                    <p class="text-xl mb-6 text-blue-50 max-w-md leading-relaxed">
-                        สนับสนุนนักศึกษาที่มีผลการเรียนยอดเยี่ยม และมอบโอกาสเพื่ออนาคตที่ดีกว่า
-                    </p>
-                    <div class="flex items-center gap-6 text-lg font-medium border-l-4 border-yellow-400 pl-6">
+                    <span class="bg-yellow-400 text-blue-900 px-4 py-1 rounded-full text-xs font-bold w-fit mb-4">🔥 กำลังเปิดรับสมัคร</span>
+                    <h2 class="text-4xl md:text-5xl font-bold text-yellow-400 mb-3">{{ item.name }}</h2>
+                    <p class="text-xl mb-6 text-blue-50 max-w-md">สนับสนุนนักศึกษาที่มีผลการเรียนยอดเยี่ยม</p>
+                    <div class="flex items-center gap-6 border-l-4 border-yellow-400 pl-6">
                         <div>
                             <p class="text-blue-200 text-sm">มูลค่าทุน</p>
                             <p class="text-white text-2xl font-bold">{{ "{:,.0f}".format(item.amount or 0) }} บาท</p>
                         </div>
-                        <div class="h-10 w-px bg-blue-700"></div>
-                        <div>
-                            <p class="text-blue-200 text-sm">ช่องทางสมัคร</p>
-                            <p class="text-white font-bold text-xl">UBU Portal</p>
-                        </div>
-                    </div>
+                </div>
                 </div>
             </div>
             {% endfor %}
         </div>
-        <div class="swiper-button-next !text-yellow-400"></div>
-        <div class="swiper-button-prev !text-yellow-400"></div>
-        <div class="swiper-pagination"></div>
+        
+        <div class="swiper-button-next !z-50"></div>
+        <div class="swiper-button-prev !z-50"></div>
+        <div class="swiper-pagination !z-50"></div>
     </div>
 
     <div class="text-center mb-12">
@@ -100,7 +91,7 @@
                 </div>
 
                 <div class="mt-8">
-                    <a href="{{ url_for('student.apply_scholarship') }}" 
+                    <a 
                        class="block w-full bg-blue-900 text-white text-center font-bold py-3 px-6 rounded-2xl hover:bg-yellow-400 hover:text-blue-900 transition-all shadow-lg active:scale-95">
                         สมัครทุนนี้
                     </a>
@@ -117,21 +108,41 @@
 </div>
 
 <style>
-    /* ปรับแต่งสี Pagination ให้เป็นสีเหลืองของ ม.อุบล */
-    .swiper-pagination-bullet-active { background: #fbbf24 !important; }
-    .swiper-button-next:after, .swiper-button-prev:after { font-size: 24px !important; font-weight: bold; }
+    .swiper-button-next, .swiper-button-prev {
+        background-color: transparent !important; 
+        
+
+        width: 40px !important;
+        height: 40px !important;
+        
+        border-radius: 50% !important;
+        color: #fbbf24 !important;
+        display: flex !important;
+        visibility: visible !important;
+        z-index: 100 !important;
+    }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
     const swiper = new Swiper('.mySwiper', {
         loop: true,
-        spaceBetween: 30,
-        effect: 'fade',
+        
+        effect: 'fade', 
         fadeEffect: { crossFade: true },
-        pagination: { el: '.swiper-pagination', clickable: true },
-        navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
-        autoplay: { delay: 5000, disableOnInteraction: false }
+        
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+        },
+        autoplay: {
+            delay: 5000,
+            disableOnInteraction: false,
+        },
     });
 </script>
 

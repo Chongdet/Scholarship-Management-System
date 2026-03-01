@@ -90,9 +90,9 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-1">ทุนการศึกษา <span class="text-red-500">*</span></label>
                 <select name="scholarship_id" required class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm bg-white transition-all">
                     <option value="">-- เลือกทุนการศึกษา --</option>
-                   
+                    {% for sch in scholarships %}
                     <option value="{{ sch.id }}" {{ 'selected' if prefill.get('scholarship_id') == sch.id else '' }}>{{ sch.name }}</option>
-                  
+                    {% endfor %}
                 </select>
             </div>
         </div>
@@ -112,9 +112,9 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-1">คำนำหน้า <span class="text-red-500">*</span></label>
                 <select name="title" required class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm bg-white transition-all">
                     <option value="">-- เลือก --</option>
-                    
+                    {% for t in titles %}
                     <option value="{{ t }}" {{ 'selected' if prefill.get('title') == t else '' }}>{{ t }}</option>
-                    
+                    {% endfor %}
                 </select>
             </div>
             <div>
@@ -145,9 +145,9 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-1">เพศ <span class="text-red-500">*</span></label>
                 <select name="gender" required class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm bg-white transition-all">
                     <option value="">-- เลือก --</option>
-                    
+                    {% for g in genders %}
                     <option value="{{ g }}" {{ 'selected' if prefill.get('gender') == g else '' }}>{{ g }}</option>
-                    
+                    {% endfor %}
                 </select>
             </div>
             <div>
@@ -220,9 +220,9 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-1">คณะ <span class="text-red-500">*</span></label>
                 <select id="faculty" name="faculty" required class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm bg-white transition-all">
                     <option value="">-- เลือกคณะ --</option>
-                    
+                    {% for f in faculties %}
                     <option value="{{ f }}" {{ 'selected' if prefill.get('faculty') == f else '' }}>{{ f }}</option>
-                    
+                    {% endfor %}
                 </select>
             </div>
             <div>
@@ -233,9 +233,9 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-1">ชั้นปีที่ <span class="text-red-500">*</span></label>
                 <select name="year_level" required class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm bg-white transition-all">
                     <option value="">-- เลือก --</option>
-                  
+                    {% for y in year_levels %}
                     <option value="{{ y }}" {{ 'selected' if prefill.get('year_level')|string == y|string else '' }}>ปีที่ {{ y }}</option>
-                 
+                    {% endfor %}
                 </select>
             </div>
             <div>
@@ -282,9 +282,9 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-1">สถานะ</label>
                 <select name="father_status" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm bg-white transition-all">
                     <option value="">-- เลือก --</option>
-                    
+                    {% for s in parent_statuses %}
                     <option value="{{ s }}" {{ 'selected' if prefill.get('father_status') == s else '' }}>{{ s }}</option>
-                    
+                    {% endfor %}
                 </select>
             </div>
         </div>
@@ -312,9 +312,9 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-1">สถานะ</label>
                 <select name="mother_status" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm bg-white transition-all">
                     <option value="">-- เลือก --</option>
-                    
+                    {% for s in parent_statuses %}
                     <option value="{{ s }}" {{ 'selected' if prefill.get('mother_status') == s else '' }}>{{ s }}</option>
-                    
+                    {% endfor %}
                 </select>
             </div>
         </div>
@@ -337,8 +337,7 @@
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">จำนวนพี่น้อง</label>
                 <input type="number" name="siblings" value="{{ prefill.get('siblings', '') }}" placeholder="0" min="0" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
+<div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">เป็นบุตรคนที่</label>
                 <input type="number" name="birth_order" value="{{ prefill.get('birth_order', '') }}" placeholder="เช่น 2" min="1" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
             </div>
@@ -346,11 +345,12 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-2">ที่อยู่อาศัยปัจจุบัน</label>
                 <div class="flex flex-wrap gap-4">
                     
+                    {% for ht in housing_types %}
                     <label class="flex items-center gap-2 text-sm cursor-pointer">
                         <input type="radio" name="housing_type" value="{{ ht }}" {{ 'checked' if prefill.get('housing_type') == ht else '' }} class="accent-blue-800"> {{ ht }}
                     </label>
                     {% endfor %}
-                </div>
+                    </div>
             </div>
             <div class="md:col-span-3">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">หมายเหตุ / ข้อมูลเพิ่มเติมด้านรายได้ครอบครัว</label>

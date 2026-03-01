@@ -64,8 +64,14 @@ class Student(db.Model):
 class Scholarship(db.Model):
     __tablename__ = 'scholarship'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    amount = db.Column(db.Float, nullable=True)
+    name = db.Column(db.String(100), nullable=False) # ชื่อทุน
+    quota = db.Column(db.Integer, default=0) # จำนวนกี่ทุน
+    amount = db.Column(db.Float, nullable=True) # ทุนละเท่าไหร่
+    category = db.Column(db.String(50)) # ประเภทของทุน (เช่น ทุนภายใน/ภายนอก)
+    start_date = db.Column(db.Date) # วันที่เปิดรับสมัคร                    
+    end_date = db.Column(db.Date) # วันที่ปิดรับสมัคร
+    provider = db.Column(db.String(100)) # หน่วยงานของทุนนั้นๆ
+
     criteria = db.relationship('Criterion', backref='scholarship', lazy=True)
     applications = db.relationship('Application', backref='scholarship', lazy=True)
 

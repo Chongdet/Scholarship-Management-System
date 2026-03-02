@@ -102,6 +102,27 @@ class Student(db.Model):
     loan_type = db.Column(db.String(100))       # [Self] ประเภทการกู้
     scholarship_history = db.Column(db.JSON)    # [Self] ประวัติรับทุน
 
+    # --- 5. ข้อมูลคำนวณและสถานะระบบ (ส่วนที่เพิ่มใหม่) ---
+    profile_completeness = db.Column(db.Integer, default=0) # คะแนนความสมบูรณ์ของโปรไฟล์ (0-100)
+    total_family_income = db.Column(db.Float, default=0.0)  # รายได้รวมครอบครัว (คำนวณอัตโนมัติ)
+    financial_hardship_score = db.Column(db.Float, default=0.0) # ดัชนีความลำบากทางการเงิน (0-1)
+    is_profile_locked = db.Column(db.Boolean, default=False) # ล็อกโปรไฟล์หลังส่งใบสมัคร
+
+    def calculate_total_income(self):
+        """คำนวณรายได้รวมจาก บิดา + มารดา + ผู้อุปการะ"""
+        total = (self.father_income or 0.0) + (self.mother_income or 0.0) + (self.guardian_income or 0.0)
+        self.total_family_income = total
+        return total
+
+    def update_completeness(self):
+        """คำนวณความสมบูรณ์ของโปรไฟล์จากฟิลด์ที่กำหนด"""
+        required_fields = [
+            'address_current', 'mobile', 'father_job', 'mother_job', 'housing_status'
+        ]
+        filled = sum(1 for field in required_fields if getattr(self, field))
+        self.profile_completeness = int((filled / len(required_fields)) * 100)
+        return self.profile_completeness
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
@@ -119,6 +140,15 @@ class Scholarship(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     amount = db.Column(db.Float, nullable=True)
+    
+    # --- เงื่อนไขการรับสมัคร (ส่วนที่เพิ่มใหม่) ---
+    start_date = db.Column(db.DateTime)       # วันที่เริ่มเปิดรับ
+    end_date = db.Column(db.DateTime)         # วันที่ปิดรับ
+    faculty_condition = db.Column(db.String(255)) # คณะที่ระบุ (เช่น "วิทยาศาสตร์") หรือ "ทุกคณะ"
+    min_gpax = db.Column(db.Float, default=0.0)   # เกรดเฉลี่ยขั้นต่ำ
+    income_cap = db.Column(db.Float)          # รายได้ครอบครัวไม่เกินเท่าไหร่
+    quota = db.Column(db.Integer)             # จำนวนที่เปิดรับ (ถ้ามี)
+
     criteria = db.relationship('Criterion', backref='scholarship', lazy=True)
     applications = db.relationship('Application', backref='scholarship', lazy=True)
 

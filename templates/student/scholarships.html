@@ -38,7 +38,7 @@
     }
 </style>
 <main class="flex-grow w-full pt-0"></main>
-<div class="banner-gradient w-screen relative left-1/2 right-1/2 -ml-[50vw] h-[300px] flex items-center px-12 -mt-8 shadow-inner">
+<div class="banner-gradient w-screen relative left-1/2 right-1/2 -ml-[50vw] h-[300px] flex items-center px-12 -mt-9 shadow-inner mb-12">
     <div class="text-white max-w-2xl">
         <h2 class="text-4xl font-bold mb-4">ประกาศระเบียบและผลการจัดสรรทุน</h2>
         <p class="text-lg text-blue-50">ติดตามข่าวสารการประกาศรายชื่อผู้มีสิทธิ์สัมภาษณ์ และประกาศรายชื่อนักศึกษาที่ได้รับทุนการศึกษาทุกประเภทที่นี่</p>
@@ -48,92 +48,144 @@
     </div>
 </div>
 
-<main class="flex-grow w-full px-8 py-10">
-    <div class="max-w-7xl mx-auto">
-        
-        <section class="mb-16">
-            <div class="flex items-center gap-3 mb-8">
-                <div class="w-2 h-8 bg-blue-600 rounded-full"></div>
-                <h3 class="text-3xl font-bold text-blue-800">ประกาศรายชื่อผู้มีสิทธิ์สัมภาษณ์</h3>
-            </div>
+<section class="mb-16">
+        <h2 class="text-2xl font-bold text-blue-900 mb-8 border-l-8 border-blue-600 pl-4">
+            ประกาศรายชื่อผู้มีสิทธิ์สัมภาษณ์
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16 max-w-7xl mx-auto">
+            {% for item in scholarships if item.status == 'interview' %}
+                <div class="bg-white rounded-[2rem] overflow-hidden shadow-lg flex flex-col hover:shadow-2xl transition-all border border-gray-100 group">
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden card-hover flex flex-col h-full">
-                    <div class="bg-blue-500 p-5 text-white">
-                        <p class="text-m font-medium opacity-90 mb-1">ประกาศรายชื่อผู้มีสิทธิ์สัมภาษณ์</p>
-                        <h4 class="font-bold text-lg leading-tight">ทุนบริษัท ไอทีไอแอล เทคโนโลยี จำกัด</h4>
+                    <div class="relative h-60 w-full overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=400" alt="Scholarship Cover"> 
+                         alt="Scholarship Image" 
+                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                    <div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-blue-900 shadow-sm uppercase">
+                        UBU Scholarship
                     </div>
-                    <div class="p-6 flex-grow">
-                        <span class="inline-block bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full mb-4">สัมภาษณ์ระดับคณะ</span>
-                        <div class="space-y-1.5 text-sm text-gray-600 bg-gray-50 p-4 rounded-xl border border-blue-50">
-                            <p><span class="font-semibold">จำนวนทุน:</span> 1 ทุน</p>
-                            <p><span class="font-semibold">ทุนละ:</span> 20,000 บาท</p>
-                            <p><span class="font-semibold">ประเภท:</span> ทุนบริจาคผ่านคณะ</p>
-                            <p><span class="font-semibold">วันที่เปิดรับสมัคร:</span> 1 - 15 ก.พ. 69</p>
-                            <p><span class="font-semibold">หน่วยงาน:</span> คณะวิศวกรรมศาสตร์</p>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+                    
+                </div>
+
+                <div class="p-8 pb-0 flex flex-col h-full">
+                    <span class="text-yellow-500 px-0 py-1  text-l font-bold ">รายชื่อผู้มีสิทธิ์สัมภาษณ์</span>
+                    <h3 class="text-2xl font-black text-blue-900 mb-6 leading-tight min-h-[3.5rem]">
+                        {{ item.name }}
+                    </h3>
+
+                    <div class="space-y-3 text-gray-800 font-medium mb-8">
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                            <span class="font-bold text-black text-l">จำนวนทุน :</span>
+                            <span class="font-bold text-blue-800">{{ item.quota if item.quota else 'ไม่ระบุจำนวน' }} ทุน</span>
+                        </div>
+
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                            <span class="font-bold text-black text-l">ทุนละ :</span>
+                            <span class="font-bold text-blue-800">{{ "{:,.0f}".format(item.amount) }} บาท</span>
+                        </div>
+
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                            <span class="font-bold text-black text-l">ประเภททุน :</span>
+                            <span class="font-bold text-blue-800">{{ item.category if item.category else 'ทุนทั่วไป' }}</span>
+                        </div>
+
+                        <div class="flex justify-between items-start border-b border-gray-100 pb-2">
+                            <span class="font-bold text-black text-sm whitespace-nowrap">วันที่เปิดรับสมัคร :</span>
+                            <span class="font-bold text-blue-800 text-[13px] text-right ml-4">
+                                {{ item.start_date.strftime('%d/%m/%Y') if item.start_date else 'ไม่ระบุ' }} 
+                                <br class="md:hidden"> - {{ item.end_date.strftime('%d/%m/%Y') if item.end_date else 'ไม่ระบุ' }}
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-black text-l">หน่วยงาน :</span>
+                            <span class="font-bold text-blue-800">{{ item.provider if item.provider else 'มหาวิทยาลัย' }}</span>
                         </div>
                     </div>
-                    <div class="p-6 pt-0 flex justify-end">
-                        <button class="bg-blue-500 text-white px-5 py-2 rounded-xl font-bold hover:bg-blue-700 transition-all text-sm">ดูประกาศรายชื่อ</button>
-                    </div>
-                </div>
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden card-hover flex flex-col h-full">
-                    <div class="bg-blue-500 p-5 text-white">
-                        <p class="text-m font-medium opacity-90 mb-1">ประกาศรายชื่อผู้มีสิทธิ์สัมภาษณ์</p>
-                        <h4 class="font-bold text-lg leading-tight">ทุนกู้ยืมเพื่อการศึกษา (กยศ.) รายใหม่</h4>
-                    </div>
-                    <div class="p-6 flex-grow">
-                        <span class="inline-block bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full mb-4">สัมภาษณ์ระดับมหาวิทยาลัย</span>
-                        <div class="space-y-1.5 text-sm text-gray-600 bg-gray-50 p-4 rounded-xl border border-blue-50">
-                            <p><span class="font-semibold">จำนวนทุน:</span> ไม่จำกัดจำนวน</p>
-                            <p><span class="font-semibold">ทุนละ:</span> ตามค่าเทอมจริง</p>
-                            <p><span class="font-semibold">ประเภท:</span> ทุนกู้ยืมรัฐบาล</p>
-                            <p><span class="font-semibold">วันที่เปิดรับสมัคร:</span> 1 มิ.ย. - 15 ส.ค. 69</p>
-                            <p><span class="font-semibold">หน่วยงาน:</span> กองทุนกู้ยืมกยศ.</p>
-                        </div>
-                    </div>
-                    <div class="p-6 pt-0 flex justify-end">
-                        <button class="bg-blue-500 text-white px-5 py-2 rounded-xl font-bold hover:bg-blue-700 transition-all text-sm">ดูประกาศรายชื่อ</button>
-                    </div>
-                </div>
-            </div>
-        </section>
 
-        <section>
-            <div class="flex items-center gap-3 mb-8">
-                <div class="w-2 h-8 bg-emerald-600 rounded-full"></div>
-                <h3 class="text-3xl font-bold text-emerald-900">ประกาศรายชื่อผู้ที่ได้รับทุนการศึกษา</h3>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {% set scholarship_details = [
-                    {'title': 'ทุนมูลนิธิทิสโก้ เพื่อการกุศล', 'count': '10 ทุน', 'amount': '15,000 บาท', 'type': 'ทุนภายนอก', 'date': 'ต.ค. 68 - ม.ค. 69', 'dept': 'มูลนิธิทิสโก้'},
-                    {'title': 'ทุนทำงานแลกเปลี่ยนประสบการณ์', 'count': '50 ทุน', 'amount': 'ชั่วโมงละ 50 บาท', 'type': 'ทุนช่วยเหลือ', 'date': 'ธ.ค. 68 - ม.ค. 69', 'dept': 'สำนักงานพัฒนานักศึกษา'},
-                    {'title': 'ทุนอุดหนุนนักศึกษาพิการ', 'count': 'ตามจำนวนผู้สมัคร', 'amount': 'ตามจ่ายจริง', 'type': 'ทุนรัฐบาล', 'date': 'พ.ย. 68 - ม.ค. 69', 'dept': 'กระทรวง อว.'}
-                ] %}
-
-                {% for item in scholarship_details %}
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden card-hover flex flex-col h-full">
-                    <div class="bg-emerald-500 p-5 text-white">
-                        <p class="text-m font-medium opacity-85 mb-1">ประกาศรายชื่อผู้ได้รับทุนการศึกษา</p>
-                        <h4 class="font-bold text-lg leading-tight">{{ item.title }}</h4>
+                    <div class="mt-2">
+                        <a href="{{ item.interview_file_url }}" 
+                        target="_blank"
+                        class="block w-full bg-yellow-500 text-white text-center font-bold py-3 rounded-2xl hover:bg-yellow-600 transition-all transform active:scale-95 shadow-md">
+                            <i class="fas fa-file-pdf mr-2"></i> ตรวจสอบรายชื่อ
+                        </a>
                     </div>
-                    <div class="p-6 flex-grow">
-                        <div class="space-y-1.5 text-sm text-gray-600 bg-gray-50 p-4 rounded-xl border border-emerald-50">
-                            <p><span class="font-semibold text-emerald-900">จำนวนทุน:</span> {{ item.count }}</p>
-                            <p><span class="font-semibold text-emerald-900">ทุนละ:</span> {{ item.amount }}</p>
-                            <p><span class="font-semibold">ประเภท:</span> {{ item.type }}</p>
-                            <p><span class="font-semibold">วันที่เปิดรับสมัคร:</span> 4 - 15 ส.ค. 69</p>
-                            <p><span class="font-semibold text-emerald-900">หน่วยงาน:</span> {{ item.dept }}</p>
-                        </div>
-                    </div>
-                    <div class="p-6 pt-0 flex justify-end">
-                        <button class="bg-emerald-500 text-white px-5 py-2 rounded-xl font-bold hover:bg-emerald-700 transition-all text-sm">ดูประกาศรายชื่อ</button>
-                    </div>
-                </div>
+                {% else %}
+                    <p class="text-gray-400 col-span-full text-center py-10">ยังไม่มีประกาศรายชื่อผู้มีสิทธิ์สัมภาษณ์</p>
                 {% endfor %}
             </div>
-        </section>
-    </div>
-</main>
+        </div>
+    </section>
+
+    <hr class="border-gray-100 mb-16">
+
+    <section>
+        <div>
+            <h2 class="text-2xl font-bold text-blue-900 mb-8 border-l-8 border-emerald-600 pl-4">
+                ประกาศรายชื่อผู้ได้รับทุน
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16 max-w-7xl mx-auto">
+            {% for item in scholarships if item.status == 'interview' %}
+                <div class="bg-white rounded-[2rem] overflow-hidden shadow-lg flex flex-col hover:shadow-2xl transition-all border border-gray-100 group">
+
+                    <div class="relative h-60 w-full overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=400" alt="Scholarship Cover"> 
+                         alt="Scholarship Image" 
+                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                    <div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-blue-900 shadow-sm uppercase">
+                        UBU Scholarship
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+                    
+                </div>
+
+                <div class="p-8 pb-0 flex flex-col h-full">
+                    <span class="text-green-500 px-0 py-1  text-l font-bold ">รายชื่อผู้ได้รับทุน</span>
+                    <h3 class="text-2xl font-black text-blue-900 mb-6 leading-tight min-h-[3.5rem]">
+                        {{ item.name }}
+                    </h3>
+
+                    <div class="space-y-3 text-gray-800 font-medium mb-8">
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                            <span class="font-bold text-black text-l">จำนวนทุน :</span>
+                            <span class="font-bold text-blue-800">{{ item.quota if item.quota else 'ไม่ระบุจำนวน' }} ทุน</span>
+                        </div>
+
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                            <span class="font-bold text-black text-l">ทุนละ :</span>
+                            <span class="font-bold text-blue-800">{{ "{:,.0f}".format(item.amount) }} บาท</span>
+                        </div>
+
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                            <span class="font-bold text-black text-l">ประเภททุน :</span>
+                            <span class="font-bold text-blue-800">{{ item.category if item.category else 'ทุนทั่วไป' }}</span>
+                        </div>
+
+                        <div class="flex justify-between items-start border-b border-gray-100 pb-2">
+                            <span class="font-bold text-black text-sm whitespace-nowrap">วันที่เปิดรับสมัคร :</span>
+                            <span class="font-bold text-blue-800 text-[13px] text-right ml-4">
+                                {{ item.start_date.strftime('%d/%m/%Y') if item.start_date else 'ไม่ระบุ' }} 
+                                <br class="md:hidden"> - {{ item.end_date.strftime('%d/%m/%Y') if item.end_date else 'ไม่ระบุ' }}
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-black text-l">หน่วยงาน :</span>
+                            <span class="font-bold text-blue-800">{{ item.provider if item.provider else 'มหาวิทยาลัย' }}</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-2">
+                        <a href="{{ item.interview_file_url }}" 
+                        target="_blank"
+                        class="block w-full bg-emerald-500 text-white text-center font-bold py-3 rounded-2xl hover:bg-emerald-600 transition-all transform active:scale-95 shadow-md">
+                            <i class="fas fa-file-pdf mr-2"></i> ตรวจสอบรายชื่อ
+                        </a>
+                    </div>
+                {% else %}
+                    <p class="text-gray-400 col-span-full text-center py-10">ยังไม่มีประกาศรายชื่อผู้ได้รับทุน</p>
+                {% endfor %}
+            </div>
+        </div>
+
 {% endblock %}

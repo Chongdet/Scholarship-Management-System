@@ -71,6 +71,10 @@ class Scholarship(db.Model):
     start_date = db.Column(db.Date) # วันที่เปิดรับสมัคร                    
     end_date = db.Column(db.Date) # วันที่ปิดรับสมัคร
     provider = db.Column(db.String(100)) # หน่วยงานของทุนนั้นๆ
+    
+    status = db.Column(db.String(20), default='open')  # สถานะของทุน open(เปิดรับ),checking=close(กำลังตรวจสอบ,ปิดทุน), interview(รายชื่อสัมภาษณ์), announce(รายชื่อได้รับทุน) 
+    interview_file_url = db.Column(db.String(500))    # ลิงก์ไฟล์ประกาศสัมภาษณ์
+    announce_file_url = db.Column(db.String(500))     # ลิงก์ไฟล์ประกาศคนได้ทุน
 
     criteria = db.relationship('Criterion', backref='scholarship', lazy=True)
     applications = db.relationship('Application', backref='scholarship', lazy=True)

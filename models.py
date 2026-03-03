@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -65,6 +66,7 @@ class Scholarship(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     amount = db.Column(db.Float, nullable=True)
+    announcement_date = db.Column(db.DateTime, nullable=True)
     criteria = db.relationship('Criterion', backref='scholarship', lazy=True)
     applications = db.relationship('Application', backref='scholarship', lazy=True)
 
@@ -80,7 +82,21 @@ class Application(db.Model):
     reviewing_by = db.Column(db.String(50))
     reviewing_at = db.Column(db.DateTime)
 
-# 2.3 เกณฑ์คะแนน
+# 2.3 บันทึกการทำงาน (Audit Log)
+class AuditLog(db.Model):
+    __tablename__ = 'audit_log'
+    id = db.Column(db.Integer, primary_key=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    officer_username = db.Column(db.String(50), nullable=False)  # ชื่อ/รหัสเจ้าหน้าที่
+    officer_label = db.Column(db.String(50), nullable=True)     # ฉายาแสดง เช่น เจ้าหน้าที่(A)
+    action = db.Column(db.String(50), nullable=False)            # approved_interview, rejected, create_scholarship, announce_scholarship
+    action_title = db.Column(db.String(100), nullable=True)      # ชื่อการกระทำภาษาไทย เช่น อนุมัติและนัดสัมภาษณ์
+    reference_id = db.Column(db.String(30), nullable=True)       # รหัสอ้างอิง เช่น APP345, SCH001
+    details = db.Column(db.String(500))                          # คำอธิบายรายละเอียด
+    status_after = db.Column(db.String(100), nullable=True)      # สถานะหลังแก้ไข/ปัจจุบัน เช่น อนุมัติแล้ว
+    previous_value = db.Column(db.String(200), nullable=True)    # ค่าเดิมก่อนแก้ไข (สำหรับกรณีแก้ไข)
+
+# 2.4 เกณฑ์คะแนน
 class Criterion(db.Model):
     __tablename__ = 'criterion'
     id = db.Column(db.Integer, primary_key=True)

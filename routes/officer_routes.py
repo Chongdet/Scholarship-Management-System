@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
-from models import db, Application, Scholarship
+from models import db, Application, Scholarship, AuditLog, Officer
 
 # สร้าง Blueprint สำหรับ Officer
 officer_bp = Blueprint('officer', __name__)
@@ -145,10 +145,54 @@ def decide_application(application_id):
         flash('ส่งกลับให้แก้ไขเอกสารเรียบร้อยแล้ว', 'success')
     return redirect(url_for('officer.applications'))
 
+@officer_bp.route('/announcement')
+def final_announcement():
+    """หน้าประกาศผลทุน"""
+    scholarships = Scholarship.query.all()
+    return render_template('officer/announcement.html', scholarships=scholarships)
+
+@officer_bp.route('/scholarship/<int:id>/recipients', methods=['GET', 'POST'])
+def scholarship_recipients(id):
+    """หน้าผู้ได้รับทุน - ดู/กำหนดวันที่ประกาศ"""
+    scholarship = Scholarship.query.get_or_404(id)
+    if request.method == 'POST':
+        date_str = request.form.get('announcement_date')
+        if date_str:
+            from datetime import datetime
+            scholarship.announcement_date = datetime.strptime(date_str, '%Y-%m-%d')
+        else:
+            scholarship.announcement_date = None
+        db.session.commit()
+        flash('บันทึกวันที่ประกาศเรียบร้อย', 'success')
+        return redirect(url_for('officer.final_announcement'))
+    applications = Application.query.filter_by(scholarship_id=id, status='approved').all()
+    if not applications:
+        applications = Application.query.filter_by(scholarship_id=id, status='interview').all()
+    return render_template('officer/recipients.html', scholarship=scholarship, applications=applications)
+
 @officer_bp.route('/audit-log')
 def audit_log():
     """หน้าบันทึกการทำงาน (Audit Log) ของเจ้าหน้าที่"""
-    return render_template('officer/audit_log.html')
+    staff_filter = request.args.get('staff', '')
+    query = AuditLog.query.order_by(AuditLog.created_at.desc())
+    if staff_filter:
+        query = query.filter(
+            db.or_(
+                AuditLog.officer_username == staff_filter,
+                AuditLog.officer_label == staff_filter
+            )
+        )
+    logs = query.all()
+    for log in logs:
+        officer = Officer.query.filter_by(username=log.officer_username).first()
+        log.officer_id = officer.id if officer else None
+        log.officer_name = officer.name if (officer and officer.name) else (log.officer_label or log.officer_username)
+    all_logs = AuditLog.query.all()
+    staff_set = set()
+    for log in all_logs:
+        staff_set.add(log.officer_label or log.officer_username)
+    staff_list = sorted(staff_set) if staff_set else []
+    return render_template('officer/audit_log.html', logs=logs, staff_list=staff_list, total_count=len(logs), selected_staff=staff_filter)
 
 # ==========================================
 # เพิ่มส่วนของกรรมการ (Director) เพื่อให้ Link ใน HTML ทำงานได้

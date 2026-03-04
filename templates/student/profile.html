@@ -1,454 +1,574 @@
-{% extends "base.html" %}
+{% extends "layouts/base.html" %}
 
 {% block content %}
-<div class="min-h-screen bg-sky-50 pb-12 pt-4">
-    <div class="max-w-6xl mx-auto px-4">
-        
-        <div class="flex items-center gap-2 mb-6 text-blue-900">
-            <a href="/student/dashboard" class="hover:text-yellow-500 font-bold flex items-center transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                หน้าหลัก
-            </a>
-            <span class="text-gray-400">></span>
-            <span class="text-gray-600 font-medium">แก้ไขข้อมูลส่วนตัว</span>
-        </div>
 
-        <form action="" method="POST" class="space-y-6">
-            
-            <div class="bg-white p-8 rounded-2xl shadow-md border-t-4 border-yellow-400">
-                <h2 class="text-2xl font-bold mb-6 text-blue-900 border-b border-blue-100 pb-3">ข้อมูลส่วนตัวของผู้สมัครขอรับทุนการศึกษา</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 text-gray-700">
-                    <div class="flex items-center gap-4">
-                        <label class="font-bold text-blue-900 w-24">ชื่อ - สกุล :</label>
-                        <input type="text" name="name" value="{{ student.name | default('') }}" class="flex-1 px-3 py-2 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed border-gray-200" readonly>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <label class="font-bold text-blue-900 w-24">รหัสนักศึกษา :</label>
-                        <input type="text" value="{{ student.student_id | default('') }}" class="flex-1 px-3 py-2 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed border-gray-200" readonly>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <label class="font-bold text-blue-900 w-24">สังกัด :</label>
-                        <input type="text" name="faculty" value="{{ student.faculty | default('') }}" class="flex-1 px-3 py-2 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed border-gray-200" readonly>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <label class="font-bold text-blue-900 w-24">อีเมล :</label>
-                        <input type="email" name="email" value="{{ student.email | default('') }}" class="flex-1 px-3 py-2 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed border-gray-200" readonly>
-                    </div>
-                </div>
-            </div>
+{% macro v(val) %}{% if val is none or val == 'None' or val == 'none' or val == 'NULL' %}{% else %}{{ val }}{% endif %}{% endmacro %}
 
-            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
-                <h3 class="text-lg font-bold mb-4 text-blue-900 border-b border-blue-50 pb-2">ประวัติการรับทุน</h3>
-                <div class="overflow-x-auto rounded-lg border border-gray-200">
-                    <table class="w-full text-sm text-left text-gray-600">
-                        <thead class="text-xs text-blue-900 uppercase bg-blue-50 border-b border-blue-100">
-                            <tr>
-                                <th class="px-4 py-3">ลำดับ</th>
-                                <th class="px-4 py-3">ชื่อทุนการศึกษา</th>
-                                <th class="px-4 py-3">ประเภท</th>
-                                <th class="px-4 py-3">หน่วยงานที่มอบ</th>
-                                <th class="px-4 py-3">วันที่</th>
-                                <th class="px-4 py-3">สถานะ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="border-b hover:bg-gray-50">
-                                <td colspan="6" class="px-4 py-8 text-center text-gray-400">ยังไม่มีประวัติการรับทุน</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="mt-4 flex justify-end gap-2">
-                    <button type="button" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">< ก่อนหน้า</button>
-                    <button type="button" class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-2 rounded-lg text-sm font-bold transition-colors">ถัดไป ></button>
-                </div>
-            </div>
+<style>
+  :root {
+    --navy:   #0f2d5e;
+    --navy2:  #1a3f7a;
+    --gold:   #f5a623;
+    --gold2:  #fbbf24;
+    --sky:    #e8f4fd;
+    --sky2:   #dbeafe;
+    --slate:  #64748b;
+    --muted:  #94a3b8;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
 
-            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
-                <h3 class="text-lg font-bold mb-4 text-blue-900 border-b border-blue-50 pb-2">1. ประวัติส่วนตัว</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">เลขประจำตัวประชาชน</label>
-                        <input type="text" name="citizen_id" value="{{ student.citizen_id | default('') }}" class="w-full px-3 py-2 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed border-gray-200" readonly>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">เบอร์โทรศัพท์มือถือ</label>
-                        <input type="text" name="mobile" value="{{ student.mobile | default('') }}" class="w-full px-3 py-2 rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500 bg-sky-50/50">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Facebook</label>
-                        <input type="text" name="facebook" value="{{ student.facebook | default('') }}" class="w-full px-3 py-2 rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500 bg-sky-50/50">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Line ID</label>
-                        <input type="text" name="line_id" value="{{ student.line_id | default('') }}" class="w-full px-3 py-2 rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500 bg-sky-50/50">
-                    </div>
-                </div>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">ที่อยู่ตามทะเบียนบ้าน</label>
-                        <textarea name="address_domicile" rows="2" class="w-full px-3 py-2 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed border-gray-200" readonly>{{ student.address_domicile | default('') }}</textarea>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">ที่อยู่ปัจจุบัน (หอพัก/บ้านเช่า)</label>
-                        <textarea name="address_current" rows="2" class="w-full px-3 py-2 rounded-md border-gray-300 focus:ring-blue-500 focus:border-blue-500 bg-sky-50/50">{{ student.address_current | default('') }}</textarea>
-                    </div>
-                </div>
-            </div>
+ * { box-sizing: border-box; }
+  .page-bg {
+    min-height: 100vh;
+    background: linear-gradient(160deg, #e8f4fd 0%, #f0f7ff 40%, #fafcff 100%);
+    padding: 1.5rem 0 6rem;
+  }
+  .container { max-width: 900px; margin: 0 auto; padding: 0 1rem; }
 
-            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
-                <h3 class="text-lg font-bold mb-4 text-blue-900 border-b border-blue-50 pb-2">2. ข้อมูลการศึกษา</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">ชั้นปีที่</label>
-                        <input type="number" name="year" value="{{ student.year | default('') }}" class="w-full px-3 py-2 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed border-gray-200" readonly>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">เกรดเฉลี่ยสะสม (GPAX)</label>
-                        <input type="number" step="0.01" name="gpax" value="{{ student.gpax | default('') }}" class="w-full px-3 py-2 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed border-gray-200" readonly>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">อาจารย์ที่ปรึกษา</label>
-                        <input type="text" name="advisor_name" value="{{ student.advisor_name | default('') }}" class="w-full px-3 py-2 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed border-gray-200" readonly>
-                    </div>
-                </div>
-                <div class="mt-4 p-4 bg-gray-100 rounded-lg border border-gray-200">
-                    <label class="block text-sm font-bold text-gray-500 mb-2">ประวัติการกระทำผิดทางวินัยนักศึกษา (ข้อมูลจากสำนักทะเบียน)</label>
-                    <div class="flex gap-6">
-                        <label class="flex items-center gap-2 cursor-not-allowed text-gray-500"><input type="radio" name="disciplinary_status" value="ไม่มี" {% if student.disciplinary_status == 'ไม่มี' or not student.disciplinary_status %}checked{% endif %} class="form-radio text-gray-400" disabled> ไม่มี</label>
-                        <label class="flex items-center gap-2 cursor-not-allowed text-gray-500"><input type="radio" name="disciplinary_status" value="มี" {% if student.disciplinary_status == 'มี' %}checked{% endif %} class="form-radio text-gray-400" disabled> มี</label>
-                    </div>
-                </div>
-            </div>
+  /* Breadcrumb */
+  .breadcrumb { display:flex; align-items:center; gap:8px; margin-bottom:1.5rem; font-size:.875rem; }
+  .breadcrumb a { color:var(--navy2); font-weight:600; display:flex; align-items:center; gap:4px; text-decoration:none; transition:color .2s; }
+  .breadcrumb a:hover { color:var(--gold); }
+  .breadcrumb .sep { color:var(--muted); }
+  .breadcrumb .cur { color:var(--slate); }
 
-            <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
-                <h3 class="text-lg font-bold mb-4 text-blue-900 border-b border-blue-50 pb-2">3. ประวัติการขอทุนการศึกษา / กยศ.</h3>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">นักศึกษากู้ยืมเงินกองทุน กยศ. หรือไม่?</label>
-                        <div class="flex gap-6">
-                            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="loan_student_fund" value="TRUE" {% if student.loan_student_fund %}checked{% endif %} class="form-radio text-blue-600 focus:ring-blue-500"> กู้ยืม</label>
-                            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="loan_student_fund" value="FALSE" {% if not student.loan_student_fund %}checked{% endif %} class="form-radio text-blue-600 focus:ring-blue-500"> ไม่กู้ยืม</label>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">ลักษณะการกู้ยืม</label>
-                        <div class="flex gap-6">
-                            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="loan_type" value="ค่าเล่าเรียน" {% if student.loan_type == 'ค่าเล่าเรียน' %}checked{% endif %} class="form-radio text-blue-600 focus:ring-blue-500"> กู้เฉพาะค่าเล่าเรียน</label>
-                            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="loan_type" value="ทั้งสองอย่าง" {% if student.loan_type == 'ทั้งสองอย่าง' %}checked{% endif %} class="form-radio text-blue-600 focus:ring-blue-500"> กู้ทั้งค่าเล่าเรียนและค่าครองชีพ</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  /* Hero */
+  .hero-card {
+    background: linear-gradient(135deg, #0f2d5e 0%, #1a3f7a 60%, #1e4d96 100%);
+    border-radius: var(--radius);
+    box-shadow: 0 4px 24px rgba(15,45,94,.28);
+    margin-bottom: 1.25rem;
+    padding: 1.75rem 2rem;
+    position: relative; overflow: hidden;
+  }
+  .hero-card::before { content:''; position:absolute; right:-40px; top:-40px; width:200px; height:200px; border-radius:50%; background:rgba(245,166,35,.12); }
+  .hero-card::after  { content:''; position:absolute; right:60px; bottom:-60px; width:150px; height:150px; border-radius:50%; background:rgba(255,255,255,.05); }
+  .hero-title { font-family:'Prompt',sans-serif; color:var(--gold2); font-size:1rem; font-weight:600; margin-bottom:1.25rem; display:flex; align-items:center; gap:8px; }
+  .hero-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; position:relative; z-index:1; }
+  @media(max-width:600px){.hero-grid{grid-template-columns:1fr;}}
+  .hero-field label { font-size:.7rem; color:rgba(255,255,255,.55); font-weight:600; text-transform:uppercase; letter-spacing:.06em; display:block; margin-bottom:4px; }
+  .hero-val { color:#fff; font-size:.9rem; font-weight:500; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.15); border-radius:var(--radius-sm); padding:8px 12px; }
+  .hero-lock-note { margin-top:1rem; font-size:.7rem; color:rgba(255,255,255,.4); display:flex; align-items:center; gap:5px; position:relative; z-index:1; }
 
-           <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
-    <h3 class="text-lg font-bold mb-4 text-blue-900 border-b border-blue-50 pb-2">
-        4. ข้อมูลครอบครัวและรายได้
-    </h3>
+  /* Section cards */
+  .section-card { background:#fff; border-radius:var(--radius); box-shadow:0 1px 3px rgba(15,45,94,.07),0 4px 16px rgba(15,45,94,.06); margin-bottom:1.25rem; overflow:hidden; }
 
-    <!-- ================= บิดา / มารดา ================= -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+  .section-header { display:flex; align-items:center; gap:12px; padding:1rem 1.5rem; border-bottom:1px solid #e8f0fe; background:linear-gradient(90deg,#f8faff,#fff); }
+  .s-icon { width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:.95rem; flex-shrink:0; }
+  .s-icon.gold   { background:linear-gradient(135deg,#fef3c7,#fde68a); }
+  .s-icon.blue   { background:linear-gradient(135deg,#dbeafe,#bfdbfe); }
+  .s-icon.teal   { background:linear-gradient(135deg,#ccfbf1,#99f6e4); }
+  .s-icon.purple { background:linear-gradient(135deg,#ede9fe,#ddd6fe); }
+  .s-icon.rose   { background:linear-gradient(135deg,#ffe4e6,#fecdd3); }
+  .s-title { font-family:'Prompt',sans-serif; font-size:.95rem; font-weight:600; color:var(--navy); }
+  .s-badge { font-size:.68rem; background:#f1f5f9; color:var(--slate); border-radius:99px; padding:2px 10px; font-weight:600; margin-left:auto; letter-spacing:.03em; }
 
-        <!-- บิดา -->
-        <div class="space-y-3 p-4 bg-sky-50/50 rounded-xl border border-gray-100">
-            <h4 class="font-bold text-blue-800 border-b border-blue-100 pb-2">ข้อมูลบิดา</h4>
+  .s-body { padding:1.25rem 1.5rem; }
 
-            <input type="text" name="father_name"
-                value="{{ student.father_name | default('') }}"
-                class="w-full px-3 py-2 rounded-md bg-gray-100 text-gray-500 border-gray-200"
-                readonly>
+  /* Fields */
+  .field-group { display:flex; flex-direction:column; gap:4px; }
+  .field-label { font-size:.78rem; font-weight:600; color:var(--slate); }
+  .field-note  { font-size:.72rem; font-weight:400; color:var(--muted); margin-left:4px; }
 
-            <input type="text" name="father_job"
-                value="{{ student.father_job | default('') }}"
-                placeholder="อาชีพ"
-                class="editable-input w-full px-3 py-2 rounded-md border-gray-300 bg-white">
+  input.locked, textarea.locked {
+    width:100%; padding:8px 12px; border-radius:var(--radius-sm);
+    background:#f1f5f9; border:1px solid #cbd5e1;
+    color:#64748b; cursor:not-allowed; font-size:.875rem; font-family:'Sarabun',sans-serif;
+  }
+  input.editable-input, textarea.editable-input {
+    width:100%; padding:8px 12px; border-radius:var(--radius-sm);
+    background:#f8faff; border:1.5px solid #e2e8f0;
+    color:#1e293b; font-size:.875rem; cursor:not-allowed; font-family:'Sarabun',sans-serif;
+    transition:all .2s;
+  }
+  input.editable-input:not([readonly]):focus,
+  textarea.editable-input:not([readonly]):focus {
+    outline:none; border-color:var(--navy2); box-shadow:0 0 0 3px rgba(26,63,122,.12);
+  }
 
-            <input type="number" name="father_income"
-                value="{{ student.father_income | default('0') }}"
-                placeholder="รายได้เฉลี่ย / เดือน"
-                class="editable-input w-full px-3 py-2 rounded-md border-gray-300 bg-white">
+  /* Grid helpers */
+  .g2 { display:grid; grid-template-columns:1fr 1fr; gap:.875rem; }
+  .g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:.875rem; }
+  .g4 { display:grid; grid-template-columns:repeat(4,1fr); gap:.875rem; }
+  @media(max-width:860px){ .g4{grid-template-columns:1fr 1fr;} .g3{grid-template-columns:1fr 1fr;} }
+  @media(max-width:580px){ .g2,.g3,.g4{grid-template-columns:1fr;} }
 
-            <input type="number" name="inc_father"
-                value="{{ student.inc_father | default('0') }}"
-                placeholder="เงินที่ส่งให้ผู้สมัคร"
-                class="editable-input w-full px-3 py-2 rounded-md border-gray-300 bg-white">
+  /* Parent cards */
+  .parent-card { border-radius:var(--radius-sm); border:1.5px solid #e8f0fe; overflow:hidden; }
+  .parent-header { padding:10px 14px; font-weight:700; font-size:.85rem; display:flex; align-items:center; gap:8px; }
+  .parent-header.father { background:linear-gradient(90deg,#eff6ff,#f0f9ff); color:#1e40af; }
+  .parent-header.mother { background:linear-gradient(90deg,#fdf2f8,#fff0fb); color:#9d174d; }
+  .parent-body { padding:12px 14px; display:flex; flex-direction:column; gap:8px; background:#fafcff; }
 
-            <input type="text" name="father_health"
-                value="{{ student.father_health | default('') }}"
-                placeholder="ปัญหาสุขภาพ"
-                class="editable-input w-full px-3 py-2 rounded-md border-gray-300 bg-white">
-        </div>
+  /* Radio pills */
+  .radio-group { display:flex; flex-wrap:wrap; gap:7px; margin-top:5px; }
+  .rpill { display:flex; align-items:center; gap:6px; padding:6px 13px; border-radius:99px; border:1.5px solid #e2e8f0; background:#f8faff; font-size:.82rem; color:var(--slate); cursor:not-allowed; transition:all .15s; user-select:none; }
+  .rpill input { accent-color:var(--navy2); }
+  .rpill:has(input:checked) { border-color:var(--navy2); background:#eff6ff; color:var(--navy); font-weight:600; }
 
-        <!-- มารดา -->
-        <div class="space-y-3 p-4 bg-sky-50/50 rounded-xl border border-gray-100">
-            <h4 class="font-bold text-blue-800 border-b border-blue-100 pb-2">ข้อมูลมารดา</h4>
+  /* Divider labels */
+  .div-label { display:flex; align-items:center; gap:10px; margin:1.4rem 0 .875rem; color:var(--navy); font-weight:700; font-size:.82rem; text-transform:uppercase; letter-spacing:.04em; }
+  .div-label::before,.div-label::after { content:''; flex:1; height:1px; background:#e8f0fe; }
 
-            <input type="text" name="mother_name"
-                value="{{ student.mother_name | default('') }}"
-                class="w-full px-3 py-2 rounded-md bg-gray-100 text-gray-500 border-gray-200"
-                readonly>
+  /* Sub-inputs */
+  .sub-wrap { padding-left:1.5rem; margin-top:6px; }
 
-            <input type="text" name="mother_job"
-                value="{{ student.mother_job | default('') }}"
-                placeholder="อาชีพ"
-                class="editable-input w-full px-3 py-2 rounded-md border-gray-300 bg-white">
+  /* Siblings */
+  .sib-table-wrap { border:1.5px solid #e2e8f0; border-radius:var(--radius-sm); overflow:hidden; }
+  .sib-table { width:100%; border-collapse:collapse; font-size:.8rem; }
+  .sib-table thead th { background:#f1f5f9; color:var(--navy2); font-weight:700; padding:10px 12px; font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; text-align:left; }
+  .sib-table tbody tr { border-top:1px solid #f1f5f9; }
+  .sib-table tbody tr:hover { background:#fafcff; }
+  .sib-table tbody td { padding:7px 10px; }
+  .sib-table tbody td input { border:1px solid #e2e8f0; border-radius:6px; padding:5px 8px; width:100%; font-size:.8rem; font-family:'Sarabun',sans-serif; background:#fafcff; transition:border-color .15s; }
+  .sib-table tbody td input:focus { outline:none; border-color:#93c5fd; }
+  .sib-footer { padding:.75rem 1rem; display:flex; justify-content:flex-end; align-items:center; gap:8px; border-top:1px solid #f1f5f9; }
 
-            <input type="number" name="mother_income"
-                value="{{ student.mother_income | default('0') }}"
-                placeholder="รายได้เฉลี่ย / เดือน"
-                class="editable-input w-full px-3 py-2 rounded-md border-gray-300 bg-white">
+  /* History table */
+  .hist-table { width:100%; border-collapse:collapse; font-size:.85rem; }
+  .hist-table thead th { background:#f1f5f9; color:var(--navy2); font-weight:700; padding:10px 14px; font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; text-align:left; }
+  .hist-table tbody td { padding:18px 14px; color:#94a3b8; text-align:center; }
 
-            <input type="number" name="inc_mother"
-                value="{{ student.inc_mother | default('0') }}"
-                placeholder="เงินที่ส่งให้ผู้สมัคร"
-                class="editable-input w-full px-3 py-2 rounded-md border-gray-300 bg-white">
+  /* Buttons */
+  .btn-edit { display:flex; align-items:center; gap:8px; background:linear-gradient(135deg,#f5a623,#f59e0b); color:var(--navy); font-weight:700; font-size:.875rem; padding:10px 26px; border-radius:99px; border:none; cursor:pointer; box-shadow:0 2px 8px rgba(245,166,35,.4); transition:all .2s; font-family:'Prompt',sans-serif; }
+  .btn-edit:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(245,166,35,.5); }
+  .btn-save { display:flex; align-items:center; gap:8px; background:linear-gradient(135deg,#0f2d5e,#1a3f7a); color:#fff; font-weight:700; font-size:.9rem; padding:10px 32px; border-radius:99px; border:none; box-shadow:0 2px 8px rgba(15,45,94,.3); transition:all .2s; font-family:'Prompt',sans-serif; }
+  .btn-save:not([disabled]):hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(15,45,94,.4); cursor:pointer; }
+  .btn-save[disabled] { opacity:.42; cursor:not-allowed; }
+  .btn-add { display:flex; align-items:center; gap:5px; background:#dcfce7; color:#166534; font-weight:600; font-size:.78rem; padding:6px 14px; border-radius:8px; border:1.5px solid #bbf7d0; cursor:pointer; transition:all .15s; font-family:'Sarabun',sans-serif; }
+  .btn-add:hover { background:#bbf7d0; }
+  .btn-pg { padding:6px 13px; border-radius:8px; font-size:.78rem; font-weight:600; border:1.5px solid #e2e8f0; cursor:pointer; transition:all .15s; font-family:'Sarabun',sans-serif; }
+  .btn-pg.prev { background:#f1f5f9; color:var(--slate); }
+  .btn-pg.prev:hover { background:#e2e8f0; }
+  .btn-pg.next { background:#dbeafe; color:var(--navy2); }
+  .btn-pg.next:hover { background:#bfdbfe; }
 
-            <input type="text" name="mother_health"
-                value="{{ student.mother_health | default('') }}"
-                placeholder="ปัญหาสุขภาพ"
-                class="editable-input w-full px-3 py-2 rounded-md border-gray-300 bg-white">
-        </div>
-        <!-- ================= สถานภาพสมรส ================= -->
-    <div class="mt-10 border-t pt-6">
-        <h4 class="font-semibold text-gray-800 mb-4">
-            สถานภาพสมรสบิดา-มารดา
-        </h4>
+  /* Sticky action bar */
+  .action-bar { position:sticky; bottom:0; z-index:40; background:rgba(255,255,255,.93); backdrop-filter:blur(14px); border-top:1px solid #e8f0fe; padding:.875rem 1.5rem; display:flex; align-items:center; justify-content:space-between; gap:12px; box-shadow:0 -4px 20px rgba(15,45,94,.08); }
+  .action-hint { font-size:.78rem; color:var(--slate); font-style:italic; display:flex; align-items:center; gap:6px; }
+  .action-btns { display:flex; gap:10px; align-items:center; }
+  @media(max-width:580px){ .action-bar{flex-direction:column;padding:.75rem 1rem;} .action-btns{width:100%;justify-content:flex-end;} }
+</style>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {% set ps = student.parent_status %}
-            {% for status in ['อยู่ด้วยกัน','แยกกันอยู่','หย่าร้าง','บิดาเสียชีวิต','มารดาเสียชีวิต','ทั้งสองเสียชีวิต'] %}
-            <label class="flex items-center gap-2">
-                <input type="radio" name="parent_status"
-                       value="{{ status }}"
-                       {% if ps == status %}checked{% endif %}
-                       class="editable-input" disabled>
-                {{ status }}
-            </label>
-            {% endfor %}
-        </div>
+<div class="page-bg">
+<div class="container">
+
+  {# Breadcrumb #}
+  <div class="breadcrumb">
+    <a href="/student/dashboard">
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+      หน้าหลัก
+    </a>
+    <span class="sep">›</span>
+    <span class="cur">แก้ไขข้อมูลส่วนตัว</span>
+  </div>
+
+  <form action="" method="POST" id="profileForm">
+
+  {# ══ HERO ══ #}
+  <div class="hero-card">
+    <div class="hero-title">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+      ข้อมูลผู้สมัครขอรับทุนการศึกษา
     </div>
-  <!-- ================= ที่อยู่อาศัย ================= -->
-    <div class="mt-10 border-t pt-6">
-        <h4 class="font-semibold mb-4">ลักษณะที่อยู่อาศัย</h4>
-
-        {% set ht = student.housing_type %}
-        <div class="space-y-4">
-
-            <label class="flex items-center gap-2">
-                <input type="radio" name="housing_type" value="own"
-                       {% if ht == 'own' %}checked{% endif %}
-                       onclick="toggleHousing()"
-                       class="editable-input" disabled>
-                เป็นของตนเอง
-            </label>
-
-            <div>
-                <label class="flex items-center gap-2">
-                    <input type="radio" name="housing_type" value="rent"
-                           {% if ht == 'rent' %}checked{% endif %}
-                           onclick="toggleHousing()"
-                           class="editable-input" disabled>
-                    บ้านเช่า
-                </label>
-
-                <input type="number" name="rent_amount"
-                       id="rentInput"
-                       value="{{ student.rent_amount | default('') }}"
-                       placeholder="อัตราค่าเช่าเดือนละ (บาท)"
-                       class="editable-input mt-2 ml-6 w-full md:w-1/2 px-4 py-2 rounded-xl border bg-gray-100"
-                       readonly>
-            </div>
-
-            <div>
-                <label class="flex items-center gap-2">
-                    <input type="radio" name="housing_type" value="other"
-                           {% if ht == 'other' %}checked{% endif %}
-                           onclick="toggleHousing()"
-                           class="editable-input" disabled>
-                    อาศัยผู้อื่น
-                </label>
-
-                <input type="text" name="housing_other"
-                       id="otherHousingInput"
-                       value="{{ student.housing_other | default('') }}"
-                       placeholder="ระบุ"
-                       class="editable-input mt-2 ml-6 w-full md:w-1/2 px-4 py-2 rounded-xl border bg-gray-100"
-                       readonly>
-            </div>
-        </div>
+    <div class="hero-grid">
+      <div class="hero-field"><label>ชื่อ - นามสกุล</label><div class="hero-val">{{ v(student.name) or '—' }}</div></div>
+      <div class="hero-field"><label>รหัสนักศึกษา</label><div class="hero-val">{{ v(student.student_id) or '—' }}</div></div>
+      <div class="hero-field"><label>สังกัด / คณะ</label><div class="hero-val">{{ v(student.faculty) or '—' }}</div></div>
+      <div class="hero-field"><label>อีเมล</label><div class="hero-val">{{ v(student.email) or '—' }}</div></div>
     </div>
+    <div class="hero-lock-note">
+      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+      ข้อมูลดึงจากระบบ REG อัตโนมัติ — ไม่สามารถแก้ไขได้
+    </div>
+  </div>
 
-</div>
-    <div class="space-y-4 mt-8">
-    <h4 class="font-semibold text-gray-800">
-        มีที่ดินทำการเกษตร
-    </h4>   
+  {# ══ ประวัติการรับทุน ══ #}
+  <div class="section-card">
+    <div class="section-header">
+      <div class="s-icon gold">🏅</div>
+      <span class="s-title">ประวัติการรับทุน</span>
+      <span class="s-badge">READ ONLY</span>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="hist-table">
+        <thead><tr>
+          <th>ลำดับ</th><th>ชื่อทุนการศึกษา</th><th>ประเภท</th><th>หน่วยงานที่มอบ</th><th>วันที่</th><th>สถานะ</th>
+        </tr></thead>
+        <tbody><tr><td colspan="6">ยังไม่มีประวัติการรับทุน</td></tr></tbody>
+      </table>
+    </div>
+    <div class="sib-footer">
+      <button type="button" class="btn-pg prev">← ก่อนหน้า</button>
+      <button type="button" class="btn-pg next">ถัดไป →</button>
+    </div>
+  </div>
 
-    <div class="space-y-4">
+  {# ══ 1. ประวัติส่วนตัว ══ #}
+  <div class="section-card">
+    <div class="section-header">
+      <div class="s-icon blue">📋</div>
+      <span class="s-title">1. ประวัติส่วนตัว</span>
+      <span class="s-badge">แก้ไขได้บางส่วน</span>
+    </div>
+    <div class="s-body">
+      <div class="g4" style="margin-bottom:.875rem;">
+        <div class="field-group">
+          <span class="field-label">เลขประจำตัวประชาชน <span class="field-note">(ล็อก)</span></span>
+          <input type="text" name="citizen_id" value="{{ v(student.citizen_id) }}" placeholder="เลขประจำตัวประชาชน 13 หลัก" class="locked" readonly>
+        </div>
+        <div class="field-group">
+          <span class="field-label">เบอร์โทรศัพท์</span>
+          <input type="text" name="mobile" value="{{ v(student.mobile) }}" placeholder="0xx-xxx-xxxx" class="editable-input" readonly>
+        </div>
+        <div class="field-group">
+          <span class="field-label">Facebook</span>
+          <input type="text" name="facebook" value="{{ v(student.facebook) }}" placeholder="ชื่อ Facebook" class="editable-input" readonly>
+        </div>
+        <div class="field-group">
+          <span class="field-label">Line ID</span>
+          <input type="text" name="line_id" value="{{ v(student.line_id) }}" placeholder="Line ID" class="editable-input" readonly>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:.75rem;">
+        <div class="field-group">
+          <span class="field-label">ที่อยู่ตามทะเบียนบ้าน <span class="field-note">(ล็อก)</span></span>
+          <textarea name="address_domicile" rows="2" placeholder="ที่อยู่ตามทะเบียนบ้าน" class="locked" readonly>{{ v(student.address_domicile) }}</textarea>
+        </div>
+        <div class="field-group">
+          <span class="field-label">ที่อยู่ปัจจุบัน (หอพัก / บ้านเช่า)</span>
+          <textarea name="address_current" rows="2" placeholder="บ้านเลขที่ / หมู่ / ตำบล / อำเภอ / จังหวัด" class="editable-input" readonly>{{ v(student.address_current) }}</textarea>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        <!-- ไม่มี -->
-        <label class="flex items-center gap-2">
-            <input type="radio" name="agri_type" value="none" onclick="toggleAgri()">
-            ไม่มี
-        </label>
+  {# ══ 2. ข้อมูลการศึกษา ══ #}
+  <div class="section-card">
+    <div class="section-header">
+      <div class="s-icon teal">🎓</div>
+      <span class="s-title">2. ข้อมูลการศึกษา</span>
+      <span class="s-badge">ดึงจาก REG</span>
+    </div>
+    <div class="s-body">
+      <div class="g3" style="margin-bottom:1rem;">
+        <div class="field-group">
+          <span class="field-label">ชั้นปีที่</span>
+          <input type="text" name="year" value="{{ v(student.year) }}" placeholder="ชั้นปีที่" class="locked" readonly>
+        </div>
+        <div class="field-group">
+          <span class="field-label">เกรดเฉลี่ยสะสม (GPAX)</span>
+          <input type="number" step="0.01" name="gpax" value="{{ v(student.gpax) }}" placeholder="0.00" class="locked" readonly>
+        </div>
+        <div class="field-group">
+          <span class="field-label">อาจารย์ที่ปรึกษา</span>
+          <input type="text" name="advisor_name" value="{{ v(student.advisor_name) }}" placeholder="ชื่อ-นามสกุลอาจารย์ที่ปรึกษา" class="locked" readonly>
+        </div>
+      </div>
+      <div class="field-group">
+        <span class="field-label">ประวัติการกระทำผิดทางวินัยนักศึกษา</span>
+        <div class="radio-group">
+          <label class="rpill"><input type="radio" name="disciplinary_status" value="ไม่มี" {% if student.disciplinary_status == 'ไม่มี' or not student.disciplinary_status %}checked{% endif %} disabled> ไม่มี</label>
+          <label class="rpill"><input type="radio" name="disciplinary_status" value="มี" {% if student.disciplinary_status == 'มี' %}checked{% endif %} disabled> มี</label>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        <!-- เป็นของตนเอง -->
+  {# ══ 3. กยศ. ══ #}
+  <div class="section-card">
+    <div class="section-header">
+      <div class="s-icon purple">💳</div>
+      <span class="s-title">3. ประวัติการขอทุนการศึกษา / กยศ.</span>
+    </div>
+    <div class="s-body">
+      <div class="g2" style="gap:1.5rem;">
+        <div class="field-group">
+          <span class="field-label">กู้ยืมเงินกองทุน กยศ. หรือไม่?</span>
+          <div class="radio-group">
+            <label class="rpill"><input type="radio" name="loan_student_fund" value="TRUE"  {% if student.loan_student_fund %}checked{% endif %} class="editable-radio" disabled> กู้ยืม</label>
+            <label class="rpill"><input type="radio" name="loan_student_fund" value="FALSE" {% if not student.loan_student_fund %}checked{% endif %} class="editable-radio" disabled> ไม่กู้ยืม</label>
+          </div>
+        </div>
+        <div class="field-group">
+          <span class="field-label">ลักษณะการกู้ยืม</span>
+          <div class="radio-group" style="flex-direction:column;">
+            <label class="rpill"><input type="radio" name="loan_type" value="ค่าเล่าเรียน"  {% if student.loan_type == 'ค่าเล่าเรียน' %}checked{% endif %} class="editable-radio" disabled> กู้เฉพาะค่าเล่าเรียน</label>
+            <label class="rpill"><input type="radio" name="loan_type" value="ทั้งสองอย่าง" {% if student.loan_type == 'ทั้งสองอย่าง' %}checked{% endif %} class="editable-radio" disabled> กู้ทั้งค่าเล่าเรียนและค่าครองชีพ</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# ══ 4. ครอบครัวและรายได้ ══ #}
+  <div class="section-card">
+    <div class="section-header">
+      <div class="s-icon rose">👨‍👩‍👧‍👦</div>
+      <span class="s-title">4. ข้อมูลครอบครัวและรายได้</span>
+    </div>
+    <div class="s-body">
+
+      {# บิดา / มารดา #}
+      <div class="g2" style="margin-bottom:1.5rem;">
+        <div class="parent-card">
+          <div class="parent-header father">👨 ข้อมูลบิดา</div>
+          <div class="parent-body">
+            <div class="field-group"><span class="field-label">ชื่อ-นามสกุล</span><input type="text" name="father_name" value="{{ v(student.father_name) }}" placeholder="ชื่อ-นามสกุลบิดา" class="editable-input" readonly></div>
+            <div class="field-group"><span class="field-label">อาชีพ</span><input type="text" name="father_job" value="{{ v(student.father_job) }}" placeholder="อาชีพ" class="editable-input" readonly></div>
+            <div class="g2">
+              <div class="field-group"><span class="field-label">รายได้ / เดือน (฿)</span><input type="number" name="father_income" value="{{ v(student.father_income) }}" placeholder="0" class="editable-input" readonly></div>
+              <div class="field-group"><span class="field-label">ส่งให้ผู้สมัคร / เดือน (฿)</span><input type="number" name="inc_father" value="{{ v(student.inc_father) }}" placeholder="0" class="editable-input" readonly></div>
+            </div>
+            <div class="field-group"><span class="field-label">ปัญหาสุขภาพ</span><input type="text" name="father_health" value="{{ v(student.father_health) }}" placeholder="ปัญหาสุขภาพ (ถ้ามี)" class="editable-input" readonly></div>
+          </div>
+        </div>
+        <div class="parent-card">
+          <div class="parent-header mother">👩 ข้อมูลมารดา</div>
+          <div class="parent-body">
+            <div class="field-group"><span class="field-label">ชื่อ-นามสกุล</span><input type="text" name="mother_name" value="{{ v(student.mother_name) }}" placeholder="ชื่อ-นามสกุลมารดา" class="editable-input" readonly></div>
+            <div class="field-group"><span class="field-label">อาชีพ</span><input type="text" name="mother_job" value="{{ v(student.mother_job) }}" placeholder="อาชีพ" class="editable-input" readonly></div>
+            <div class="g2">
+              <div class="field-group"><span class="field-label">รายได้ / เดือน (฿)</span><input type="number" name="mother_income" value="{{ v(student.mother_income) }}" placeholder="0" class="editable-input" readonly></div>
+              <div class="field-group"><span class="field-label">ส่งให้ผู้สมัคร / เดือน (฿)</span><input type="number" name="inc_mother" value="{{ v(student.inc_mother) }}" placeholder="0" class="editable-input" readonly></div>
+            </div>
+            <div class="field-group"><span class="field-label">ปัญหาสุขภาพ</span><input type="text" name="mother_health" value="{{ v(student.mother_health) }}" placeholder="ปัญหาสุขภาพ (ถ้ามี)" class="editable-input" readonly></div>
+          </div>
+        </div>
+      </div>
+
+      {# สถานภาพสมรส #}
+      <div class="div-label">สถานภาพสมรสบิดา-มารดา</div>
+      <div class="radio-group">
+        {% set ps = student.parents_status %}
+        {% for status in ['อยู่ด้วยกัน','แยกกันอยู่','หย่าร้าง','บิดาเสียชีวิต','มารดาเสียชีวิต','ทั้งสองเสียชีวิต'] %}
+        <label class="rpill"><input type="radio" name="parents_status" value="{{ status }}" {% if ps == status %}checked{% endif %} class="editable-radio" disabled> {{ status }}</label>
+        {% endfor %}
+      </div>
+
+      {# ที่อยู่อาศัย #}
+      <div class="div-label">ลักษณะที่อยู่อาศัย</div>
+      {% set ht = student.housing_status %}
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <label class="rpill" style="width:fit-content;"><input type="radio" name="housing_status" value="own" {% if ht == 'own' %}checked{% endif %} onclick="toggleHousing()" class="editable-radio" disabled> บ้านตัวเอง</label>
         <div>
-            <label class="flex items-center gap-2">
-                <input type="radio" name="agri_type" value="own" onclick="toggleAgri()">
-                เป็นของตนเอง
-            </label>
-
-            <input type="number" id="agriOwnInput"
-                placeholder="จำนวน (ไร่)"
-                class="mt-2 ml-6 w-full md:w-1/2 px-4 py-2 rounded-xl bg-gray-100 border"
-                style="display:none;">
+          <label class="rpill" style="width:fit-content;"><input type="radio" name="housing_status" value="rent" {% if ht == 'rent' %}checked{% endif %} onclick="toggleHousing()" class="editable-radio" disabled> บ้านเช่า</label>
+          <div class="sub-wrap {% if ht != 'rent' %}hidden{% endif %}" id="rentWrap">
+            <input type="number" name="rent_amount" value="{{ v(student.rent_amount) }}" placeholder="อัตราค่าเช่าเดือนละ (บาท)" class="editable-input" style="max-width:260px;" readonly>
+          </div>
         </div>
-
-        <!-- เช่าผู้อื่น -->
         <div>
-            <label class="flex items-center gap-2">
-                <input type="radio" name="agri_type" value="rent" onclick="toggleAgri()">
-                เช่าผู้อื่น
-            </label>
+          <label class="rpill" style="width:fit-content;"><input type="radio" name="housing_status" value="other" {% if ht == 'other' %}checked{% endif %} onclick="toggleHousing()" class="editable-radio" disabled> อาศัยผู้อื่น</label>
+          <div class="sub-wrap {% if ht != 'other' %}hidden{% endif %}" id="otherHousingWrap">
+            <input type="text" name="housing_other" value="{{ v(student.housing_other) }}" placeholder="ระบุลักษณะที่อยู่อาศัย" class="editable-input" style="max-width:260px;" readonly>
+          </div>
+        </div>
+      </div>
 
-            <div id="agriRentBox" class="mt-2 ml-6 flex gap-4" style="display:none;">
-                <input type="number"
-                    placeholder="จำนวน (ไร่)"
-                    class="px-4 py-2 rounded-xl bg-gray-100 border w-1/2">
-                <input type="number"
-                    placeholder="ค่าเช่า (บาท/เดือน)"
-                    class="px-4 py-2 rounded-xl bg-gray-100 border w-1/2">
+      {# ที่ดินเกษตร #}
+      <div class="div-label">ที่ดินทำการเกษตร</div>
+      {% set ls = student.land_status %}
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <label class="rpill" style="width:fit-content;"><input type="radio" name="land_status" value="none" {% if ls == 'ไม่มี' or ls == 'none' %}checked{% endif %} onclick="toggleAgri()" class="editable-radio" disabled> ไม่มี</label>
+        <div>
+          <label class="rpill" style="width:fit-content;"><input type="radio" name="land_status" value="own" {% if ls == 'มีที่ดินตัวเอง' or ls == 'own' %}checked{% endif %} onclick="toggleAgri()" class="editable-radio" disabled> เป็นของตนเอง</label>
+          <div class="sub-wrap" id="agriOwnWrap" style="display:none;">
+            <input type="number" name="agri_own_amount" value="{{ v(student.agri_own_amount) }}" placeholder="จำนวน (ไร่)" class="editable-input" style="max-width:180px;" readonly>
+          </div>
+        </div>
+        <div>
+          <label class="rpill" style="width:fit-content;"><input type="radio" name="land_status" value="rent" {% if ls == 'เช่าผู้อื่น' or ls == 'rent' %}checked{% endif %} onclick="toggleAgri()" class="editable-radio" disabled> เช่าผู้อื่น</label>
+          <div class="sub-wrap" id="agriRentBox" style="display:none;">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <input type="number" name="agri_rent_amount" value="{{ v(student.agri_rent_amount) }}" placeholder="จำนวน (ไร่)" class="editable-input" style="max-width:160px;" readonly>
+              <input type="number" name="agri_rent_cost"   value="{{ v(student.agri_rent_cost) }}"   placeholder="ค่าเช่า (บาท/เดือน)" class="editable-input" style="max-width:200px;" readonly>
             </div>
+          </div>
         </div>
-
-        <!-- อาศัยผู้อื่น -->
         <div>
-            <label class="flex items-center gap-2">
-                <input type="radio" name="agri_type" value="other" onclick="toggleAgri()">
-                อาศัยผู้อื่น
-            </label>
-
-            <input type="text" id="agriOtherInput"
-                placeholder="ระบุ"
-                class="mt-2 ml-6 w-full md:w-1/2 px-4 py-2 rounded-xl bg-gray-100 border"
-                style="display:none;">
+          <label class="rpill" style="width:fit-content;"><input type="radio" name="land_status" value="other" {% if ls == 'อาศัยผู้อื่น' or ls == 'other' %}checked{% endif %} onclick="toggleAgri()" class="editable-radio" disabled> อาศัยผู้อื่น</label>
+          <div class="sub-wrap" id="agriOtherWrap" style="display:none;">
+            <input type="text" name="agri_other_detail" value="{{ v(student.agri_other_detail) }}" placeholder="ระบุรายละเอียด" class="editable-input" style="max-width:280px;" readonly>
+          </div>
         </div>
+      </div>
 
-    </div>
-</div>
+      {# ผู้อุปการะ #}
+      <div class="div-label">ข้อมูลผู้อุปการะ <span style="font-size:.72rem;font-weight:400;color:var(--muted);margin-left:4px;">(ถ้ามี)</span></div>
+      <div class="g2">
+        <div class="field-group"><span class="field-label">ชื่อ-นามสกุล</span><input type="text" name="guardian_name" value="{{ v(student.guardian_name) }}" placeholder="ชื่อ-นามสกุลผู้อุปการะ" class="editable-input" readonly></div>
+        <div class="field-group"><span class="field-label">ความสัมพันธ์</span><input type="text" name="guardian_relation" value="{{ v(student.guardian_relation) }}" placeholder="เช่น ลุง, ป้า, ปู่, ย่า" class="editable-input" readonly></div>
+        <div class="field-group"><span class="field-label">อาชีพ</span><input type="text" name="guardian_job" value="{{ v(student.guardian_job) }}" placeholder="อาชีพ" class="editable-input" readonly></div>
+        <div class="field-group"><span class="field-label">รายได้ / เดือน (฿)</span><input type="number" name="guardian_income" value="{{ v(student.guardian_income) }}" placeholder="0" class="editable-input" readonly></div>
+      </div>
 
-    <!-- ================= ผู้อุปการะ ================= -->
-    <div class="border-t border-gray-100 pt-6 mt-6">
-        <h4 class="font-bold text-blue-800 mb-3">ข้อมูลผู้อุปการะ</h4>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input type="text" name="guardian_name"
-                value="{{ student.guardian_name | default('') }}"
-                placeholder="ชื่อ-สกุล"
-                class="editable-input w-full px-3 py-2 rounded-md border-gray-300 bg-white">
-
-            <input type="text" name="guardian_relation"
-                value="{{ student.guardian_relation | default('') }}"
-                placeholder="ความสัมพันธ์"
-                class="editable-input w-full px-3 py-2 rounded-md border-gray-300 bg-white">
-
-            <input type="text" name="guardian_job"
-                value="{{ student.guardian_job | default('') }}"
-                placeholder="อาชีพ"
-                class="editable-input w-full px-3 py-2 rounded-md border-gray-300 bg-white">
-
-            <input type="number" name="guardian_income"
-                value="{{ student.guardian_income | default('0') }}"
-                placeholder="รายได้ / เดือน"
-                class="editable-input w-full px-3 py-2 rounded-md border-gray-300 bg-white">
-        </div>
-    </div>
-
-    <!-- ================= ตารางพี่น้อง (อยู่ล่างสุดของ Section 4) ================= -->
-    <h4 class="text-md font-bold text-blue-900 mb-2 mt-8 border-t border-gray-100 pt-6">
-        จำนวนพี่น้องร่วมบิดามารดาเดียวกัน (รวมตัวผู้สมัคร)
-    </h4>
-
-    <div class="overflow-x-auto rounded-lg border border-gray-200">
-        <table class="w-full text-sm text-left text-gray-600">
-            <thead class="text-xs text-blue-900 bg-blue-50 border-b border-blue-100">
-                <tr>
-                    <th class="px-4 py-3">ลำดับ</th>
-                    <th class="px-4 py-3">ชื่อ - นามสกุล</th>
-                    <th class="px-4 py-3">อายุ</th>
-                    <th class="px-4 py-3">อาชีพ/ระดับชั้น</th>
-                    <th class="px-4 py-3">สถานที่ทำงาน/สถานศึกษา</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td colspan="5" class="px-4 py-6 text-center text-gray-400">
-                        ยังไม่มีข้อมูลพี่น้อง
-                    </td>
-                </tr>
-            </tbody>
+      {# พี่น้อง #}
+      <div class="div-label">จำนวนพี่น้องร่วมบิดามารดาเดียวกัน <span style="font-size:.72rem;font-weight:400;color:var(--muted);margin-left:4px;">(รวมตัวผู้สมัคร)</span></div>
+      <div class="sib-table-wrap">
+        <table class="sib-table">
+          <thead>
+            <tr>
+              <th style="width:52px;text-align:center;">ลำดับ</th>
+              <th>ชื่อ - นามสกุล</th>
+              <th style="width:80px;text-align:center;">อายุ</th>
+              <th>อาชีพ / ระดับชั้น</th>
+              <th>สถานที่ทำงาน / สถานศึกษา</th>
+            </tr>
+          </thead>
+          <tbody id="siblingsTableBody">
+            <tr>
+              <td colspan="5" style="text-align:center;padding:2.5rem;color:var(--muted);font-size:.875rem;">
+                ยังไม่มีข้อมูลพี่น้อง
+              </td>
+            </tr>
+          </tbody>
         </table>
+        <div class="sib-footer">
+          <button type="button" id="addSiblingBtn" class="btn-add hidden">＋ เพิ่มพี่น้อง</button>
+          <button type="button" id="prevSiblingBtn" class="btn-pg prev">← ก่อนหน้า</button>
+          <button type="button" id="nextSiblingBtn" class="btn-pg next">ถัดไป →</button>
+        </div>
+      </div>
+
+    </div>{# /s-body #}
+  </div>{# /section-card #}
+
+  {# hidden field — JS จะ inject JSON พี่น้องก่อน submit #}
+  <input type="hidden" name="siblings_json" id="siblings_json_input" value="[]">
+
+  </form>
+
+  {# ══ STICKY ACTION BAR ══ #}
+  <div class="action-bar">
+    <p class="action-hint" id="editHint">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+      กรุณากดปุ่ม "แก้ไข" ก่อนทำการเปลี่ยนข้อมูล
+    </p>
+    <div class="action-btns">
+      <button type="button" id="editBtn" class="btn-edit">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/></svg>
+        แก้ไขข้อมูล
+      </button>
+      <button type="submit" form="profileForm" id="saveBtn" disabled class="btn-save">
+        💾 บันทึกข้อมูล
+      </button>
     </div>
-</div>
+  </div>
 
-            </div>
-<div class="flex flex-col items-center gap-4 pt-6 pb-12">
-                <button type="button" id="editBtn" class="bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-bold py-3 px-12 rounded-full shadow-md transition-all flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                    </svg>
-                    แก้ไขประวัติส่วนตัว
-                </button>
+</div>{# /container #}
+</div>{# /page-bg #}
 
-                <button type="submit" id="saveBtn" disabled class="bg-blue-900 text-white font-bold py-3 px-20 rounded-full shadow-lg transition-all text-lg opacity-50 cursor-not-allowed">
-                    💾 บันทึกข้อมูลโปรไฟล์
-                </button>
-                
-                <p id="editHint" class="text-sm text-gray-500 italic">กรุณากดปุ่ม "แก้ไขประวัติส่วนตัว" ก่อนทำการเปลี่ยนข้อมูล</p>
-            </div>
-
-        </form>
-    </div>
-</div>
 <script>
-    function toggleHousing() {
-    const value = document.querySelector('input[name="housing_type"]:checked')?.value;
+let siblings = JSON.parse('{{ (student.siblings_list or []) | tojson | safe }}');
+let currentPage = 0;
+const rowsPerPage = 3;
 
-    document.getElementById("rentInput").style.display = value === "rent" ? "block" : "none";
-    document.getElementById("otherHousingInput").style.display = value === "other" ? "block" : "none";
+const tableBody = document.getElementById("siblingsTableBody");
+const addBtn    = document.getElementById("addSiblingBtn");
+const prevBtn   = document.getElementById("prevSiblingBtn");
+const nextBtn   = document.getElementById("nextSiblingBtn");
+const editBtn   = document.getElementById('editBtn');
+const saveBtn   = document.getElementById('saveBtn');
+const sibJson   = document.getElementById('siblings_json_input');
+
+// ── sync siblings array → hidden JSON field ก่อน submit ────────
+function syncSiblingsJson() {
+  // ดึงค่าล่าสุดจาก input ที่อยู่ใน table ตอนนี้ (หน้าปัจจุบัน)
+  const rows = tableBody.querySelectorAll('tr[data-idx]');
+  rows.forEach(row => {
+    const idx = parseInt(row.dataset.idx);
+    if (idx >= 0 && idx < siblings.length) {
+      siblings[idx].name  = row.querySelector('input[name="sibling_name[]"]')?.value  ?? '';
+      siblings[idx].age   = row.querySelector('input[name="sibling_age[]"]')?.value   ?? '';
+      siblings[idx].job   = row.querySelector('input[name="sibling_job[]"]')?.value   ?? '';
+      siblings[idx].place = row.querySelector('input[name="sibling_place[]"]')?.value ?? '';
+    }
+  });
+  sibJson.value = JSON.stringify(siblings);
 }
 
+// intercept submit → sync ก่อนส่ง
+document.getElementById('profileForm').addEventListener('submit', (e) => {
+  syncSiblingsJson();
+  // ถ้าต้องการ validate ก็ใส่ที่นี่ แล้ว e.preventDefault() ถ้าไม่ผ่าน
+});
+
+function toggleHousing() {
+  const v = document.querySelector('input[name="housing_status"]:checked')?.value;
+  document.getElementById('rentWrap')?.classList.toggle('hidden', v !== 'rent');
+  document.getElementById('otherHousingWrap')?.classList.toggle('hidden', v !== 'other');
+}
 function toggleAgri() {
-    const value = document.querySelector('input[name="agri_type"]:checked')?.value;
-
-    document.getElementById("agriOwnInput").style.display = value === "own" ? "block" : "none";
-    document.getElementById("agriRentBox").style.display = value === "rent" ? "flex" : "none";
-    document.getElementById("agriOtherInput").style.display = value === "other" ? "block" : "none";
+  const v = document.querySelector('input[name="land_status"]:checked')?.value;
+  const show = (id, cond) => { const el = document.getElementById(id); if(el) el.style.display = cond ? 'block' : 'none'; };
+  show('agriOwnWrap',  v === 'own');
+  show('agriRentBox',  v === 'rent');
+  show('agriOtherWrap',v === 'other');
 }
-    const editBtn = document.getElementById('editBtn');
-    const saveBtn = document.getElementById('saveBtn');
-    const inputs = document.querySelectorAll('.editable-input');
-    const editHint = document.getElementById('editHint');
 
-    editBtn.addEventListener('click', () => {
-        // 1. ปลดล็อกช่อง input ทั้งหมดที่เป็นคลาส editable-input
-        inputs.forEach(input => {
-            input.removeAttribute('readonly');
-            input.classList.remove('bg-gray-50', 'cursor-not-allowed');
-            input.classList.add('bg-white', 'border-blue-300', 'focus:ring-2', 'focus:ring-blue-500');
-        });
+function renderSiblings() {
+  if (siblings.length === 0) {
+    tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2.5rem;color:var(--muted);font-size:.875rem;">ยังไม่มีข้อมูลพี่น้อง</td></tr>`;
+    return;
+  }
+  const start = currentPage * rowsPerPage;
+  tableBody.innerHTML = siblings.slice(start, start + rowsPerPage).map((s, i) => `
+    <tr data-idx="${start + i}">
+      <td style="text-align:center;font-weight:600;color:#475569;">${start + i + 1}</td>
+      <td><input type="text"   name="sibling_name[]"  value="${s.name  ?? ''}" placeholder="ชื่อ-นามสกุล"              class="editable-input"></td>
+      <td><input type="number" name="sibling_age[]"   value="${s.age   ?? ''}" placeholder="อายุ"                       class="editable-input" style="max-width:70px;"></td>
+      <td><input type="text"   name="sibling_job[]"   value="${s.job   ?? ''}" placeholder="อาชีพ / ระดับชั้น"          class="editable-input"></td>
+      <td><input type="text"   name="sibling_place[]" value="${s.place ?? ''}" placeholder="สถานที่ทำงาน / สถานศึกษา" class="editable-input"></td>
+    </tr>`).join('');
+}
 
-        // 2. เปิดใช้งานปุ่มบันทึก
-        saveBtn.removeAttribute('disabled');
-        saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-        saveBtn.classList.add('hover:bg-blue-800', 'active:scale-95');
+// sync ค่าจาก table ก่อนเปลี่ยนหน้า
+function saveCurrentPage() {
+  const rows = tableBody.querySelectorAll('tr[data-idx]');
+  rows.forEach(row => {
+    const idx = parseInt(row.dataset.idx);
+    if (idx >= 0 && idx < siblings.length) {
+      siblings[idx].name  = row.querySelector('input[name="sibling_name[]"]')?.value  ?? '';
+      siblings[idx].age   = row.querySelector('input[name="sibling_age[]"]')?.value   ?? '';
+      siblings[idx].job   = row.querySelector('input[name="sibling_job[]"]')?.value   ?? '';
+      siblings[idx].place = row.querySelector('input[name="sibling_place[]"]')?.value ?? '';
+    }
+  });
+}
 
-        // 3. ซ่อนปุ่มแก้ไข และข้อความแนะนำ
-        editBtn.classList.add('hidden');
-        editHint.textContent = "ขณะนี้คุณสามารถแก้ไขข้อมูลได้แล้ว อย่าลืมกดบันทึกเมื่อเสร็จสิ้น";
-        editHint.classList.remove('text-gray-500');
-        editHint.classList.add('text-green-600', 'font-medium');
-    });
+editBtn.addEventListener('click', () => {
+  document.querySelectorAll('.editable-input').forEach(el => {
+    el.removeAttribute('readonly');
+    el.style.cursor = 'text';
+    el.style.background = '#fff';
+    el.style.borderColor = '#93c5fd';
+    el.style.boxShadow = '0 0 0 3px rgba(147,197,253,.2)';
+  });
+  document.querySelectorAll('.editable-radio').forEach(r => r.removeAttribute('disabled'));
+
+  saveBtn.disabled = false;
+  editBtn.style.display = 'none';
+  addBtn.classList.remove('hidden');
+
+  document.getElementById('editHint').innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
+    🔓 พร้อมแก้ไขแล้ว — อย่าลืมกดบันทึกด้วยนะครับ`;
+});
+
+addBtn.addEventListener("click", () => {
+  saveCurrentPage();
+  siblings.push({ name:"", age:"", job:"", place:"" });
+  currentPage = Math.floor((siblings.length - 1) / rowsPerPage);
+  renderSiblings();
+});
+prevBtn.addEventListener("click", () => { if (currentPage > 0) { saveCurrentPage(); currentPage--; renderSiblings(); } });
+nextBtn.addEventListener("click", () => { if ((currentPage+1)*rowsPerPage < siblings.length) { saveCurrentPage(); currentPage++; renderSiblings(); } });
+
+document.addEventListener('DOMContentLoaded', () => {
+  toggleHousing();
+  toggleAgri();
+  if (siblings.length > 0) renderSiblings();
+});
 </script>
 {% endblock %}

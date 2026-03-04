@@ -227,40 +227,13 @@ def apply_scholarship():
     
     # 2. ดึงข้อมูลทุนทั้งหมดเพื่อไปแสดงใน Dropdown
     scholarships = Scholarship.query.all()
+    return render_template("student/scholarships.html", scholarships=scholarships)
 
-    # 3. ดึงข้อมูลนักศึกษาที่ Login อยู่มาเตรียมไว้สำหรับ Auto-fill
-    current_student_id = session["user_id"]
-    student = Student.query.filter_by(student_id=current_student_id).first()
-
-    # 4. สร้างตัวแปร prefill โดยดึงค่าจากฐานข้อมูลมาใส่
-    # ถ้าใน DB ไม่มีข้อมูล ให้ใส่เป็นค่าว่าง '' เพื่อไม่ให้หน้าเว็บ Error
-    prefill_data = {
-        'student_id': student.student_id if student else '',
-        'first_name': student.name.split()[0] if student and student.name else '',
-        'last_name': student.name.split()[1] if student and student.name and len(student.name.split()) > 1 else '',
-        'faculty': student.faculty if student else '',
-        # คุณสามารถเพิ่ม field อื่นๆ ที่ต้องการ Auto-fill ได้ที่นี่
-    }
-
-    return render_template("student/apply.html", 
-                           scholarships=scholarships, 
-                           prefill=prefill_data)
-
-@student_bp.route('/upload', methods=['POST'])
-def upload_documents():
-    """อัปโหลดเอกสารประกอบการสมัคร (InputDocument Upload)"""
-    return "Student: Document Upload endpoint"
-
-# ==========================================
-# ฟีเจอร์: ออกจากระบบ (Logout)
-# ==========================================
-@student_bp.route('/logout')
-def logout():
-    # 1. ล้างข้อมูลใน Session ทั้งหมดเพื่อออกจากระบบ
-    session.clear()
+@student_bp.route("/status")
+def track_status():
+    """ระบบติดตามสถานะการสมัคร"""
     
-    # 2. แจ้งเตือนผู้ใช้ (ถ้าต้องการ)
-    flash("ออกจากระบบเรียบร้อยแล้ว", "success")
-    
-    # 3. บังคับเปลี่ยนหน้าไปที่หน้าแรกสุด http://127.0.0.1:5000/
-    return redirect('/')
+@student_bp.route("/auto-match")
+def auto_match():
+    """ระบบจับคู่ทุนอัตโนมัติ"""
+    return render_template("student/auto_match.html")

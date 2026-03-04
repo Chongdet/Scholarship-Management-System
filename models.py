@@ -37,7 +37,6 @@ class Director(db.Model):
         return check_password_hash(self.password_hash, password)
 
 # 1.3 ข้อมูลนักศึกษา (Student)
-# models.py (เฉพาะส่วนของ Student)
 class Student(db.Model):
     __tablename__ = 'student'
     id = db.Column(db.Integer, primary_key=True)
@@ -76,9 +75,6 @@ class Student(db.Model):
     mother_health = db.Column(db.Text)          # [Self] ปัญหาสุขภาพมารดา [NEW]
     
     parents_status = db.Column(db.String(50))   # [Self]
-    
-    
-    # ... (สามารถเพิ่มฟิลด์อื่นๆ ตามที่คุณมีในไฟล์เดิมได้เลย) ...
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -102,7 +98,8 @@ class Scholarship(db.Model):
     start_date = db.Column(db.Date) # วันที่เปิดรับสมัคร                    
     end_date = db.Column(db.Date) # วันที่ปิดรับสมัคร
     provider = db.Column(db.String(100)) # หน่วยงานของทุนนั้นๆ
-    
+    min_gpax = db.Column(db.Float, nullable=True)   
+    income_cap = db.Column(db.Float, nullable=True) # กำหนดเพดานรายได้ (ถ้ามี)  
     status = db.Column(db.String(20), default='open')  # สถานะของทุน open(เปิดรับ),checking=close(กำลังตรวจสอบ,ปิดทุน), interview(รายชื่อสัมภาษณ์), announce(รายชื่อได้รับทุน) 
     interview_file_url = db.Column(db.String(500))    # ลิงก์ไฟล์ประกาศสัมภาษณ์
     announce_file_url = db.Column(db.String(500))     # ลิงก์ไฟล์ประกาศคนได้ทุน
@@ -113,14 +110,15 @@ class Scholarship(db.Model):
     def is_open(self):
         """เช็คว่าทุนเปิดอยู่และยังไม่หมดเขต"""
         now = datetime.now()
-        if self.status != "Open":
+        if self.status != "open": # เปลี่ยนเป็นพิมพ์เล็กให้ตรงกับค่า default
             return False
         if self.start_date and self.end_date:
-            return self.start_date <= now <= self.end_date
+            return self.start_date <= now.date() <= self.end_date # เปรียบเทียบ date() ให้ตรงกัน
         return True
 
     def __repr__(self):
-        return f"<Scholarship {self.scholarship_name}>"
+        return f"<Scholarship {self.name}>" # เปลี่ยนเป็น self.name เพราะตารางนี้ไม่มี scholarship_name
+
 
 # 2.2 ข้อมูลใบสมัคร
 class Application(db.Model):
@@ -128,15 +126,16 @@ class Application(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.String(20), nullable=False)
     student_name = db.Column(db.String(100))
-    faculty = db.Column(db.String(100)) # <--- คงไว้ตามที่คุณเพิ่มมา
-    scholarship_id = db.Column(db.Integer, db.ForeignKey('scholarship.id'))
-    status = db.Column(db.String(20), default='รอตรวจสอบ') # <--- สถานะหลังจากกดส่งใบสมัครเสร็จ
+    faculty = db.Column(db.String(100))
+    
+    scholarship_id = db.Column(db.Integer, db.ForeignKey('scholarship.id'), nullable=False)
+    status = db.Column(db.String(20), default='รอตรวจสอบ')
     reviewing_by = db.Column(db.String(50))
     reviewing_at = db.Column(db.DateTime)
-    status_description = db.Column(db.Text) # <--- สำหรับเก็บนัดหมายหรือเหตุผลจากเจ้าหน้าที่
+    status_description = db.Column(db.Text)
 
 
-# 2.3 บันทึกการทำงาน (Audit Log) - จากฝั่ง main
+# 2.3 บันทึกการทำงาน (Audit Log)
 class AuditLog(db.Model):
     __tablename__ = 'audit_log'
     id = db.Column(db.Integer, primary_key=True)
@@ -150,11 +149,14 @@ class AuditLog(db.Model):
     status_after = db.Column(db.String(100), nullable=True)      # สถานะหลังแก้ไข/ปัจจุบัน 
     previous_value = db.Column(db.String(200), nullable=True)    # ค่าเดิมก่อนแก้ไข 
 
+
 # 2.4 เกณฑ์คะแนน
 class Criterion(db.Model):
     __tablename__ = 'criterion'
     id = db.Column(db.Integer, primary_key=True)
-    # ผูกกับ scholarship_id ที่เป็น String
-    scholarship_id = db.Column(db.String(20), db.ForeignKey('scholarship.scholarship_id'))
+    
+    # ✅ แก้ไขตรงนี้: เปลี่ยนเป็น db.Integer และอ้างอิงไปที่ scholarship.id
+    scholarship_id = db.Column(db.Integer, db.ForeignKey('scholarship.id'))
+    
     name = db.Column(db.String(100))  # เช่น 'คะแนนสัมภาษณ์', 'จิตอาสา'
     max_score = db.Column(db.Integer) # คะแนนเต็มของหัวข้อนั้น

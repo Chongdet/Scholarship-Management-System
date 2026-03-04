@@ -1,6 +1,12 @@
-from flask import Blueprint, render_template, request, session, redirect, url_for, flash
-from models import db, Student, Scholarship # อย่าลืม Import ข้อมูลที่ต้องใช้
+import os
 import json
+
+from flask import Blueprint, current_app, render_template, request, session, redirect, url_for, flash
+from werkzeug.utils import secure_filename
+
+# แก้ไข: เพิ่มการ Import Application จาก models และลบ prompt_toolkit ออกเพื่อไม่ให้ชื่อชนกัน
+from models import db, Student, Scholarship, Application 
+from services.reg_service import RegService
 
 student_bp = Blueprint('student', __name__)
 
@@ -13,7 +19,7 @@ def dashboard():
     # ตรวจสอบการ Login
     if "user_id" not in session or session.get("role") != "student":
         flash("กรุณาเข้าสู่ระบบ", "error")
-        return redirect(url_for("login"))
+        return redirect(url_for("student.login"))
 
     # ดึงข้อมูลนักศึกษาที่ Login จากฐานข้อมูลจริง
     current_student_id = session["user_id"]
@@ -21,7 +27,7 @@ def dashboard():
 
     if not student:
         flash("ไม่พบข้อมูลนักศึกษา", "error")
-        return redirect(url_for("login"))
+        return redirect(url_for("student.login"))
 
     # ดึงข้อมูลทุนทั้งหมดมาแสดง
     all_scholarships = Scholarship.query.all()
@@ -34,7 +40,6 @@ def dashboard():
 # ==========================================
 # ผู้รับผิดชอบ: นาย กิตติพงษ์ เลี้ยงหิรัญถาวร
 # ==========================================
-
 @student_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -89,7 +94,6 @@ def profile():
         return redirect(url_for("student.login"))
 
     if request.method == "POST":
-
         # ── Helper: แปลง float ปลอดภัย (รับ '' และ None ได้) ──────────
         def safe_float(key, default=None):
             val = request.form.get(key, '').strip()
@@ -99,11 +103,6 @@ def profile():
                 return float(val)
             except (ValueError, TypeError):
                 return default
-
-        # ══════════════════════════════════════════════════════════════
-        # [Security] ห้ามรับ gpax / faculty / year / citizen_id /
-        #             address_domicile / disciplinary_status จาก form
-        # ══════════════════════════════════════════════════════════════
 
         # ── 1. ประวัติส่วนตัว (editable) ─────────────────────────────
         student_record.mobile           = request.form.get("mobile",   "").strip() or None
@@ -152,7 +151,6 @@ def profile():
         student_record.loan_type         = request.form.get("loan_type") or None
 
         # ── 9. พี่น้อง (รับ JSON จาก hidden field) ───────────────────
-        # Template ส่งมาเป็น JSON string ใน hidden input ชื่อ siblings_json
         try:
             siblings_data = request.form.get("siblings_json")
             if siblings_data and siblings_data.strip():
@@ -170,12 +168,13 @@ def profile():
 
     return render_template("student/profile.html", student=student_record)
 
+
 @student_bp.route('/auto-match')
 def auto_match():
     """ระบบจับคู่ทุนอัตโนมัติ (Scholarship Auto-Matching)"""
     if "user_id" not in session or session.get("role") != "student":
         flash("กรุณาเข้าสู่ระบบ", "error")
-        return redirect(url_for("login"))
+        return redirect(url_for("student.login"))
         
     from services.matching_service import MatchingService
     current_student_id = session["user_id"]
@@ -183,7 +182,7 @@ def auto_match():
     
     if not student:
         flash("ไม่พบข้อมูลนักศึกษา", "error")
-        return redirect(url_for("login"))
+        return redirect(url_for("student.login"))
         
     # ประมวลผลการจับคู่ทุนทั้งหมด
     matches = MatchingService.get_all_matches(student)
@@ -191,6 +190,7 @@ def auto_match():
     return render_template("student/auto_match.html", 
                            student=student, 
                            matches=matches)
+
 
 # ==========================================
 # ผู้รับผิดชอบ: นาย จารุวัฒน์ บุญสาร
@@ -209,7 +209,7 @@ def apply_scholarship():
     housing_types = ["บ้านพัก", "ที่อยู่อาศัย", "ที่พัก"]
     if "user_id" not in session or session.get("role") != "student":
         flash("กรุณาเข้าสู่ระบบ", "error")
-        return redirect(url_for("login"))
+        return redirect(url_for("student.login"))
 
     current_student_id = session["user_id"]
     student = Student.query.filter_by(student_id=current_student_id).first()
@@ -303,11 +303,16 @@ def apply_scholarship():
                            parent_statuses=parent_statuses,
                            housing_types=housing_types)
 
+@student_bp.route('/logout')
+def logout():
+    # ล้างข้อมูลทั้งหมดใน session
+    session.clear()
+    flash("ออกจากระบบเรียบร้อยแล้ว", "success")
+    # เด้งกลับไปหน้าเข้าสู่ระบบ
+    return redirect(url_for("student.login"))
+
 @student_bp.route("/status")
 def track_status():
     """ระบบติดตามสถานะการสมัคร"""
-    
-@student_bp.route("/auto-match")
-def auto_match():
-    """ระบบจับคู่ทุนอัตโนมัติ"""
-    return render_template("student/auto_match.html")
+    # เติม pass ชั่วคราวเพื่อไม่ให้ระบบพัง (เนื่องจากฟังก์ชันนี้ยังไม่มีโค้ดข้างใน)
+    return "หน้าระบบติดตามสถานะการสมัคร กำลังอยู่ในระหว่างการพัฒนา..."

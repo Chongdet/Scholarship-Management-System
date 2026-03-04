@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from flask import Flask, redirect, url_for, render_template, request, session, flash
 from models import db, Student, Officer, Director, Scholarship
 from routes.student_routes import student_bp

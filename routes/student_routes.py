@@ -299,7 +299,8 @@ def apply_scholarship():
             "gpa": getattr(student, 'gpax', ''),
             "housing_type": getattr(student, 'housing_status', ''),
             "family_income": family_income,
-            "siblings": siblings
+            "siblings": siblings,
+            "parents_status": getattr(student, 'parents_status', '')
         }
 
     titles = ["นาย", "นางสาว", "นาง"]

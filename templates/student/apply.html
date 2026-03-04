@@ -262,6 +262,8 @@
         </div>
 
         <!-- บิดา -->
+
+
         <p class="text-sm font-bold text-blue-800 mb-3">👨 บิดา</p>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
             <div>
@@ -279,15 +281,6 @@
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">เบอร์โทรศัพท์</label>
                 <input type="tel" name="father_phone" value="{{ prefill.get('father_phone', '') }}" placeholder="0xx-xxx-xxxx" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
-            </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">สถานะ</label>
-                <select name="father_status" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm bg-white transition-all">
-                    <option value="">-- เลือก --</option>
-                    {% for s in parent_statuses %}
-                    <option value="{{ s }}" {{ 'selected' if prefill.get('father_status') == s else '' }}>{{ s }}</option>
-                    {% endfor %}
-                </select>
             </div>
         </div>
 
@@ -310,18 +303,21 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-1">เบอร์โทรศัพท์</label>
                 <input type="tel" name="mother_phone" value="{{ prefill.get('mother_phone', '') }}" placeholder="0xx-xxx-xxxx" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm transition-all">
             </div>
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">สถานะ</label>
-                <select name="mother_status" class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm bg-white transition-all">
-                    <option value="">-- เลือก --</option>
-                    {% for s in parent_statuses %}
-                    <option value="{{ s }}" {{ 'selected' if prefill.get('mother_status') == s else '' }}>{{ s }}</option>
-                    {% endfor %}
-                </select>
+             </div>
+        <div class="mb-5">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">สถานภาพสมรสบิดา-มารดา <span class="text-red-500">*</span></label>
+            <div class="flex flex-wrap gap-3">
+                {% set ps = prefill.get('parents_status') %}
+                {% for status in ['อยู่ด้วยกัน','แยกกันอยู่','หย่าร้าง','บิดาเสียชีวิต','มารดาเสียชีวิต','ทั้งสองเสียชีวิต'] %}
+                <label class="flex items-center gap-2 px-4 py-2 border-2 border-slate-200 rounded-full text-sm text-slate-600 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-all has-[:checked]:border-blue-800 has-[:checked]:bg-blue-50 has-[:checked]:text-blue-900 has-[:checked]:font-semibold">
+                    <input type="radio" name="parents_status" value="{{ status }}" {% if ps == status %}checked{% endif %} class="accent-blue-800" required>
+                    {{ status }}
+                </label>
+                {% endfor %}
             </div>
         </div>
+        </div>
     </div>
-
     <!-- ===== 5. รายได้ครอบครัว ===== -->
     <div class="section-card">
         <div class="section-header">

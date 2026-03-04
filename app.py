@@ -16,6 +16,22 @@ from datetime import datetime, timedelta
 def create_app():
     app = Flask(__name__)
 
+    thai_months = [
+        "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.",
+        "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."
+    ]
+
+    @app.template_filter("thai_date")
+    def thai_date(value):
+        if not value:
+            return "-"
+        if not isinstance(value, datetime):
+            return str(value)
+
+        thai_year = value.year + 543
+        month = thai_months[value.month - 1]
+        return f"{value.day} {month} {thai_year} {value.strftime('%H:%M')} น."
+
     # -------------------------
     # Configuration
     # -------------------------

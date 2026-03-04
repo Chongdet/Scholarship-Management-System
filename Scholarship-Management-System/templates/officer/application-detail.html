@@ -1,0 +1,396 @@
+{% extends "base.html" %}
+
+{% block nav_links %}
+    <a href="{{ url_for('officer.applications') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ตรวจสอบเอกสาร</a>
+    <a href="{{ url_for('officer.audit_log') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">บันทึกการทำงาน</a>
+{% endblock %}
+
+{% block role_name %}เจ้าหน้าที่{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto p-6">
+    <div class="mb-4 flex items-center text-sm text-gray-500">
+        <a href="{{ url_for('officer.applications') }}" class="hover:text-blue-600 transition">กลับ</a>
+        <span class="mx-2">></span>
+        <span class="font-bold text-gray-800">รายละเอียดใบสมัคร</span>
+    </div>
+
+    <div class="mb-4 text-sm text-gray-700">
+        รายละเอียดใบสมัคร - {{ application.student_name }}
+        <span class="text-gray-400">|</span>
+        รหัสนักศึกษา: {{ application.student_id }}
+    </div>
+
+    <div class="border border-gray-300 bg-white">
+        <form method="post" action="{{ url_for('officer.decide_application', application_id=application.id) }}" id="decisionForm">
+        <div class="grid grid-cols-1 lg:grid-cols-3">
+            <!-- Left Column: Summary -->
+            <div class="p-6 border-b lg:border-b-0 lg:border-r border-gray-300">
+                <div class="text-sm text-gray-600 mb-4 border border-blue-200 bg-blue-50 rounded-lg p-4">
+                    <div class="font-semibold text-gray-800 mb-2">สถานะปัจจุบัน</div>
+                    <div class="mt-1">
+                        {% if application.status == 'pending' %}
+                        รอตรวจสอบ
+                        {% elif application.status == 'reviewing' %}
+                        กำลังตรวจสอบ
+                        {% elif application.status == 'interview' %}
+                        เรียกสัมภาษณ์
+                        {% elif application.status == 'approved' %}
+                        ผ่านแล้ว
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="text-sm text-gray-700 space-y-2 mb-4 border border-gray-200 bg-gray-50 rounded-lg p-4">
+                    <div class="font-semibold text-gray-800 mb-2">ข้อมูลส่วนตัว</div>
+                    <div>ชื่อ-นามสกุล: {{ application.student_name }}</div>
+                    <div>คณะ: {{ application.faculty }}</div>
+                    <div>GPAX: {{ application.gpa }}</div>
+                    <div>เบอร์โทรศัพท์: 081-234-5678</div>
+                    <div>อีเมล: somchai.i@email.com</div>
+                </div>
+
+                <div class="text-sm text-gray-700 space-y-2 mb-4 border border-gray-200 bg-gray-50 rounded-lg p-4">
+                    <div class="font-semibold text-gray-800 mb-2">ข้อมูลทุนที่สมัคร</div>
+                    <div>ชื่อทุน: {{ application.scholarship.name }}</div>
+                    <div>วันที่สมัคร: {{ application.application_date }}</div>
+                </div>
+
+                <div class="text-sm text-gray-700 space-y-2 border border-gray-200 bg-gray-50 rounded-lg p-4">
+                    <div class="font-semibold text-gray-800 mb-2">ข้อมูลเพิ่มเติม</div>
+                    <div>{{ application.notes or 'เป็นนักศึกษาที่มีความขยันหมั่นเพียร ต้องการทุนการศึกษาเพื่อบรรเทาภาระค่าใช้จ่ายของครอบครัว' }}</div>
+                </div>
+            </div>
+
+            <!-- Middle Column: Documents -->
+            <div class="p-6 border-b lg:border-b-0 lg:border-r border-gray-300">
+                <div class="font-semibold text-gray-800 mb-3">เอกสารประกอบ (3)</div>
+                <div class="space-y-3">
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-3 hover:bg-blue-100 transition cursor-pointer doc-item" data-doc="transcript" data-doc-name="ใบระเบียนผลการเรียน" onclick="viewDocument(this)">
+                        <div class="flex-1 text-gray-800">📄 ใบระเบียนผลการเรียน</div>
+                        <label class="flex items-center gap-2 text-sm text-gray-700" onclick="event.stopPropagation()">
+                            <input type="checkbox" name="doc_transcript" required class="w-4 h-4 accent-blue-600">
+                            <span class="doc-status" data-unchecked="ตรวจสอบ" data-checked="ตรวจสอบแล้ว">ตรวจสอบ</span>
+                        </label>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-3 hover:bg-blue-100 transition cursor-pointer doc-item" data-doc="idcard" data-doc-name="สำเนาบัตรประชาชน" onclick="viewDocument(this)">
+                        <div class="flex-1 text-gray-800">🪪 สำเนาบัตรประชาชน</div>
+                        <label class="flex items-center gap-2 text-sm text-gray-700" onclick="event.stopPropagation()">
+                            <input type="checkbox" name="doc_idcard" required class="w-4 h-4 accent-blue-600">
+                            <span class="doc-status" data-unchecked="ตรวจสอบ" data-checked="ตรวจสอบแล้ว">ตรวจสอบ</span>
+                        </label>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-3 hover:bg-blue-100 transition cursor-pointer doc-item" data-doc="house" data-doc-name="รูปถ่ายบ้าน" onclick="viewDocument(this)">
+                        <div class="flex-1 text-gray-800">🏠 รูปถ่ายบ้าน</div>
+                        <label class="flex items-center gap-2 text-sm text-gray-700" onclick="event.stopPropagation()">
+                            <input type="checkbox" name="doc_house" required class="w-4 h-4 accent-blue-600">
+                            <span class="doc-status" data-unchecked="ตรวจสอบ" data-checked="ตรวจสอบแล้ว">ตรวจสอบ</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Photo -->
+            <div class="p-6">
+                <div class="font-semibold text-gray-800 mb-3" id="imageTitle">แสดงรูปภาพ</div>
+                <div id="imageViewer" class="bg-gray-200 h-64 flex items-center justify-center text-gray-400 border border-gray-300 rounded-lg overflow-hidden">
+                    <div class="text-center">
+                        <div class="text-4xl mb-2">👆</div>
+                        <div>คลิกที่เอกสารเพื่อดูรูปภาพ</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <input type="hidden" name="decision" id="decisionValue" value="">
+        {% if application.status == 'interview' or application.status == 'approved' %}
+        <div class="p-6 border-t border-gray-300 bg-blue-50">
+            <div class="text-center py-4">
+                <div class="text-blue-700 font-semibold text-lg mb-2">
+                    {% if application.status == 'interview' %}
+                    ✓ ใบสมัครนี้อยู่ในสถานะ "เรียกสัมภาษณ์" แล้ว
+                    {% elif application.status == 'approved' %}
+                    ✓ ใบสมัครนี้ได้รับการอนุมัติแล้ว
+                    {% endif %}
+                </div>
+                <div class="text-gray-600 text-sm">ไม่สามารถดำเนินการเพิ่มเติมได้</div>
+            </div>
+        </div>
+        {% else %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 border-t border-gray-300 bg-gray-50">
+            <button type="button" id="openRejectModal" class="w-full text-center py-3 rounded-full bg-red-500 hover:bg-red-600 text-white font-medium transition shadow-sm hover:shadow-md">ปฏิเสธใบสมัคร</button>
+            <button type="button" id="openInterviewModal" class="w-full text-center py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium transition shadow-sm hover:shadow-md">อนุมัติและนัดสัมภาษณ์</button>
+        </div>
+        {% endif %}
+
+        <div id="rejectModal" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
+            <div class="bg-white w-full max-w-2xl rounded-2xl shadow-lg p-6">
+                <div class="text-lg font-semibold text-gray-800">ปฏิเสธใบสมัคร</div>
+                <div class="text-sm text-gray-600 mt-1">กรุณาระบุเหตุผลในการปฏิเสธใบสมัครของ {{ application.student_name }}</div>
+
+                <div class="mt-5">
+                    <label class="text-sm font-medium text-gray-700">เหตุผลในการปฏิเสธ *</label>
+                    <textarea name="reject_reason" rows="5" class="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg" required></textarea>
+                </div>
+
+                <p class="text-xs text-gray-500 mt-4">หมายเหตุ: เมื่อบันทึกแล้ว ระบบจะแจ้งเหตุผลให้นักศึกษาทราบโดยอัตโนมัติ</p>
+
+                <div class="mt-6 flex justify-between gap-3">
+                    <button type="button" id="closeRejectModal" class="px-4 py-2 rounded-full bg-gray-200 text-gray-700">ยกเลิก</button>
+                    <button type="button" id="confirmRejectButton" class="px-4 py-2 rounded-full bg-gray-300 text-gray-800">ยืนยันการปฏิเสธ</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="interviewModal" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
+            <div class="bg-white w-full max-w-xl rounded-2xl shadow-lg p-6">
+                <div class="text-lg font-semibold text-gray-800">อนุมัติและนัดสัมภาษณ์</div>
+                <div class="text-sm text-gray-600 mt-1">กรอกข้อมูลการนัดสัมภาษณ์สำหรับ {{ application.student_name }}</div>
+
+                <div class="mt-5 space-y-4">
+                    <div>
+                        <label class="text-sm font-medium text-gray-700">วันที่สัมภาษณ์</label>
+                        <input type="date" name="interview_date" class="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg" required>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-700">เวลา</label>
+                        <input type="time" name="interview_time" class="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg" required>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-700">สถานที่</label>
+                        <input type="text" name="interview_location" class="mt-2 w-full px-4 py-2 border border-gray-300 rounded-lg" required>
+                    </div>
+                </div>
+
+                <p class="text-xs text-gray-500 mt-4">หมายเหตุ: เมื่อบันทึกแล้ว สถานะจะเปลี่ยนเป็น “เรียกสัมภาษณ์”</p>
+
+                <div class="mt-6 flex justify-between gap-3">
+                    <button type="button" id="closeInterviewModal" class="px-4 py-2 rounded-full bg-gray-200 text-gray-700">ยกเลิก</button>
+                    <button type="button" id="confirmInterviewButton" class="px-4 py-2 rounded-full bg-gray-300 text-gray-800">ยืนยันการนัดสัมภาษณ์</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="confirmModal" class="fixed inset-0 hidden items-center justify-center bg-black/40 p-4">
+            <div class="bg-white w-full max-w-lg rounded-2xl shadow-lg p-6">
+                <div class="text-lg font-semibold text-gray-800" id="confirmTitle">ยืนยันการทำรายการ</div>
+                <div class="text-sm text-gray-600 mt-2" id="confirmMessage">คุณต้องการยืนยันการทำรายการนี้หรือไม่</div>
+
+                <div class="mt-4 text-sm text-gray-600">
+                    ยืนยันภายใน <span id="confirmCountdown" class="font-semibold text-gray-800">10</span> วินาที
+                </div>
+
+                <div class="mt-6 flex justify-between gap-3">
+                    <button type="button" id="cancelConfirmButton" class="px-4 py-2 rounded-full bg-gray-200 text-gray-700">ยกเลิก</button>
+                    <button type="button" id="submitConfirmButton" class="px-4 py-2 rounded-full bg-gray-300 text-gray-800 flex items-center gap-2">
+                        <span class="confirm-text">ยืนยัน</span>
+                        <span class="confirm-loading hidden">กำลังส่ง...</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Image viewer function
+    const documentImages = {
+        'transcript': 'https://via.placeholder.com/400x300/3B82F6/FFFFFF?text=ใบระเบียนผลการเรียน',
+        'idcard': 'https://via.placeholder.com/400x300/10B981/FFFFFF?text=สำเนาบัตรประชาชน',
+        'house': 'https://via.placeholder.com/400x300/8B5CF6/FFFFFF?text=รูปถ่ายบ้าน'
+    };
+
+    function viewDocument(element) {
+        const docType = element.dataset.doc;
+        const docName = element.dataset.docName;
+        const imageViewer = document.getElementById('imageViewer');
+        const imageTitle = document.getElementById('imageTitle');
+        
+        // Remove active class from all documents
+        document.querySelectorAll('.doc-item').forEach(item => {
+            item.classList.remove('ring-2', 'ring-blue-500');
+        });
+        
+        // Add active class to clicked document
+        element.classList.add('ring-2', 'ring-blue-500');
+        
+        // Update title
+        imageTitle.textContent = docName;
+        
+        // Update image
+        imageViewer.innerHTML = `<img src="${documentImages[docType]}" alt="${docName}" class="w-full h-full object-contain">`;
+    }
+
+    const modal = document.getElementById('interviewModal');
+    const openBtn = document.getElementById('openInterviewModal');
+    const closeBtn = document.getElementById('closeInterviewModal');
+    const rejectModal = document.getElementById('rejectModal');
+    const openRejectBtn = document.getElementById('openRejectModal');
+    const closeRejectBtn = document.getElementById('closeRejectModal');
+    const confirmRejectButton = document.getElementById('confirmRejectButton');
+    const confirmInterviewButton = document.getElementById('confirmInterviewButton');
+    const decisionValue = document.getElementById('decisionValue');
+    const confirmModal = document.getElementById('confirmModal');
+    const confirmTitle = document.getElementById('confirmTitle');
+    const confirmMessage = document.getElementById('confirmMessage');
+    const confirmCountdown = document.getElementById('confirmCountdown');
+    const cancelConfirmButton = document.getElementById('cancelConfirmButton');
+    const submitConfirmButton = document.getElementById('submitConfirmButton');
+    const confirmText = submitConfirmButton.querySelector('.confirm-text');
+    const confirmLoading = submitConfirmButton.querySelector('.confirm-loading');
+    const docInputs = Array.from(document.querySelectorAll('input[name^="doc_"]'));
+    let confirmTimer = null;
+    let remainingSeconds = 10;
+
+    const updateDocLabels = () => {
+        docInputs.forEach((input) => {
+            const label = input.closest('label');
+            const textEl = label ? label.querySelector('.doc-status') : null;
+            if (!textEl) {
+                return;
+            }
+            textEl.textContent = input.checked
+                ? textEl.dataset.checked
+                : textEl.dataset.unchecked;
+        });
+    };
+
+    updateDocLabels();
+    docInputs.forEach((input) => input.addEventListener('change', updateDocLabels));
+
+    const canProceed = () => {
+        const allChecked = docInputs.every((input) => input.checked);
+        if (!allChecked) {
+            const firstUnchecked = docInputs.find((input) => !input.checked);
+            if (firstUnchecked) {
+                firstUnchecked.reportValidity();
+                firstUnchecked.focus();
+            }
+            return false;
+        }
+        return true;
+    };
+
+    const openConfirm = (titleText, messageText, decision) => {
+        decisionValue.value = decision;
+        confirmTitle.textContent = titleText;
+        confirmMessage.textContent = messageText;
+        remainingSeconds = 10;
+        confirmCountdown.textContent = String(remainingSeconds);
+        confirmText.classList.remove('hidden');
+        confirmLoading.classList.add('hidden');
+        submitConfirmButton.disabled = false;
+
+        if (confirmTimer) {
+            clearInterval(confirmTimer);
+        }
+        confirmTimer = setInterval(() => {
+            remainingSeconds -= 1;
+            confirmCountdown.textContent = String(remainingSeconds);
+            if (remainingSeconds <= 0) {
+                closeConfirm();
+            }
+        }, 1000);
+
+        confirmModal.classList.remove('hidden');
+        confirmModal.classList.add('flex');
+    };
+
+    const closeConfirm = () => {
+        if (confirmTimer) {
+            clearInterval(confirmTimer);
+            confirmTimer = null;
+        }
+        confirmModal.classList.add('hidden');
+        confirmModal.classList.remove('flex');
+    };
+
+    openBtn.addEventListener('click', () => {
+        if (!canProceed()) {
+            return;
+        }
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    });
+
+    openRejectBtn.addEventListener('click', () => {
+        if (!canProceed()) {
+            return;
+        }
+        rejectModal.classList.remove('hidden');
+        rejectModal.classList.add('flex');
+    });
+
+    closeBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    });
+
+    closeRejectBtn.addEventListener('click', () => {
+        rejectModal.classList.add('hidden');
+        rejectModal.classList.remove('flex');
+    });
+
+    confirmRejectButton.addEventListener('click', () => {
+        const rejectReason = document.querySelector('textarea[name="reject_reason"]');
+        if (rejectReason && !rejectReason.checkValidity()) {
+            rejectReason.reportValidity();
+            rejectReason.focus();
+            return;
+        }
+        rejectModal.classList.add('hidden');
+        rejectModal.classList.remove('flex');
+        openConfirm('ยืนยันการปฏิเสธ', 'คุณต้องการยืนยันการปฏิเสธใบสมัครหรือไม่', 'pending');
+    });
+
+    confirmInterviewButton.addEventListener('click', () => {
+        const dateInput = document.querySelector('input[name="interview_date"]');
+        const timeInput = document.querySelector('input[name="interview_time"]');
+        const locationInput = document.querySelector('input[name="interview_location"]');
+        const inputs = [dateInput, timeInput, locationInput].filter(Boolean);
+        const invalidInput = inputs.find((input) => !input.checkValidity());
+        if (invalidInput) {
+            invalidInput.reportValidity();
+            invalidInput.focus();
+            return;
+        }
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        openConfirm('ยืนยันการอนุมัติ', 'คุณต้องการยืนยันการนัดสัมภาษณ์หรือไม่', 'interview');
+    });
+
+    cancelConfirmButton.addEventListener('click', () => {
+        closeConfirm();
+    });
+
+    submitConfirmButton.addEventListener('click', () => {
+        submitConfirmButton.disabled = true;
+        confirmText.classList.add('hidden');
+        confirmLoading.classList.remove('hidden');
+        document.getElementById('decisionForm').submit();
+    });
+
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    });
+
+    rejectModal.addEventListener('click', (event) => {
+        if (event.target === rejectModal) {
+            rejectModal.classList.add('hidden');
+            rejectModal.classList.remove('flex');
+        }
+    });
+
+    confirmModal.addEventListener('click', (event) => {
+        if (event.target === confirmModal) {
+            closeConfirm();
+        }
+    });
+</script>
+
+{% endblock %}
+

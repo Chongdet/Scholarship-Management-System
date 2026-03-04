@@ -458,6 +458,7 @@
             <div class="field-group"><span class="field-label">อาชีพ</span><input type="text" name="father_job" value="{{ v(student.father_job) }}" placeholder="อาชีพ" class="editable-input" readonly></div>
             <div class="g2">
               <div class="field-group"><span class="field-label">รายได้ / เดือน (฿)</span><input type="number" name="father_income" value="{{ v(student.father_income) }}" placeholder="0" class="editable-input" readonly></div>
+              <div class="field-group"><span class="field-label">ส่งให้ผู้สมัคร / เดือน (฿) <span class="field-note">(แก้ไขได้ที่ข้อ 4)</span></span><input type="number" value="{{ v(student.inc_father) }}" placeholder="0" class="locked" readonly tabindex="-1"></div>
             </div>
             <div class="field-group"><span class="field-label">ปัญหาสุขภาพ</span><input type="text" name="father_health" value="{{ v(student.father_health) }}" placeholder="ปัญหาสุขภาพ (ถ้ามี)" class="editable-input" readonly></div>
           </div>

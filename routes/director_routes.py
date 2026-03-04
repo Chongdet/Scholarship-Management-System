@@ -21,15 +21,14 @@ def scoring():
     # สร้าง List ข้อมูลใหม่เพื่อคำนวณจำนวนผู้สมัคร
     scholarship_list = []
     for sch in scholarships:
-        # นับจำนวนผู้สมัครทั้งหมดของทุนนี้
-        total_applicants = Application.query.filter_by(scholarship_id=sch.id).count()
-        # นับจำนวนคนที่ผ่านเอกสาร (สมมติว่าเช็คจาก gpa ว่ามีข้อมูลแล้ว)
-        passed_docs = Application.query.filter_by(scholarship_id=sch.id).count()
+        # ใช้ scholarship_id เป็นกุญแจหลัก
+        total_applicants = Application.query.filter_by(scholarship_id=sch.scholarship_id).count()
+        passed_docs = Application.query.filter_by(scholarship_id=sch.scholarship_id).count()
 
         scholarship_list.append(
             {
-                "id": sch.id,
-                "name": sch.name,
+                "scholarship_id": sch.scholarship_id,
+                "scholarship_name": sch.scholarship_name,
                 "total_applicants": total_applicants,
                 "passed_docs": passed_docs,
             }
@@ -41,7 +40,7 @@ def scoring():
 # ==========================================
 # 2. หน้าแสดงรายชื่อนักศึกษา (แยกตามทุน)
 # ==========================================
-@director_bp.route("/scoring/<int:scholarship_id>")
+@director_bp.route("/scoring/<scholarship_id>")
 def scholarship_students(scholarship_id):
     # ดึงข้อมูลทุนเพื่อเอาชื่อทุนมาแสดง
     sch = Scholarship.query.get_or_404(scholarship_id)
@@ -51,7 +50,7 @@ def scholarship_students(scholarship_id):
     return render_template(
         "director/scoring_students.html",
         scholarship_id=scholarship_id,
-        scholarship_name=sch.name,
+        scholarship_name=sch.scholarship_name,
         candidates=candidates,
     )
 

@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -176,7 +177,7 @@ class Student(db.Model):
 class Scholarship(db.Model):
     __tablename__ = 'scholarship'
     id = db.Column(db.Integer, primary_key=True)
-    name   = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
     amount = db.Column(db.Float, nullable=True)
 
     # --- เงื่อนไขการรับสมัคร ---
@@ -190,22 +191,48 @@ class Scholarship(db.Model):
     criteria     = db.relationship('Criterion',   backref='scholarship', lazy=True)
     applications = db.relationship('Application', backref='scholarship', lazy=True)
 
+    def is_open(self):
+        """เช็คว่าทุนเปิดอยู่และยังไม่หมดเขต"""
+        now = datetime.now()
+        if self.status != "Open":
+            return False
+        if self.start_date and self.end_date:
+            return self.start_date <= now <= self.end_date
+        return True
+
+    def __repr__(self):
+        return f"<Scholarship {self.scholarship_name}>"
+
 # 2.2 ข้อมูลใบสมัคร
 class Application(db.Model):
     __tablename__ = 'application'
-    id             = db.Column(db.Integer, primary_key=True)
-    student_id     = db.Column(db.String(20), nullable=False)
-    student_name   = db.Column(db.String(100))
-    faculty        = db.Column(db.String(100))
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.String(20), nullable=False)
+    student_name = db.Column(db.String(100))
+    faculty = db.Column(db.String(100)) # <--- คงไว้ตามที่คุณเพิ่มมา
     scholarship_id = db.Column(db.Integer, db.ForeignKey('scholarship.id'))
-    status         = db.Column(db.String(20), default='pending')
-    reviewing_by   = db.Column(db.String(50))
-    reviewing_at   = db.Column(db.DateTime)
+    status = db.Column(db.String(20), default='pending')
+    reviewing_by = db.Column(db.String(50))
+    reviewing_at = db.Column(db.DateTime)
 
-# 2.3 เกณฑ์คะแนน
+# 2.3 บันทึกการทำงาน (Audit Log) - จากฝั่ง main
+class AuditLog(db.Model):
+    __tablename__ = 'audit_log'
+    id = db.Column(db.Integer, primary_key=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    officer_username = db.Column(db.String(50), nullable=False)  # ชื่อ/รหัสเจ้าหน้าที่
+    officer_label = db.Column(db.String(50), nullable=True)      # ฉายาแสดง เช่น เจ้าหน้าที่(A)
+    action = db.Column(db.String(50), nullable=False)            # ชนิดการทำงาน
+    action_title = db.Column(db.String(100), nullable=True)      # ชื่อการกระทำภาษาไทย 
+    reference_id = db.Column(db.String(30), nullable=True)       # รหัสอ้างอิง เช่น APP345, SCH001
+    details = db.Column(db.String(500))                          # คำอธิบายรายละเอียด
+    status_after = db.Column(db.String(100), nullable=True)      # สถานะหลังแก้ไข/ปัจจุบัน 
+    previous_value = db.Column(db.String(200), nullable=True)    # ค่าเดิมก่อนแก้ไข 
+
+# 2.4 เกณฑ์คะแนน
 class Criterion(db.Model):
     __tablename__ = 'criterion'
-    id             = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     scholarship_id = db.Column(db.Integer, db.ForeignKey('scholarship.id'))
-    name           = db.Column(db.String(100))
-    max_score      = db.Column(db.Integer)
+    name = db.Column(db.String(100))
+    max_score = db.Column(db.Integer)

@@ -36,82 +36,120 @@ class Director(db.Model):
         return check_password_hash(self.password_hash, password)
 
 # 1.3 ข้อมูลนักศึกษา (Student)
-# models.py (เฉพาะส่วนของ Student)
 class Student(db.Model):
     __tablename__ = 'student'
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.String(20), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=True)
     name = db.Column(db.String(100), nullable=False)
-    
+
     # --- 1. ข้อมูลส่วนตัวและการติดต่อ ---
-    citizen_id = db.Column(db.String(13))       # [REG]
-    address_domicile = db.Column(db.Text)       # [REG]
-    email = db.Column(db.String(100))           # [REG]
-    mobile = db.Column(db.String(20))           # [REG/Editable]
-    address_current = db.Column(db.Text)        # [Self]
-    facebook = db.Column(db.String(100))        # [Self]
-    line_id = db.Column(db.String(100))         # [Self]
+    citizen_id       = db.Column(db.String(13))   # [REG]
+    address_domicile = db.Column(db.Text)          # [REG]
+    email            = db.Column(db.String(100))   # [REG]
+    mobile           = db.Column(db.String(20))    # [REG/Editable]
+    address_current  = db.Column(db.Text)          # [Self]
+    facebook         = db.Column(db.String(100))   # [Self]
+    line_id          = db.Column(db.String(100))   # [Self]
 
     # --- 2. ข้อมูลการศึกษา [ดึงจาก REG ทั้งหมด] ---
-    faculty = db.Column(db.String(100))
-    year = db.Column(db.String(10))             # เช่น "ปี 1"
-    gpax = db.Column(db.Float)
-    advisor_name = db.Column(db.String(100))
-    disciplinary_status = db.Column(db.String(50))
+    faculty              = db.Column(db.String(100))
+    year                 = db.Column(db.String(10))   # เช่น "ปี 1"
+    gpax                 = db.Column(db.Float)
+    advisor_name         = db.Column(db.String(100))
+    disciplinary_status  = db.Column(db.String(50))
 
     # --- 3. ข้อมูลครอบครัว ---
-    father_name = db.Column(db.String(100))     # [REG]
-    mother_name = db.Column(db.String(100))     # [REG]
-    
-    father_job = db.Column(db.String(100))      # [Self]
-    father_income = db.Column(db.Float)         # [Self]
-    inc_father = db.Column(db.Float)            # [Self] เงินที่บิดาส่งให้ [NEW]
-    father_health = db.Column(db.Text)          # [Self]
-    
-    mother_job = db.Column(db.String(100))      # [Self]
-    mother_income = db.Column(db.Float)         # [Self]
-    inc_mother = db.Column(db.Float)            # [Self] เงินที่มารดาส่งให้ [NEW]
-    mother_health = db.Column(db.Text)          # [Self] ปัญหาสุขภาพมารดา [NEW]
-    
-    parents_status = db.Column(db.String(50))   # [Self]
-    
-    # ข้อมูลที่อยู่อาศัย (ขยายเพิ่ม)
-    housing_status = db.Column(db.String(100))  # [Self]
-    rent_amount = db.Column(db.Float)           # [Self] ค่าเช่าบ้าน [NEW]
-    housing_other = db.Column(db.String(100))   # [Self] ระบุที่อยู่อาศัยอื่นๆ [NEW]
-    
-    # ข้อมูลที่ดินเกษตร (ขยายเพิ่ม)
-    land_status = db.Column(db.String(100))     # [Self]
-    agri_own_amount = db.Column(db.Float)       # [Self] จำนวนที่ดินตัวเอง (ไร่) [NEW]
-    agri_rent_amount = db.Column(db.Float)      # [Self] จำนวนที่ดินเช่า (ไร่) [NEW]
-    agri_rent_cost = db.Column(db.Float)        # [Self] ค่าเช่าที่ดิน (บาท/เดือน) [NEW]
-    agri_other_detail = db.Column(db.String(100)) # [Self] ระบุอาศัยที่ดินผู้อื่น [NEW]
+    father_name   = db.Column(db.String(100))  # [REG]
+    mother_name   = db.Column(db.String(100))  # [REG]
 
-    # ข้อมูลผู้อุปการะ (กรณีไม่ใช่บิดามารดา) [NEW]
-    guardian_name = db.Column(db.String(100))     # [Self] [NEW]
-    guardian_relation = db.Column(db.String(50))  # [Self] [NEW]
-    guardian_job = db.Column(db.String(100))      # [Self] [NEW]
-    guardian_income = db.Column(db.Float)         # [Self] [NEW]
-    
-    siblings_list = db.Column(db.JSON)          # [Self] เก็บเป็น JSON
+    father_job    = db.Column(db.String(100))  # [Self]
+    father_income = db.Column(db.Float)        # [Self] รายได้บิดา/เดือน
+    inc_father    = db.Column(db.Float)        # [Self] เงินที่บิดาส่งให้/เดือน
+    father_health = db.Column(db.Text)         # [Self]
 
-    # --- 4. สถานะทางการเงินของนักศึกษา ---
-    monthly_allowance = db.Column(db.Float)     # [Self] เงินที่ได้รับต่อเดือน
-    loan_student_fund = db.Column(db.Boolean)   # [Self] สถานะ กยศ.
-    loan_type = db.Column(db.String(100))       # [Self] ประเภทการกู้
-    scholarship_history = db.Column(db.JSON)    # [Self] ประวัติรับทุน
+    mother_job    = db.Column(db.String(100))  # [Self]
+    mother_income = db.Column(db.Float)        # [Self] รายได้มารดา/เดือน
+    inc_mother    = db.Column(db.Float)        # [Self] เงินที่มารดาส่งให้/เดือน
+    mother_health = db.Column(db.Text)         # [Self] ปัญหาสุขภาพมารดา
 
-    # --- 5. ข้อมูลคำนวณและสถานะระบบ (ส่วนที่เพิ่มใหม่) ---
-    profile_completeness = db.Column(db.Integer, default=0) # คะแนนความสมบูรณ์ของโปรไฟล์ (0-100)
-    total_family_income = db.Column(db.Float, default=0.0)  # รายได้รวมครอบครัว (คำนวณอัตโนมัติ)
-    financial_hardship_score = db.Column(db.Float, default=0.0) # ดัชนีความลำบากทางการเงิน (0-1)
-    is_profile_locked = db.Column(db.Boolean, default=False) # ล็อกโปรไฟล์หลังส่งใบสมัคร
+    parents_status = db.Column(db.String(50))  # [Self]
 
+    # ข้อมูลที่อยู่อาศัย
+    housing_status = db.Column(db.String(100)) # [Self]
+    rent_amount    = db.Column(db.Float)        # [Self] ค่าเช่าบ้าน/เดือน
+    housing_other  = db.Column(db.String(100)) # [Self] ระบุที่อยู่อาศัยอื่นๆ
+
+    # ข้อมูลที่ดินเกษตร
+    land_status       = db.Column(db.String(100))  # [Self]
+    agri_own_amount   = db.Column(db.Float)         # [Self] จำนวนที่ดินตัวเอง (ไร่)
+    agri_rent_amount  = db.Column(db.Float)         # [Self] จำนวนที่ดินเช่า (ไร่)
+    agri_rent_cost    = db.Column(db.Float)         # [Self] ค่าเช่าที่ดิน (บาท/เดือน)
+    agri_other_detail = db.Column(db.String(100))   # [Self] ระบุอาศัยที่ดินผู้อื่น
+
+    # ข้อมูลผู้อุปการะ (กรณีไม่ใช่บิดามารดา)
+    guardian_name     = db.Column(db.String(100))  # [Self]
+    guardian_relation = db.Column(db.String(50))   # [Self]
+    guardian_job      = db.Column(db.String(100))  # [Self]
+    guardian_income   = db.Column(db.Float)         # [Self]
+
+    siblings_list = db.Column(db.JSON)  # [Self] เก็บเป็น JSON
+
+    # --- 4. รายได้และค่าใช้จ่ายนักศึกษาต่อเดือน ---
+    # รายได้ที่นักศึกษาได้รับ
+    inc_guardian    = db.Column(db.Float)  # [Self] ได้รับจากผู้อุปการะ
+    inc_scholarship = db.Column(db.Float)  # [Self] ได้รับจากทุนการศึกษา (เฉลี่ยรายเดือน)
+    inc_parttime    = db.Column(db.Float)  # [Self] ได้รับจากการทำงาน Part time
+
+    # ค่าใช้จ่ายนักศึกษา
+    exp_food        = db.Column(db.Float)  # [Self] ค่าอาหาร
+    exp_dorm        = db.Column(db.Float)  # [Self] ค่าหอพัก
+    exp_transport   = db.Column(db.Float)  # [Self] ค่าพาหนะ/เดินทาง
+    exp_other       = db.Column(db.Float)  # [Self] ค่าใช้จ่ายอื่นๆ
+
+    # --- 5. สถานะ กยศ. และทุนการศึกษา ---
+    monthly_allowance  = db.Column(db.Float)        # [Self] เงินที่ได้รับต่อเดือน (รวม)
+    loan_student_fund  = db.Column(db.Boolean)      # [Self] สถานะ กยศ.
+    loan_type          = db.Column(db.String(100))  # [Self] ประเภทการกู้
+    scholarship_history = db.Column(db.JSON)        # [Self] ประวัติรับทุน
+
+    # --- 6. ข้อมูลคำนวณและสถานะระบบ ---
+    profile_completeness    = db.Column(db.Integer, default=0)    # คะแนนความสมบูรณ์ของโปรไฟล์ (0-100)
+    total_family_income     = db.Column(db.Float,   default=0.0)  # รายได้รวมครอบครัว (คำนวณอัตโนมัติ)
+    financial_hardship_score = db.Column(db.Float,  default=0.0)  # ดัชนีความลำบากทางการเงิน (0-1)
+    is_profile_locked       = db.Column(db.Boolean, default=False) # ล็อกโปรไฟล์หลังส่งใบสมัคร
+
+    # ──────────────────────────────────────────────────────────────
     def calculate_total_income(self):
-        """คำนวณรายได้รวมจาก บิดา + มารดา + ผู้อุปการะ"""
-        total = (self.father_income or 0.0) + (self.mother_income or 0.0) + (self.guardian_income or 0.0)
+        """คำนวณรายได้รวมครอบครัว: บิดา + มารดา + ผู้อุปการะ"""
+        total = (
+            (self.father_income   or 0.0) +
+            (self.mother_income   or 0.0) +
+            (self.guardian_income or 0.0)
+        )
         self.total_family_income = total
+        return total
+
+    def calculate_student_income(self):
+        """คำนวณรายได้รวมที่นักศึกษาได้รับต่อเดือน"""
+        total = (
+            (self.inc_father      or 0.0) +
+            (self.inc_mother      or 0.0) +
+            (self.inc_guardian    or 0.0) +
+            (self.inc_scholarship or 0.0) +
+            (self.inc_parttime    or 0.0)
+        )
+        self.monthly_allowance = total
+        return total
+
+    def calculate_student_expense(self):
+        """คำนวณค่าใช้จ่ายรวมของนักศึกษาต่อเดือน"""
+        total = (
+            (self.exp_food      or 0.0) +
+            (self.exp_dorm      or 0.0) +
+            (self.exp_transport or 0.0) +
+            (self.exp_other     or 0.0)
+        )
         return total
 
     def update_completeness(self):
@@ -138,36 +176,36 @@ class Student(db.Model):
 class Scholarship(db.Model):
     __tablename__ = 'scholarship'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    name   = db.Column(db.String(100), nullable=False)
     amount = db.Column(db.Float, nullable=True)
-    
-    # --- เงื่อนไขการรับสมัคร (ส่วนที่เพิ่มใหม่) ---
-    start_date = db.Column(db.DateTime)       # วันที่เริ่มเปิดรับ
-    end_date = db.Column(db.DateTime)         # วันที่ปิดรับ
-    faculty_condition = db.Column(db.String(255)) # คณะที่ระบุ (เช่น "วิทยาศาสตร์") หรือ "ทุกคณะ"
-    min_gpax = db.Column(db.Float, default=0.0)   # เกรดเฉลี่ยขั้นต่ำ
-    income_cap = db.Column(db.Float)          # รายได้ครอบครัวไม่เกินเท่าไหร่
-    quota = db.Column(db.Integer)             # จำนวนที่เปิดรับ (ถ้ามี)
 
-    criteria = db.relationship('Criterion', backref='scholarship', lazy=True)
+    # --- เงื่อนไขการรับสมัคร ---
+    start_date        = db.Column(db.DateTime)          # วันที่เริ่มเปิดรับ
+    end_date          = db.Column(db.DateTime)          # วันที่ปิดรับ
+    faculty_condition = db.Column(db.String(255))       # คณะที่ระบุ หรือ "ทุกคณะ"
+    min_gpax          = db.Column(db.Float, default=0.0) # เกรดเฉลี่ยขั้นต่ำ
+    income_cap        = db.Column(db.Float)             # รายได้ครอบครัวไม่เกิน
+    quota             = db.Column(db.Integer)           # จำนวนที่เปิดรับ
+
+    criteria     = db.relationship('Criterion',   backref='scholarship', lazy=True)
     applications = db.relationship('Application', backref='scholarship', lazy=True)
 
 # 2.2 ข้อมูลใบสมัคร
 class Application(db.Model):
     __tablename__ = 'application'
-    id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.String(20), nullable=False)
-    student_name = db.Column(db.String(100))
-    faculty = db.Column(db.String(100)) # <--- คงไว้ตามที่คุณเพิ่มมา
+    id             = db.Column(db.Integer, primary_key=True)
+    student_id     = db.Column(db.String(20), nullable=False)
+    student_name   = db.Column(db.String(100))
+    faculty        = db.Column(db.String(100))
     scholarship_id = db.Column(db.Integer, db.ForeignKey('scholarship.id'))
-    status = db.Column(db.String(20), default='pending')
-    reviewing_by = db.Column(db.String(50))
-    reviewing_at = db.Column(db.DateTime)
+    status         = db.Column(db.String(20), default='pending')
+    reviewing_by   = db.Column(db.String(50))
+    reviewing_at   = db.Column(db.DateTime)
 
 # 2.3 เกณฑ์คะแนน
 class Criterion(db.Model):
     __tablename__ = 'criterion'
-    id = db.Column(db.Integer, primary_key=True)
+    id             = db.Column(db.Integer, primary_key=True)
     scholarship_id = db.Column(db.Integer, db.ForeignKey('scholarship.id'))
-    name = db.Column(db.String(100))
-    max_score = db.Column(db.Integer)
+    name           = db.Column(db.String(100))
+    max_score      = db.Column(db.Integer)

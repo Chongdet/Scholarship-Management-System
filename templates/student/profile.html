@@ -61,6 +61,7 @@
   .s-icon.teal   { background:linear-gradient(135deg,#ccfbf1,#99f6e4); }
   .s-icon.purple { background:linear-gradient(135deg,#ede9fe,#ddd6fe); }
   .s-icon.rose   { background:linear-gradient(135deg,#ffe4e6,#fecdd3); }
+  .s-icon.green  { background:linear-gradient(135deg,#d1fae5,#a7f3d0); }
   .s-title { font-family:'Prompt',sans-serif; font-size:.95rem; font-weight:600; color:var(--navy); }
   .s-badge { font-size:.68rem; background:#f1f5f9; color:var(--slate); border-radius:99px; padding:2px 10px; font-weight:600; margin-left:auto; letter-spacing:.03em; }
 
@@ -130,6 +131,39 @@
   .hist-table thead th { background:#f1f5f9; color:var(--navy2); font-weight:700; padding:10px 14px; font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; text-align:left; }
   .hist-table tbody td { padding:18px 14px; color:#94a3b8; text-align:center; }
 
+  /* Income summary box */
+  .income-summary {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border: 1.5px solid #bbf7d0;
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .income-summary .label { font-size:.78rem; font-weight:600; color:#166534; }
+  .income-summary .amount { font-size:1rem; font-weight:700; color:#15803d; font-family:'Prompt',sans-serif; }
+  .expense-summary {
+    background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+    border: 1.5px solid #fed7aa;
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .expense-summary .label { font-size:.78rem; font-weight:600; color:#9a3412; }
+  .expense-summary .amount { font-size:1rem; font-weight:700; color:#c2410c; font-family:'Prompt',sans-serif; }
+
+  /* Hidden utility */
+  .hidden { display:none !important; }
+
   /* Buttons */
   .btn-edit { display:flex; align-items:center; gap:8px; background:linear-gradient(135deg,#f5a623,#f59e0b); color:var(--navy); font-weight:700; font-size:.875rem; padding:10px 26px; border-radius:99px; border:none; cursor:pointer; box-shadow:0 2px 8px rgba(245,166,35,.4); transition:all .2s; font-family:'Prompt',sans-serif; }
   .btn-edit:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(245,166,35,.5); }
@@ -138,6 +172,8 @@
   .btn-save[disabled] { opacity:.42; cursor:not-allowed; }
   .btn-add { display:flex; align-items:center; gap:5px; background:#dcfce7; color:#166534; font-weight:600; font-size:.78rem; padding:6px 14px; border-radius:8px; border:1.5px solid #bbf7d0; cursor:pointer; transition:all .15s; font-family:'Sarabun',sans-serif; }
   .btn-add:hover { background:#bbf7d0; }
+  .btn-del-sib { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:6px; border:1.5px solid #fecaca; background:#fff1f2; color:#ef4444; cursor:pointer; transition:all .15s; padding:0; }
+  .btn-del-sib:hover { background:#fee2e2; border-color:#f87171; transform:scale(1.1); }
   .btn-pg { padding:6px 13px; border-radius:8px; font-size:.78rem; font-weight:600; border:1.5px solid #e2e8f0; cursor:pointer; transition:all .15s; font-family:'Sarabun',sans-serif; }
   .btn-pg.prev { background:#f1f5f9; color:var(--slate); }
   .btn-pg.prev:hover { background:#e2e8f0; }
@@ -283,30 +319,133 @@
       <span class="s-title">3. ประวัติการขอทุนการศึกษา / กยศ.</span>
     </div>
     <div class="s-body">
-      <div class="g2" style="gap:1.5rem;">
+      <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+        {# ── ฝั่งซ้าย: กู้ยืมหรือไม่ ── #}
         <div class="field-group">
           <span class="field-label">กู้ยืมเงินกองทุน กยศ. หรือไม่?</span>
           <div class="radio-group">
-            <label class="rpill"><input type="radio" name="loan_student_fund" value="TRUE"  {% if student.loan_student_fund %}checked{% endif %} class="editable-radio" disabled> กู้ยืม</label>
-            <label class="rpill"><input type="radio" name="loan_student_fund" value="FALSE" {% if not student.loan_student_fund %}checked{% endif %} class="editable-radio" disabled> ไม่กู้ยืม</label>
+            <label class="rpill">
+              <input type="radio" name="loan_student_fund" value="TRUE"
+                {% if student.loan_student_fund %}checked{% endif %}
+                class="editable-radio" disabled
+                onchange="toggleLoanType()"> กู้ยืม
+            </label>
+            <label class="rpill">
+              <input type="radio" name="loan_student_fund" value="FALSE"
+                {% if not student.loan_student_fund %}checked{% endif %}
+                class="editable-radio" disabled
+                onchange="toggleLoanType()"> ไม่กู้ยืม
+            </label>
           </div>
         </div>
-        <div class="field-group">
-          <span class="field-label">ลักษณะการกู้ยืม</span>
-          <div class="radio-group" style="flex-direction:column;">
-            <label class="rpill"><input type="radio" name="loan_type" value="ค่าเล่าเรียน"  {% if student.loan_type == 'ค่าเล่าเรียน' %}checked{% endif %} class="editable-radio" disabled> กู้เฉพาะค่าเล่าเรียน</label>
-            <label class="rpill"><input type="radio" name="loan_type" value="ทั้งสองอย่าง" {% if student.loan_type == 'ทั้งสองอย่าง' %}checked{% endif %} class="editable-radio" disabled> กู้ทั้งค่าเล่าเรียนและค่าครองชีพ</label>
+
+        {# ── ลักษณะการกู้ยืม (แสดง/ซ่อนตามการเลือก) ── #}
+        <div class="field-group" id="loanTypeWrap"
+          style="
+            transition: opacity .25s, transform .25s;
+            {% if not student.loan_student_fund %}opacity:.4; pointer-events:none;{% endif %}
+          ">
+          <span class="field-label">
+            ลักษณะการกู้ยืม
+            <span id="loanTypeRequired" class="field-note"
+              style="color:#ef4444;font-weight:700;{% if not student.loan_student_fund %}display:none;{% endif %}">
+              * จำเป็นต้องระบุ
+            </span>
+          </span>
+          <div class="radio-group" style="flex-direction:column;" id="loanTypeGroup">
+            <label class="rpill" id="loanTypePill1">
+              <input type="radio" name="loan_type" value="ค่าเล่าเรียน"
+                {% if student.loan_type == 'ค่าเล่าเรียน' %}checked{% endif %}
+                class="editable-radio loan-type-radio" disabled> กู้เฉพาะค่าเล่าเรียน
+            </label>
+            <label class="rpill" id="loanTypePill2">
+              <input type="radio" name="loan_type" value="ทั้งสองอย่าง"
+                {% if student.loan_type == 'ทั้งสองอย่าง' %}checked{% endif %}
+                class="editable-radio loan-type-radio" disabled> กู้ทั้งค่าเล่าเรียนและค่าครองชีพ
+            </label>
+          </div>
+          <div id="loanTypeHint" style="
+            margin-top:6px; font-size:.72rem; display:flex; align-items:center; gap:5px;
+            {% if not student.loan_student_fund or student.loan_type %}display:none!important;{% endif %}
+          ">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="#f59e0b" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span style="color:#b45309;">กรุณาเลือกลักษณะการกู้ยืมด้วย</span>
           </div>
         </div>
+
       </div>
     </div>
   </div>
 
-  {# ══ 4. ครอบครัวและรายได้ ══ #}
+  {# ══ 4. รายได้และค่าใช้จ่ายนักศึกษา ══ #}
+  <div class="section-card">
+    <div class="section-header">
+      <div class="s-icon green">💰</div>
+      <span class="s-title">4. รายได้และค่าใช้จ่ายนักศึกษาต่อเดือน</span>
+    </div>
+    <div class="s-body">
+
+      <div class="div-label">รายได้ที่นักศึกษาได้รับต่อเดือน</div>
+      <div class="g2" style="margin-bottom:.5rem;">
+        <div class="field-group">
+          <span class="field-label">ได้รับจากบิดา (บาท)</span>
+          <input type="number" name="inc_father" value="{{ v(student.inc_father) }}" placeholder="0" class="editable-input" readonly>
+        </div>
+        <div class="field-group">
+          <span class="field-label">ได้รับจากมารดา (บาท)</span>
+          <input type="number" name="inc_mother" value="{{ v(student.inc_mother) }}" placeholder="0" class="editable-input" readonly>
+        </div>
+        <div class="field-group">
+          <span class="field-label">ได้รับจากผู้อุปการะ (บาท)</span>
+          <input type="number" name="inc_guardian" value="{{ v(student.inc_guardian) }}" placeholder="0" class="editable-input" readonly>
+        </div>
+        <div class="field-group">
+          <span class="field-label">ได้รับจากทุนการศึกษา (เฉลี่ยรายเดือน) (บาท)</span>
+          <input type="number" name="inc_scholarship" value="{{ v(student.inc_scholarship) }}" placeholder="0" class="editable-input" readonly>
+        </div>
+        <div class="field-group">
+          <span class="field-label">ได้รับจากการทำงาน (Part time) (บาท)</span>
+          <input type="number" name="inc_parttime" value="{{ v(student.inc_parttime) }}" placeholder="0" class="editable-input" readonly>
+        </div>
+      </div>
+      <div class="income-summary" id="incomeSummaryBox">
+        <span class="label">💵 รายได้รวมต่อเดือน (ประมาณการ)</span>
+        <span class="amount" id="totalIncomeDisplay">— บาท</span>
+      </div>
+
+      <div class="div-label" style="margin-top:1.5rem;">ค่าใช้จ่ายนักศึกษาต่อเดือน</div>
+      <div class="g2" style="margin-bottom:.5rem;">
+        <div class="field-group">
+          <span class="field-label">ค่าอาหาร (บาท)</span>
+          <input type="number" name="exp_food" value="{{ v(student.exp_food) }}" placeholder="0" class="editable-input" readonly>
+        </div>
+        <div class="field-group">
+          <span class="field-label">ค่าหอพัก (บาท)</span>
+          <input type="number" name="exp_dorm" value="{{ v(student.exp_dorm) }}" placeholder="0" class="editable-input" readonly>
+        </div>
+        <div class="field-group">
+          <span class="field-label">ค่าพาหนะ/เดินทาง (บาท)</span>
+          <input type="number" name="exp_transport" value="{{ v(student.exp_transport) }}" placeholder="0" class="editable-input" readonly>
+        </div>
+        <div class="field-group">
+          <span class="field-label">ค่าใช้จ่ายอื่นๆ (บาท)</span>
+          <input type="number" name="exp_other" value="{{ v(student.exp_other) }}" placeholder="0" class="editable-input" readonly>
+        </div>
+      </div>
+      <div class="expense-summary" id="expenseSummaryBox">
+        <span class="label">🧾 ค่าใช้จ่ายรวมต่อเดือน (ประมาณการ)</span>
+        <span class="amount" id="totalExpenseDisplay">— บาท</span>
+      </div>
+
+    </div>
+  </div>
+
+  {# ══ 5. ข้อมูลครอบครัวและรายได้ ══ #}
   <div class="section-card">
     <div class="section-header">
       <div class="s-icon rose">👨‍👩‍👧‍👦</div>
-      <span class="s-title">4. ข้อมูลครอบครัวและรายได้</span>
+      <span class="s-title">5. ข้อมูลครอบครัวและรายได้</span>
     </div>
     <div class="s-body">
 
@@ -319,7 +458,6 @@
             <div class="field-group"><span class="field-label">อาชีพ</span><input type="text" name="father_job" value="{{ v(student.father_job) }}" placeholder="อาชีพ" class="editable-input" readonly></div>
             <div class="g2">
               <div class="field-group"><span class="field-label">รายได้ / เดือน (฿)</span><input type="number" name="father_income" value="{{ v(student.father_income) }}" placeholder="0" class="editable-input" readonly></div>
-              <div class="field-group"><span class="field-label">ส่งให้ผู้สมัคร / เดือน (฿)</span><input type="number" name="inc_father" value="{{ v(student.inc_father) }}" placeholder="0" class="editable-input" readonly></div>
             </div>
             <div class="field-group"><span class="field-label">ปัญหาสุขภาพ</span><input type="text" name="father_health" value="{{ v(student.father_health) }}" placeholder="ปัญหาสุขภาพ (ถ้ามี)" class="editable-input" readonly></div>
           </div>
@@ -331,7 +469,7 @@
             <div class="field-group"><span class="field-label">อาชีพ</span><input type="text" name="mother_job" value="{{ v(student.mother_job) }}" placeholder="อาชีพ" class="editable-input" readonly></div>
             <div class="g2">
               <div class="field-group"><span class="field-label">รายได้ / เดือน (฿)</span><input type="number" name="mother_income" value="{{ v(student.mother_income) }}" placeholder="0" class="editable-input" readonly></div>
-              <div class="field-group"><span class="field-label">ส่งให้ผู้สมัคร / เดือน (฿)</span><input type="number" name="inc_mother" value="{{ v(student.inc_mother) }}" placeholder="0" class="editable-input" readonly></div>
+            
             </div>
             <div class="field-group"><span class="field-label">ปัญหาสุขภาพ</span><input type="text" name="mother_health" value="{{ v(student.mother_health) }}" placeholder="ปัญหาสุขภาพ (ถ้ามี)" class="editable-input" readonly></div>
           </div>
@@ -411,14 +549,16 @@
             <tr>
               <th style="width:52px;text-align:center;">ลำดับ</th>
               <th>ชื่อ - นามสกุล</th>
-              <th style="width:80px;text-align:center;">อายุ</th>
+              <th style="width:70px;text-align:center;">อายุ</th>
               <th>อาชีพ / ระดับชั้น</th>
               <th>สถานที่ทำงาน / สถานศึกษา</th>
+              <th style="width:130px;text-align:center;">รายได้/เดือน (฿)</th>
+              <th style="width:44px;" id="sibDeleteHeader" class="hidden"></th>
             </tr>
           </thead>
           <tbody id="siblingsTableBody">
             <tr>
-              <td colspan="5" style="text-align:center;padding:2.5rem;color:var(--muted);font-size:.875rem;">
+              <td colspan="7" style="text-align:center;padding:2.5rem;color:var(--muted);font-size:.875rem;">
                 ยังไม่มีข้อมูลพี่น้อง
               </td>
             </tr>
@@ -472,26 +612,96 @@ const editBtn   = document.getElementById('editBtn');
 const saveBtn   = document.getElementById('saveBtn');
 const sibJson   = document.getElementById('siblings_json_input');
 
+// ── Income / Expense live calculator ──────────────────────────
+const incomeFields  = ['inc_father','inc_mother','inc_guardian','inc_scholarship','inc_parttime'];
+const expenseFields = ['exp_food','exp_dorm','exp_transport','exp_other'];
+
+function recalcSummary() {
+  const sumIncome  = incomeFields.reduce((s,n) => s + (parseFloat(document.querySelector(`[name="${n}"]`)?.value || 0)), 0);
+  const sumExpense = expenseFields.reduce((s,n) => s + (parseFloat(document.querySelector(`[name="${n}"]`)?.value || 0)), 0);
+  const fmt = v => v > 0 ? v.toLocaleString('th-TH') + ' บาท' : '— บาท';
+  document.getElementById('totalIncomeDisplay').textContent  = fmt(sumIncome);
+  document.getElementById('totalExpenseDisplay').textContent = fmt(sumExpense);
+}
+
+[...incomeFields,...expenseFields].forEach(name => {
+  document.querySelector(`[name="${name}"]`)?.addEventListener('input', recalcSummary);
+});
+recalcSummary();
+
 // ── sync siblings array → hidden JSON field ก่อน submit ────────
 function syncSiblingsJson() {
-  // ดึงค่าล่าสุดจาก input ที่อยู่ใน table ตอนนี้ (หน้าปัจจุบัน)
   const rows = tableBody.querySelectorAll('tr[data-idx]');
   rows.forEach(row => {
     const idx = parseInt(row.dataset.idx);
     if (idx >= 0 && idx < siblings.length) {
-      siblings[idx].name  = row.querySelector('input[name="sibling_name[]"]')?.value  ?? '';
-      siblings[idx].age   = row.querySelector('input[name="sibling_age[]"]')?.value   ?? '';
-      siblings[idx].job   = row.querySelector('input[name="sibling_job[]"]')?.value   ?? '';
-      siblings[idx].place = row.querySelector('input[name="sibling_place[]"]')?.value ?? '';
+      siblings[idx].name   = row.querySelector('input[name="sibling_name[]"]')?.value   ?? '';
+      siblings[idx].age    = row.querySelector('input[name="sibling_age[]"]')?.value    ?? '';
+      siblings[idx].job    = row.querySelector('input[name="sibling_job[]"]')?.value    ?? '';
+      siblings[idx].place  = row.querySelector('input[name="sibling_place[]"]')?.value  ?? '';
+      siblings[idx].income = row.querySelector('input[name="sibling_income[]"]')?.value ?? '';
     }
   });
   sibJson.value = JSON.stringify(siblings);
 }
 
-// intercept submit → sync ก่อนส่ง
 document.getElementById('profileForm').addEventListener('submit', (e) => {
+  // Validate: if กู้ยืม is selected, loan_type must be chosen
+  const isLoan = document.querySelector('input[name="loan_student_fund"]:checked')?.value === 'TRUE';
+  const loanType = document.querySelector('input[name="loan_type"]:checked');
+  if (isLoan && !loanType) {
+    e.preventDefault();
+    const hint = document.getElementById('loanTypeHint');
+    const wrap = document.getElementById('loanTypeWrap');
+    if (hint) hint.style.display = 'flex';
+    // Highlight the loan type section
+    wrap.style.outline = '2px solid #ef4444';
+    wrap.style.borderRadius = '8px';
+    wrap.style.padding = '8px';
+    wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => { wrap.style.outline = ''; wrap.style.padding = ''; }, 2500);
+    return;
+  }
   syncSiblingsJson();
-  // ถ้าต้องการ validate ก็ใส่ที่นี่ แล้ว e.preventDefault() ถ้าไม่ผ่าน
+});
+
+// ── กยศ. loan type toggle ──────────────────────────────────────
+function toggleLoanType() {
+  const isLoan = document.querySelector('input[name="loan_student_fund"]:checked')?.value === 'TRUE';
+  const wrap   = document.getElementById('loanTypeWrap');
+  const hint   = document.getElementById('loanTypeHint');
+  const reqBadge = document.getElementById('loanTypeRequired');
+  const radios = document.querySelectorAll('.loan-type-radio');
+
+  if (isLoan) {
+    wrap.style.opacity        = '1';
+    wrap.style.pointerEvents  = 'auto';
+    wrap.style.transform      = 'none';
+    reqBadge.style.display    = 'inline';
+    // enable radios only if edit mode is on
+    const editMode = document.getElementById('saveBtn').disabled === false;
+    if (editMode) radios.forEach(r => r.removeAttribute('disabled'));
+    // show hint if nothing selected
+    const anyChecked = document.querySelector('input[name="loan_type"]:checked');
+    if (hint) hint.style.display = anyChecked ? 'none' : 'flex';
+  } else {
+    wrap.style.opacity        = '0.4';
+    wrap.style.pointerEvents  = 'none';
+    reqBadge.style.display    = 'none';
+    if (hint) hint.style.display = 'none';
+    // clear selection & disable
+    radios.forEach(r => { r.checked = false; r.setAttribute('disabled', ''); });
+    // re-render pill styles
+    document.querySelectorAll('#loanTypeGroup .rpill').forEach(p => p.style.borderColor = '');
+  }
+}
+
+// watch loan_type radios to hide hint once selected
+document.addEventListener('change', (e) => {
+  if (e.target.name === 'loan_type') {
+    const hint = document.getElementById('loanTypeHint');
+    if (hint) hint.style.display = 'none';
+  }
 });
 
 function toggleHousing() {
@@ -509,30 +719,53 @@ function toggleAgri() {
 
 function renderSiblings() {
   if (siblings.length === 0) {
-    tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2.5rem;color:var(--muted);font-size:.875rem;">ยังไม่มีข้อมูลพี่น้อง</td></tr>`;
+    tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2.5rem;color:var(--muted);font-size:.875rem;">ยังไม่มีข้อมูลพี่น้อง</td></tr>`;
+    // ซ่อน delete header เมื่อไม่มีข้อมูล
+    document.getElementById('sibDeleteHeader')?.classList.add('hidden');
     return;
   }
+  const editMode = document.getElementById('saveBtn').disabled === false;
+  const ro = editMode ? '' : 'readonly';
   const start = currentPage * rowsPerPage;
   tableBody.innerHTML = siblings.slice(start, start + rowsPerPage).map((s, i) => `
     <tr data-idx="${start + i}">
       <td style="text-align:center;font-weight:600;color:#475569;">${start + i + 1}</td>
-      <td><input type="text"   name="sibling_name[]"  value="${s.name  ?? ''}" placeholder="ชื่อ-นามสกุล"              class="editable-input"></td>
-      <td><input type="number" name="sibling_age[]"   value="${s.age   ?? ''}" placeholder="อายุ"                       class="editable-input" style="max-width:70px;"></td>
-      <td><input type="text"   name="sibling_job[]"   value="${s.job   ?? ''}" placeholder="อาชีพ / ระดับชั้น"          class="editable-input"></td>
-      <td><input type="text"   name="sibling_place[]" value="${s.place ?? ''}" placeholder="สถานที่ทำงาน / สถานศึกษา" class="editable-input"></td>
+      <td><input type="text"   name="sibling_name[]"   value="${s.name   ?? ''}" placeholder="ชื่อ-นามสกุล"             class="editable-input" ${ro} style="${editMode ? '' : 'cursor:not-allowed;'}"></td>
+      <td><input type="number" name="sibling_age[]"    value="${s.age    ?? ''}" placeholder="อายุ"                      class="editable-input" ${ro} style="max-width:70px;${editMode ? '' : 'cursor:not-allowed;'}"></td>
+      <td><input type="text"   name="sibling_job[]"    value="${s.job    ?? ''}" placeholder="อาชีพ / ระดับชั้น"         class="editable-input" ${ro} style="${editMode ? '' : 'cursor:not-allowed;'}"></td>
+      <td><input type="text"   name="sibling_place[]"  value="${s.place  ?? ''}" placeholder="สถานที่ทำงาน / สถานศึกษา" class="editable-input" ${ro} style="${editMode ? '' : 'cursor:not-allowed;'}"></td>
+      <td><input type="number" name="sibling_income[]" value="${s.income ?? ''}" placeholder="0"                         class="editable-input" ${ro} style="max-width:120px;${editMode ? '' : 'cursor:not-allowed;'}"></td>
+      <td style="text-align:center;">
+        <button type="button" class="btn-del-sib" onclick="deleteSibling(${start + i})" title="ลบ">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+        </button>
+      </td>
     </tr>`).join('');
+
+  // แสดง delete header เสมอเมื่อมีข้อมูล
+  document.getElementById('sibDeleteHeader')?.classList.remove('hidden');
+
+  // apply edit styling to newly rendered inputs if in edit mode
+  if (editMode) {
+    tableBody.querySelectorAll('.editable-input').forEach(el => {
+      el.style.cursor      = 'text';
+      el.style.background  = '#fff';
+      el.style.borderColor = '#93c5fd';
+      el.style.boxShadow   = '0 0 0 3px rgba(147,197,253,.2)';
+    });
+  }
 }
 
-// sync ค่าจาก table ก่อนเปลี่ยนหน้า
 function saveCurrentPage() {
   const rows = tableBody.querySelectorAll('tr[data-idx]');
   rows.forEach(row => {
     const idx = parseInt(row.dataset.idx);
     if (idx >= 0 && idx < siblings.length) {
-      siblings[idx].name  = row.querySelector('input[name="sibling_name[]"]')?.value  ?? '';
-      siblings[idx].age   = row.querySelector('input[name="sibling_age[]"]')?.value   ?? '';
-      siblings[idx].job   = row.querySelector('input[name="sibling_job[]"]')?.value   ?? '';
-      siblings[idx].place = row.querySelector('input[name="sibling_place[]"]')?.value ?? '';
+      siblings[idx].name   = row.querySelector('input[name="sibling_name[]"]')?.value   ?? '';
+      siblings[idx].age    = row.querySelector('input[name="sibling_age[]"]')?.value    ?? '';
+      siblings[idx].job    = row.querySelector('input[name="sibling_job[]"]')?.value    ?? '';
+      siblings[idx].place  = row.querySelector('input[name="sibling_place[]"]')?.value  ?? '';
+      siblings[idx].income = row.querySelector('input[name="sibling_income[]"]')?.value ?? '';
     }
   });
 }
@@ -547,9 +780,18 @@ editBtn.addEventListener('click', () => {
   });
   document.querySelectorAll('.editable-radio').forEach(r => r.removeAttribute('disabled'));
 
+  // After enabling radios, re-evaluate loan type state
+  toggleLoanType();
+
+  // Re-attach live recalc listeners after inputs become editable
+  [...incomeFields,...expenseFields].forEach(name => {
+    document.querySelector(`[name="${name}"]`)?.addEventListener('input', recalcSummary);
+  });
+
   saveBtn.disabled = false;
   editBtn.style.display = 'none';
   addBtn.classList.remove('hidden');
+  renderSiblings(); // re-render เพื่อให้ inputs เป็น editable
 
   document.getElementById('editHint').innerHTML = `
     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
@@ -562,13 +804,24 @@ addBtn.addEventListener("click", () => {
   currentPage = Math.floor((siblings.length - 1) / rowsPerPage);
   renderSiblings();
 });
+
+function deleteSibling(idx) {
+  saveCurrentPage();
+  siblings.splice(idx, 1);
+  // ปรับหน้าถ้าลบแล้วหน้าปัจจุบันเกิน
+  const maxPage = Math.max(0, Math.ceil(siblings.length / rowsPerPage) - 1);
+  if (currentPage > maxPage) currentPage = maxPage;
+  renderSiblings();
+}
 prevBtn.addEventListener("click", () => { if (currentPage > 0) { saveCurrentPage(); currentPage--; renderSiblings(); } });
 nextBtn.addEventListener("click", () => { if ((currentPage+1)*rowsPerPage < siblings.length) { saveCurrentPage(); currentPage++; renderSiblings(); } });
 
 document.addEventListener('DOMContentLoaded', () => {
   toggleHousing();
   toggleAgri();
+  toggleLoanType();
   if (siblings.length > 0) renderSiblings();
+  recalcSummary();
 });
 </script>
 {% endblock %}

@@ -43,8 +43,10 @@ app.register_blueprint(student_bp, url_prefix="/student")
 
 # 4. การจัดการ Database และสร้างบัญชีทดสอบ
 with app.app_context():
+    # หมายเหตุ: เอา db.drop_all() ออก เพื่อไม่ให้ข้อมูลผู้ใช้หรือตารางหายเมื่อรันใหม่
     db.create_all()
 
+    # --- ส่วนที่ 1: ตรวจสอบและอัปเดตโครงสร้างตาราง (จาก main) ---
     inspector = inspect(db.engine)
     existing_columns = {col["name"] for col in inspector.get_columns("application")}
     if "reviewing_by" not in existing_columns:
@@ -83,13 +85,12 @@ with app.app_context():
     except Exception:
         pass
 
-    # สร้างบัญชี Admin (Officer) พื้นฐาน
+    # --- ส่วนที่ 2: สร้างบัญชีพื้นฐาน (จาก main) ---
     if not Officer.query.filter_by(username="admin").first():
         admin = Officer(username="admin", name="ผู้ดูแลระบบหลัก (Officer)")
         admin.set_password("ubu123456") 
         db.session.add(admin)
         
-    # 🌟 เพิ่มบัญชี กรรมการ (Director) สำหรับทดสอบระบบ
     if not Director.query.filter_by(username="director").first():
         director_test = Director(username="director", name="กรรมการพิจารณาทุน")
         director_test.set_password("ubu123456")
@@ -97,7 +98,53 @@ with app.app_context():
         
     db.session.commit()
 
-    # สร้างข้อมูลตัวอย่าง Audit Log (ถ้ายังไม่มี) - โครงสร้างตามแบบบันทึกประวัติ
+    # --- ส่วนที่ 3: สร้างข้อมูลจำลอง ทุนการศึกษาและนักศึกษา (จากฝั่ง Yotsaran) ---
+    # เช็คก่อนว่ามีข้อมูลในระบบหรือยัง ถ้ายังไม่มีถึงจำลองข้อมูล เพื่อป้องกัน error ข้อมูลซ้ำ
+    if Scholarship.query.count() == 0:
+        # 1. สร้างรายชื่อทุน (Scholarships)
+        sch1 = Scholarship(scholarship_id="SCH-001", scholarship_name="ทุนอาหารกลางวัน")
+        sch2 = Scholarship(scholarship_id="SCH-002", scholarship_name="ทุนเรียนดี (GPA สูง)")
+        sch3 = Scholarship(scholarship_id="SCH-003", scholarship_name="ทุนกิจกรรมเด่น")
+        db.session.add_all([sch1, sch2, sch3])
+        db.session.commit()
+
+        # 2. สร้างเกณฑ์คะแนนแยกตามทุน (Criteria)
+        db.session.add_all([
+            Criterion(name="สถานะความขาดแคลน", max_score=50, scholarship_id=sch1.scholarship_id),
+            Criterion(name="ความประพฤติ", max_score=30, scholarship_id=sch1.scholarship_id),
+            Criterion(name="สัมภาษณ์", max_score=20, scholarship_id=sch1.scholarship_id),
+        ])
+        db.session.add_all([
+            Criterion(name="ผลการเรียนสะสม (GPA)", max_score=70, scholarship_id=sch2.scholarship_id),
+            Criterion(name="เรียงความเป้าหมายชีวิต", max_score=30, scholarship_id=sch2.scholarship_id),
+        ])
+        db.session.add_all([
+            Criterion(name="ผลงาน/เกียรติบัตร", max_score=60, scholarship_id=sch3.scholarship_id),
+            Criterion(name="การมีส่วนร่วมในวิทยาลัย", max_score=40, scholarship_id=sch3.scholarship_id),
+        ])
+        db.session.commit()
+
+        # 3. สร้างรายชื่อผู้สมัคร 10 คน (Applications) กระจายตามทุน
+        students = [
+            # ทุนอาหารกลางวัน (4 คน)
+            Application(student_id="68114540214", student_name="นาย ทรงเดช จำปาเทศ", faculty="คณะวิศวกรรมศาสตร์", gpa="3.94", application_date="2026-02-01", scholarship_id=sch1.scholarship_id, status="approved"),
+            Application(student_id="68114540101", student_name="นางสาว สวยใส ใจชื่น", faculty="คณะวิทยาศาสตร์", gpa="3.20", application_date="2026-02-02", scholarship_id=sch1.scholarship_id, status="pending"),
+            Application(student_id="68114540102", student_name="นาย มานะ อดทน", faculty="คณะบริหารศาสตร์", gpa="2.85", application_date="2026-02-03", scholarship_id=sch1.scholarship_id, status="reviewing"),
+            Application(student_id="68114540103", student_name="นางสาว ขยัน เรียนดี", faculty="คณะศิลปศาสตร์", gpa="3.15", application_date="2026-02-03", scholarship_id=sch1.scholarship_id, status="interview"),
+            # ทุนเรียนดี (4 คน)
+            Application(student_id="68114540215", student_name="นาย ปกรณ์เกียรติ มั่นคง", faculty="คณะวิศวกรรมศาสตร์", gpa="3.98", application_date="2026-02-04", scholarship_id=sch2.scholarship_id, status="approved"),
+            Application(student_id="68114540104", student_name="นางสาว ปัญญา เลิศล้ำ", faculty="คณะวิทยาศาสตร์", gpa="4.00", application_date="2026-02-04", scholarship_id=sch2.scholarship_id, status="reviewing"),
+            Application(student_id="68114540105", student_name="นาย ฉลาด รอบรู้", faculty="คณะบริหารศาสตร์", gpa="3.85", application_date="2026-02-05", scholarship_id=sch2.scholarship_id, status="pending"),
+            Application(student_id="68114540106", student_name="นางสาว สมองไว ใจสู้", faculty="คณะศิลปศาสตร์", gpa="3.92", application_date="2026-02-05", scholarship_id=sch2.scholarship_id, status="interview"),
+            # ทุนกิจกรรม (2 คน)
+            Application(student_id="68114540107", student_name="นาย กล้าหาญ ชาญชัย", faculty="คณะนิติศาสตร์", gpa="2.50", application_date="2026-02-06", scholarship_id=sch3.scholarship_id, status="pending"),
+            Application(student_id="68114540108", student_name="นางสาว ร่าเริง แจ่มใส", faculty="คณะศิลปศาสตร์", gpa="3.45", application_date="2026-02-06", scholarship_id=sch3.scholarship_id, status="reviewing"),
+        ]
+        db.session.add_all(students)
+        db.session.commit()
+        print("--- ฐานข้อมูลถูกสร้างและเพิ่มข้อมูลชุดใหญ่ 10 คน เรียบร้อยแล้ว ---")
+
+    # --- ส่วนที่ 4: สร้างข้อมูลตัวอย่าง Audit Log (จาก main) ---
     try:
         if AuditLog.query.count() == 0:
             from datetime import datetime, timedelta
@@ -117,7 +164,7 @@ with app.app_context():
     print("--- System Ready: Created accounts 'admin' and 'director' ---")
 
 
-# 5. Route สำหรับหน้า Login หลัก (แยกตารางค้นหาตาม Role)
+# 5. Route สำหรับหน้า Login หลัก
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -163,19 +210,16 @@ def login():
 
     return render_template("login.html")
 
-
 @app.route("/")
 def index():
     all_scholarships = Scholarship.query.all()
     return render_template("index.html", scholarships=all_scholarships)
-
 
 @app.route("/logout")
 def logout():
     session.clear()
     flash("ออกจากระบบเรียบร้อยแล้ว", "success")
     return redirect(url_for("index"))
-
 
 if __name__ == "__main__":
     app.run(debug=True)

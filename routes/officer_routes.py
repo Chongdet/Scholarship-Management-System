@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from models import db, Application, Scholarship, AuditLog, Officer
 
@@ -14,54 +13,115 @@ officer_bp = Blueprint('officer', __name__)
 def login():
     return "Officer: Login Page"
 
-@officer_bp.route('/scholarships/<int:id>/applications')
-def view_applications_by_scholarship(id):
-    applications = Application.query.filter_by(scholarship_id=id).all()
+# =========================
+# แสดงรายการใบสมัครของทุน
+# =========================
+@officer_bp.route('/scholarships/<scholarship_id>/applications')
+def view_applications_by_scholarship(scholarship_id):
+    # เปลี่ยนให้รับ scholarship_id เป็น String ตาม Database Schema ใหม่
+    applications = Application.query.filter_by(scholarship_id=scholarship_id).all()
     return render_template('officer/applications.html', applications=applications)
 
 @officer_bp.route('/scholarships/add', methods=['GET', 'POST'])
 def add_scholarship():
     if request.method == 'POST':
-        name = request.form.get('name')
+        # รับค่าจากฟอร์มให้ครอบคลุมทั้ง 2 ฝั่ง
+        scholarship_id = request.form.get('scholarship_id')
+        scholarship_name = request.form.get('scholarship_name') or request.form.get('name') 
         amount = request.form.get('amount')
-        if not name or not amount:
-            flash('กรุณากรอกข้อมูลให้ครบ', 'danger')
+        min_gpax = request.form.get('min_gpax')
+        faculty_condition = request.form.get('faculty_condition')
+        start_date = request.form.get('start_date')
+        end_date = request.form.get('end_date')
+        status = request.form.get('status')
+
+        if not scholarship_id or not scholarship_name:
+            flash('กรุณากรอกรหัสและชื่อทุนให้ครบถ้วน', 'danger')
             return redirect(url_for('officer.add_scholarship'))
-        new_scholarship = Scholarship(name=name, amount=float(amount))
+
+        # convert types
+        try:
+            amt = float(amount) if amount else None
+        except ValueError:
+            amt = None
+        try:
+            min_g = float(min_gpax) if min_gpax else None
+        except ValueError:
+            min_g = None
+            
+        sd = datetime.strptime(start_date, '%Y-%m-%d') if start_date else None
+        ed = datetime.strptime(end_date, '%Y-%m-%d') if end_date else None
+
+        new_scholarship = Scholarship(
+            scholarship_id=scholarship_id,
+            scholarship_name=scholarship_name,
+            amount=amt,
+            min_gpax=min_g,
+            faculty_condition=faculty_condition or None,
+            start_date=sd,
+            end_date=ed,
+            status=status or 'Open'
+        )
+
         db.session.add(new_scholarship)
         db.session.commit()
         flash('เพิ่มทุนสำเร็จ', 'success')
         return redirect(url_for('officer.list_scholarships'))
     return render_template('officer/add_scholarship.html')
 
+
 @officer_bp.route('/scholarships')
 def list_scholarships():
     scholarships = Scholarship.query.all()
     return render_template('officer/scholarships.html', scholarships=scholarships)
 
-@officer_bp.route('/scholarships/<int:id>/edit', methods=['GET', 'POST'])
-def edit_scholarship(id):
-    scholarship = Scholarship.query.get_or_404(id)
+
+@officer_bp.route('/scholarships/<scholarship_id>/edit', methods=['GET', 'POST'])
+def edit_scholarship(scholarship_id):
+    """แก้ไขทุน (Edit scholarship)"""
+    scholarship = Scholarship.query.get_or_404(scholarship_id)
     if request.method == 'POST':
-        name = request.form.get('name')
+        scholarship_name = request.form.get('scholarship_name') or request.form.get('name')
         amount = request.form.get('amount')
-        if not name or not amount:
-            flash('กรุณากรอกข้อมูลให้ครบ', 'danger')
-            return redirect(url_for('officer.edit_scholarship', id=id))
-        scholarship.name = name
-        scholarship.amount = float(amount)
+        min_gpax = request.form.get('min_gpax')
+        faculty_condition = request.form.get('faculty_condition')
+        start_date = request.form.get('start_date')
+        end_date = request.form.get('end_date')
+        status = request.form.get('status')
+
+        if not scholarship_name:
+            flash('กรุณากรอกชื่อทุน', 'danger')
+            return redirect(url_for('officer.edit_scholarship', scholarship_id=scholarship_id))
+
+        scholarship.scholarship_name = scholarship_name
+        try:
+            scholarship.amount = float(amount) if amount else None
+        except ValueError:
+            pass
+        try:
+            scholarship.min_gpax = float(min_gpax) if min_gpax else None
+        except ValueError:
+            pass
+            
+        scholarship.faculty_condition = faculty_condition or None
+        scholarship.start_date = datetime.strptime(start_date, '%Y-%m-%d') if start_date else None
+        scholarship.end_date = datetime.strptime(end_date, '%Y-%m-%d') if end_date else None
+        scholarship.status = status or scholarship.status
+
         db.session.commit()
         flash('แก้ไขทุนสำเร็จ', 'success')
         return redirect(url_for('officer.list_scholarships'))
     return render_template('officer/edit_scholarship.html', scholarship=scholarship)
 
-@officer_bp.route('/scholarships/<int:id>/delete', methods=['POST'])
-def delete_scholarship(id):
-    scholarship = Scholarship.query.get_or_404(id)
+@officer_bp.route('/scholarships/<scholarship_id>/delete', methods=['POST'])
+def delete_scholarship(scholarship_id):
+    """ลบทุน (Delete scholarship)"""
+    scholarship = Scholarship.query.get_or_404(scholarship_id)
     db.session.delete(scholarship)
     db.session.commit()
     flash('ลบทุนสำเร็จ', 'success')
     return redirect(url_for('officer.list_scholarships'))
+
 
 # ==========================================
 # ผู้รับผิดชอบ: นาย ธีรภัทร พิกุลศรี (Officer ส่วนเดิม)
@@ -114,7 +174,9 @@ def view_application(application_id):
     if not current_officer:
         flash('กรุณาเข้าสู่ระบบเจ้าหน้าที่ก่อน', 'error')
         return redirect(url_for('login'))
+        
     application = Application.query.get_or_404(application_id)
+    
     if application.status == 'reviewing' and application.reviewing_by and application.reviewing_by != current_officer:
         flash(f'ใบสมัครนี้กำลังตรวจสอบโดย {application.reviewing_by}', 'warning')
         return redirect(url_for('officer.applications'))
@@ -125,12 +187,14 @@ def view_application(application_id):
             application.reviewing_by = current_officer
             application.reviewing_at = datetime.utcnow()
             db.session.commit()
+            
     return render_template('officer/application-detail.html', application=application)
 
 @officer_bp.route('/application/<int:application_id>/decision', methods=['POST'])
 def decide_application(application_id):
     application = Application.query.get_or_404(application_id)
     decision = request.form.get('decision')
+    
     if decision == 'interview':
         application.status = 'interview'
         application.reviewing_by = None
@@ -143,6 +207,7 @@ def decide_application(application_id):
         application.reviewing_at = None
         db.session.commit()
         flash('ส่งกลับให้แก้ไขเอกสารเรียบร้อยแล้ว', 'success')
+        
     return redirect(url_for('officer.applications'))
 
 @officer_bp.route('/announcement')
@@ -151,23 +216,23 @@ def final_announcement():
     scholarships = Scholarship.query.all()
     return render_template('officer/announcement.html', scholarships=scholarships)
 
-@officer_bp.route('/scholarship/<int:id>/recipients', methods=['GET', 'POST'])
-def scholarship_recipients(id):
+@officer_bp.route('/scholarship/<scholarship_id>/recipients', methods=['GET', 'POST'])
+def scholarship_recipients(scholarship_id):
     """หน้าผู้ได้รับทุน - ดู/กำหนดวันที่ประกาศ"""
-    scholarship = Scholarship.query.get_or_404(id)
+    scholarship = Scholarship.query.get_or_404(scholarship_id)
     if request.method == 'POST':
         date_str = request.form.get('announcement_date')
         if date_str:
-            from datetime import datetime
             scholarship.announcement_date = datetime.strptime(date_str, '%Y-%m-%d')
         else:
             scholarship.announcement_date = None
         db.session.commit()
         flash('บันทึกวันที่ประกาศเรียบร้อย', 'success')
         return redirect(url_for('officer.final_announcement'))
-    applications = Application.query.filter_by(scholarship_id=id, status='approved').all()
+        
+    applications = Application.query.filter_by(scholarship_id=scholarship_id, status='approved').all()
     if not applications:
-        applications = Application.query.filter_by(scholarship_id=id, status='interview').all()
+        applications = Application.query.filter_by(scholarship_id=scholarship_id, status='interview').all()
     return render_template('officer/recipients.html', scholarship=scholarship, applications=applications)
 
 @officer_bp.route('/audit-log')
@@ -183,18 +248,23 @@ def audit_log():
             )
         )
     logs = query.all()
+    
     for log in logs:
         officer = Officer.query.filter_by(username=log.officer_username).first()
         log.officer_id = officer.id if officer else None
         log.officer_name = officer.name if (officer and officer.name) else (log.officer_label or log.officer_username)
+        
     all_logs = AuditLog.query.all()
     staff_set = set()
     for log in all_logs:
         staff_set.add(log.officer_label or log.officer_username)
     staff_list = sorted(staff_set) if staff_set else []
+    
     return render_template('officer/audit_log.html', logs=logs, staff_list=staff_list, total_count=len(logs), selected_staff=staff_filter)
 
+
 # ==========================================
+# (หากใน app.py โหลด Director Blueprint จากที่อื่นแล้ว คุณสามารถลบส่วนด้านล่างนี้ทิ้งได้)
 # เพิ่มส่วนของกรรมการ (Director) เพื่อให้ Link ใน HTML ทำงานได้
 # ==========================================
 director_bp = Blueprint('director', __name__)
@@ -211,10 +281,10 @@ def scoring():
     # เพิ่ม Logic เพื่อนับจำนวนผู้สมัครในแต่ละสถานะให้ Template
     for s in scholarships:
         s.total_applicants = len(s.applications)
-        s.passed_docs = Application.query.filter_by(scholarship_id=s.id, status='interview').count()
+        s.passed_docs = Application.query.filter_by(scholarship_id=s.scholarship_id, status='interview').count()
     return render_template('director/scoring.html', scholarships=scholarships)
 
-@director_bp.route('/scholarship/<int:scholarship_id>/students')
+@director_bp.route('/scholarship/<scholarship_id>/students')
 def scholarship_students(scholarship_id):
     """หน้าแสดงรายชื่อนักศึกษาในทุนนั้นๆ สำหรับกรรมการ"""
     scholarship = Scholarship.query.get_or_404(scholarship_id)
@@ -228,6 +298,6 @@ def ranking():
     return render_template('director/ranking.html')
 
 @director_bp.route('/audit_log')
-def audit_log():
+def director_audit_log():
     """หน้าบันทึกการทำงาน LOG ของกรรมการ"""
     return "Director: Audit Log System"

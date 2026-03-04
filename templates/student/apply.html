@@ -1,64 +1,181 @@
-{% extends "layouts/base_stu.html" %}
+{% extends "layouts/base_stu.html" %} {% block content %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %} {% if messages
+%}
+<script>
+  {% for category, message in messages %}
+    Swal.fire({ icon: 'success', title: 'สำเร็จ', text: '{{ message }}', confirmButtonColor: '#1e3a8a' });
+  {% endfor %}
+</script>
+{% endif %} {% endwith %}
+
 <style>
-    /* CSS เฉพาะหน้าสมัครทุน */
-    #drop-zone { border: 2px dashed #93c5fd; transition: border-color 0.2s, background-color 0.2s; }
-    #drop-zone.drag-over { border-color: #1e3a8a; background-color: #eff6ff; }
-    .form-input:focus { outline: none; box-shadow: 0 0 0 3px rgba(250,204,21,0.4); border-color: #1e3a8a; }
-    .section-card { background:#fff; border-radius:1rem; border:1px solid #f0f4f8; padding:2rem; margin-bottom:1.5rem; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
-    .section-header { display:flex; align-items:center; gap:0.75rem; margin-bottom:1.25rem; padding-bottom:0.75rem; border-bottom:2px solid #eff6ff; }
-    .section-num { width:2.25rem; height:2.25rem; background:#1e3a8a; color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.9rem; flex-shrink:0; }
+  .file-row {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .btn-choose {
+    background: #cbd5e1;
+    color: #475569;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .btn-choose:hover {
+    background: #94a3b8;
+  }
+  .file-name {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin-left: 1rem;
+    flex-grow: 1;
+  }
+  option:disabled {
+    color: #cbd5e1;
+    background: #f1f5f9;
+  }
 </style>
 
-<div class="max-w-5xl mx-auto py-10">
-    <div class="mb-6 text-center">
-        <h2 class="text-3xl font-extrabold text-blue-900 mb-1">📝 ฟอร์มสมัครทุนการศึกษา</h2>
-        <p class="text-gray-500 text-sm">กรอกข้อมูลให้ครบถ้วนแล้วแนบเอกสารประกอบการสมัคร</p>
+<div class="max-w-4xl mx-auto py-10 px-4">
+  <div class="mb-8">
+    <h2 class="text-2xl font-bold text-gray-800">ยื่นสมัครขอรับทุน</h2>
+    <p class="text-gray-500">กรุณาแนบเอกสารให้ครบถ้วนตามรายการด้านล่าง</p>
+  </div>
+
+  <form
+    action="{{ url_for('student.apply_scholarship') }}"
+    method="POST"
+    enctype="multipart/form-data"
+  >
+    <div class="mb-8">
+      <label class="block text-sm font-bold text-gray-700 mb-2"
+        >ทุนการศึกษาที่ต้องการสมัคร</label
+      >
+      <select
+        name="scholarship_id"
+        required
+        class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none"
+      >
+        <option value="">-- เลือกทุนการศึกษา --</option>
+        {% for sch in scholarships %}
+        <option
+          value="{{ sch.id }}"
+          {%
+          if
+          sch.id
+          in
+          applied_ids
+          %}disabled{%
+          endif
+          %}
+        >
+          {{ sch.name }} {% if sch.id in applied_ids %}(สมัครแล้ว){% endif %}
+        </option>
+        {% endfor %}
+      </select>
     </div>
 
-    <form id="apply-form" method="POST" action="{{ url_for('student.apply_scholarship') }}" enctype="multipart/form-data">
-        <div class="section-card">
-            <div class="section-header">
-                <div class="section-num">★</div>
-                <h3 class="text-base font-bold text-blue-900">ทุนการศึกษาที่ต้องการสมัคร</h3>
-            </div>
-            <select name="scholarship_id" required class="form-input w-full border border-gray-300 rounded-xl px-4 py-3 text-sm">
-                <option value="">-- เลือกทุนการศึกษา --</option>
-                {% for sch in scholarships %}
-                <option value="{{ sch.id }}">{{ sch.name }}</option>
-                {% endfor %}
-            </select>
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1"
+          >ใบรับรองผลการศึกษา</label
+        >
+        <div class="file-row">
+          <label for="transcript" class="btn-choose">Choose File</label>
+          <input
+            type="file"
+            id="transcript"
+            name="file_transcript"
+            class="hidden"
+            onchange="updateFileName(this)"
+          />
+          <span class="file-name">no file chosen</span>
         </div>
+      </div>
 
-        <div class="section-card">
-            <div id="drop-zone" class="rounded-2xl p-10 text-center cursor-pointer mb-4" onclick="document.getElementById('file-input').click()">
-                <div class="text-5xl mb-3">📂</div>
-                <p class="font-semibold text-gray-600 text-sm">คลิกหรือลากไฟล์มาวางที่นี่ (ไม่เกิน 5MB)</p>
-            </div>
-            <input type="file" id="file-input" name="documents" multiple class="hidden">
-            <ul id="file-list" class="space-y-2 mb-5"></ul>
-
-            <div class="flex justify-end gap-3 pt-4 border-t">
-                <button type="submit" class="bg-blue-900 text-white font-bold px-8 py-3 rounded-xl hover:bg-yellow-400 hover:text-blue-900 transition-all">
-                    📨 ยืนยันการสมัคร
-                </button>
-            </div>
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1"
+          >สำเนาบัตรนักศึกษาหรือบัตรประชาชน</label
+        >
+        <div class="file-row">
+          <label for="id_card" class="btn-choose">Choose File</label>
+          <input
+            type="file"
+            id="id_card"
+            name="file_id_card"
+            class="hidden"
+            onchange="updateFileName(this)"
+          />
+          <span class="file-name">no file chosen</span>
         </div>
-    </form>
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1"
+          >หนังสือรับรองรายได้ผู้ปกครอง</label
+        >
+        <div class="file-row">
+          <label for="income" class="btn-choose">Choose File</label>
+          <input
+            type="file"
+            id="income"
+            name="file_income_cert"
+            class="hidden"
+            onchange="updateFileName(this)"
+          />
+          <span class="file-name">no file chosen</span>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1"
+          >ภาพถ่ายที่อยู่อาศัย (ด้านหน้า ด้านหลัง ด้านข้าง ภายในบ้าน)</label
+        >
+        <div class="file-row">
+          <label for="house" class="btn-choose">Choose File</label>
+          <input
+            type="file"
+            id="house"
+            name="file_house_pics"
+            multiple
+            class="hidden"
+            onchange="updateFileName(this)"
+          />
+          <span class="file-name">no file chosen (อัปโหลดได้หลายรูป)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-10">
+      <button
+        type="submit"
+        class="w-40 bg-gray-500 text-white font-bold py-3 rounded-xl hover:bg-gray-600 transition-all text-lg"
+      >
+        เสร็จสิ้น
+      </button>
+    </div>
+  </form>
 </div>
 
 <script>
-    const fileInput = document.getElementById('file-input');
-    const fileList = document.getElementById('file-list');
-    fileInput.addEventListener('change', () => {
-        fileList.innerHTML = '';
-        Array.from(fileInput.files).forEach(file => {
-            const li = document.createElement('li');
-            li.className = "p-2 bg-blue-50 text-blue-800 rounded-lg text-xs border border-blue-100 flex justify-between";
-            li.innerHTML = `<span>📄 ${file.name}</span> <span>${(file.size/1024/1024).toFixed(2)} MB</span>`;
-            fileList.appendChild(li);
-        });
-    });
+  function updateFileName(input) {
+    const fileNameSpan = input.parentElement.querySelector(".file-name");
+    if (input.files && input.files.length > 1) {
+      fileNameSpan.textContent = `เลือกแล้ว ${input.files.length} ไฟล์`;
+    } else if (input.files && input.files.length === 1) {
+      fileNameSpan.textContent = input.files[0].name;
+    } else {
+      fileNameSpan.textContent = "no file chosen";
+    }
+  }
 </script>
 {% endblock %}

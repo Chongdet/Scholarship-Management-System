@@ -1,115 +1,125 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}ระบบทุนการศึกษา - Ubon Ratchathani University{% endblock %}</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      {% block title %}ระบบทุนการศึกษา - Ubon Ratchathani University{% endblock
+      %}
+    </title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.css"
+    />
+
     <style>
-        body {
-            font-family: 'Prompt', sans-serif;
-        }
+      body {
+        font-family: "Prompt", sans-serif;
+      }
+      /* ปรับแต่งความสูง Footer ให้คงที่ */
+      main {
+        min-height: calc(100vh - 160px);
+      }
     </style>
-    
+
     {% block extra_styles %}{% endblock %}
-</head>
-<body class="bg-sky-50 min-h-screen flex flex-col m-0 p-0">
-    
-    <header class="bg-blue-900 text-white shadow-md w-full">
-        <div class="px-8 py-4 flex justify-between items-center w-full">
-            
-            <div class="flex items-center gap-4">
-                <div class="w-14 h-14 flex items-center justify-center">
-                    <img src="{{ url_for('static', filename='images/ubu_logo.png') }}" alt="UBU Logo" class="w-full h-full object-contain">
-                </div>
-                <div>
-                    <h1 class="text-2xl font-bold text-yellow-400 tracking-wide">ระบบทุนการศึกษา</h1>
-                    <p class="text-sm text-blue-200">Ubon Ratchathani University</p>
-                </div>
-            </div>
-            
-            <nav class="flex items-center gap-6">
-                {% block nav_links %}{% endblock %}
-                
-                <div class="bg-blue-800 px-4 py-2 rounded-full text-sm border border-blue-700 flex items-center gap-2 text-yellow-100">
-                    👤 {% block role_name %}ผู้ใช้งาน{% endblock %}
-                </div>
-                
-                <a href="/logout" class="bg-yellow-400 text-blue-900 px-5 py-2.5 rounded-full font-bold hover:bg-yellow-300 transition-all shadow-md hover:shadow-lg">
-                    ออกจากระบบ 🚪
-                </a>
-            </nav>
+  </head>
+  <body class="bg-sky-50 min-h-screen flex flex-col m-0 p-0">
+    <header class="bg-blue-900 text-white shadow-md w-full sticky top-0 z-40">
+      <div class="px-8 py-4 flex justify-between items-center w-full">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 flex items-center justify-center">
+            <img
+              src="{{ url_for('static', filename='images/ubu_logo.png') }}"
+              alt="UBU Logo"
+              class="w-full h-full object-contain"
+            />
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold text-yellow-400 tracking-wide">
+              ระบบทุนการศึกษา
+            </h1>
+            <p class="text-sm text-blue-200">Ubon Ratchathani University</p>
+          </div>
         </div>
+
+        <nav class="flex items-center gap-6">
+          {% block nav_links %}{% endblock %}
+
+          <div
+            class="bg-blue-800 px-4 py-2 rounded-full text-sm border border-blue-700 flex items-center gap-2 text-yellow-100"
+          >
+            👤 {% block role_name %}ผู้ใช้งาน{% endblock %}
+          </div>
+
+          <a
+            href="/logout"
+            class="bg-yellow-400 text-blue-900 px-5 py-2.5 rounded-full font-bold hover:bg-yellow-300 transition-all shadow-md hover:shadow-lg"
+          >
+            ออกจากระบบ 🚪
+          </a>
+        </nav>
+      </div>
     </header>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div id="flash-container" class="fixed inset-0 z-50 flex items-center justify-center px-4">
-                {% for category, message in messages %}
-                <div class="flash-message relative w-72 h-72 bg-gradient-to-br from-slate-50 via-white to-sky-50 text-slate-800 px-6 py-6 rounded-2xl border border-slate-200 shadow-[0_20px_60px_rgba(15,23,42,0.18)] flex flex-col items-center justify-center gap-4 text-center animate-slide-in" role="alert">
-                    <span class="text-3xl w-14 h-14 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center">✓</span>
-                    <span class="text-lg font-semibold text-slate-800">{{ message }}</span>
-                    <span class="text-xs text-slate-500">ระบบแจ้งเตือน</span>
-                    <button onclick="this.parentElement.remove()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold text-2xl leading-none">&times;</button>
-                </div>
-                {% endfor %}
-            </div>
-            <script>
-                setTimeout(() => {
-                    const flashContainer = document.getElementById('flash-container');
-                    if (flashContainer) {
-                        flashContainer.querySelectorAll('.flash-message').forEach(msg => {
-                            msg.style.transition = 'opacity 0.5s, transform 0.5s';
-                            msg.style.opacity = '0';
-                            msg.style.transform = 'translateY(-20px)';
-                            setTimeout(() => msg.remove(), 500);
-                        });
-                    }
-                }, 3000);
-            </script>
-            <style>
-                @keyframes slide-in {
-                    from {
-                        transform: translateY(-16px);
-                        opacity: 0;
-                    }
-                    to {
-                        transform: translateY(0);
-                        opacity: 1;
-                    }
-                }
-                .animate-slide-in {
-                    animation: slide-in 0.3s ease-out;
-                }
-            </style>
-        {% endif %}
-    {% endwith %}
-
     <main class="flex-grow w-full px-8 py-10">
-        {% block content %}{% endblock %}
+      {% block content %}{% endblock %}
     </main>
 
     <footer class="bg-blue-950 text-blue-200 py-8 px-8 w-full text-sm mt-auto">
-        <div class="flex justify-between items-start">
-            <div>
-                <strong class="text-yellow-400 text-base">สำนักงานพัฒนานักศึกษา</strong><br>
-                มหาวิทยาลัยอุบลราชธานี<br>
-                85 ถนนสถลมาร์ค ตำบลเมืองศรีไค อำเภอวารินชำราบ จังหวัดอุบลราชธานี 34190
-            </div>
-            <div class="text-right">
-                <strong class="text-yellow-400 text-base">ติดต่อเรา</strong><br>
-                Email: ubustudent.d@ubu.ac.th<br>
-                โทรศัพท์: 045-353000 ต่อ 1210
-            </div>
+      <div class="flex justify-between items-start max-w-7xl mx-auto">
+        <div>
+          <strong class="text-yellow-400 text-base"
+            >สำนักงานพัฒนานักศึกษา</strong
+          ><br />
+          มหาวิทยาลัยอุบลราชธานี<br />
+          85 ถนนสถลมาร์ค ตำบลเมืองศรีไค อำเภอวารินชำราบ จังหวัดอุบลราชธานี 34190
         </div>
+        <div class="text-right">
+          <strong class="text-yellow-400 text-base">ติดต่อเรา</strong><br />
+          Email: ubustudent.d@ubu.ac.th<br />
+          โทรศัพท์: 045-353000 ต่อ 1210
+        </div>
+      </div>
     </footer>
 
-</body>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %}
+    <script>
+      // ย้ายการประกาศฟังก์ชันมาไว้ใน Tag Script ปกติ
+      document.addEventListener('DOMContentLoaded', function() {
+          const Toast = Swal.mixin({
+              toast: true,
+              position: 'top-end',
+              showConfirmButton: false,
+              timer: 3000,
+              timerProgressBar: true,
+              didOpen: (toast) => {
+                  toast.addEventListener('mouseenter', Swal.stopTimer)
+                  toast.addEventListener('mouseleave', Swal.resumeTimer)
+              }
+          });
+
+          // วนลูปผ่าน Jinja เพื่อสร้างคำสั่ง JS
+          {% for category, message in messages %}
+              Toast.fire({
+                  icon: "{{ 'success' if category == 'success' else 'error' if category == 'danger' else 'info' }}",
+                  title: "{{ message|safe }}"
+              });
+          {% endfor %}
+      });
+    </script>
+    {% endif %} {% endwith %} {% block extra_scripts %}{% endblock %}
+  </body>
 </html>

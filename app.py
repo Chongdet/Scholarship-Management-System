@@ -1,20 +1,30 @@
 from flask import Flask, redirect, url_for, render_template, request, session, flash
 from sqlalchemy import inspect, text
+import os
+
 # นำเข้า Blueprint (ตรวจสอบให้แน่ใจว่า path ไฟล์ถูกต้อง)
-# หากคุณรวมไว้ในไฟล์เดียวกัน ให้เปลี่ยนเป็น from officer_routes import officer_bp, director_bp
 from routes.director_routes import director_bp
 from routes.officer_routes import officer_bp
 from routes.student_routes import student_bp
 
 # 1. นำเข้า db และ Models
 from models import db, Scholarship, Criterion, Application, Student, Officer, Director
-import os
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "ubu-scholarship-secret-key"
 
+# --- 🚀 ส่วนที่แก้ไข: ตั้งค่า UPLOAD_FOLDER และสร้างโฟลเดอร์อัตโนมัติ ---
+basedir = os.path.abspath(os.path.dirname(__file__)) # หา Path ปัจจุบันของโปรเจกต์
+UPLOAD_FOLDER = os.path.join(basedir, 'static', 'uploads')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# เช็คว่ามีโฟลเดอร์ static/uploads หรือยัง ถ้ายังไม่มีให้สร้างขึ้นมาเลย
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    print(f"--- 📁 Created Upload Folder at: {UPLOAD_FOLDER} ---")
+# -----------------------------------------------------------------
+
 # 2. ตั้งค่า Database
-basedir = os.path.abspath(os.path.dirname(__file__))
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(
     basedir, "scholarship.db"
 )

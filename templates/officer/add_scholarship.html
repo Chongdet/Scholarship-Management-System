@@ -1,71 +1,103 @@
-{% extends "layouts/base_officer.html" %} {% block content %}
-<div class="max-w-3xl mx-auto p-6">
-  <div class="mb-6 flex items-center text-sm text-gray-500">
-    <a
-      href="{{ url_for('officer.list_scholarships') }}"
-      class="hover:text-blue-600 transition"
-      >จัดการทุน</a
-    >
-    <span class="mx-2">></span>
-    <span class="font-bold text-gray-800">เพิ่มทุนการศึกษา</span>
-  </div>
+{% extends "layouts/base_officer.html" %} 
 
-  <div
-    class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden p-8"
-  >
-    <div class="mb-6 border-b border-gray-200 pb-4">
-      <h2 class="text-2xl font-bold text-gray-800">เพิ่มทุนการศึกษาใหม่</h2>
-      <p class="text-gray-500 text-sm mt-1">
-        กรอกข้อมูลรายละเอียดของทุนการศึกษาที่ต้องการเพิ่มเข้าสู่ระบบ
-      </p>
+{% block content %}
+<div class="max-w-4xl mx-auto p-6">
+    <div class="mb-6 flex items-center text-sm text-gray-500">
+        <a href="{{ url_for('officer.home') }}" class="hover:text-blue-600 transition">หน้าแรก</a>
+        <span class="mx-2">></span>
+        <a href="{{ url_for('officer.list_scholarships') }}" class="hover:text-blue-600 transition">จัดการทุน</a>
+        <span class="mx-2">></span>
+        <span class="font-bold text-gray-800">เพิ่มทุนการศึกษาใหม่</span>
     </div>
 
-    <form method="POST" class="space-y-6">
-      <div>
-        <label for="name" class="block text-sm font-semibold text-gray-700 mb-2"
-          >ชื่อทุนการศึกษา <span class="text-red-500">*</span></label
-        >
-        <input
-          type="text"
-          id="name"
-          name="name"
-          required
-          class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none bg-gray-50 focus:bg-white"
-          placeholder="เช่น ทุนเรียนดี, ทุนขาดแคลนทุนทรัพย์"
-        />
-      </div>
+    <div class="mb-8 pb-4 border-b border-gray-300">
+        <h1 class="text-2xl font-bold text-gray-800">ประกาศทุนการศึกษาใหม่</h1>
+        <p class="text-gray-500 text-sm mt-1">สร้างประกาศทุนใหม่และกำหนดรหัสทุนเพื่อใช้ในการอ้างอิงในระบบ</p>
+    </div>
 
-      <div>
-        <label
-          for="amount"
-          class="block text-sm font-semibold text-gray-700 mb-2"
-          >จำนวนเงิน (บาท)</label
-        >
-        <input
-          type="number"
-          step="0.01"
-          id="amount"
-          name="amount"
-          class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none bg-gray-50 focus:bg-white"
-          placeholder="เช่น 15000"
-        />
-      </div>
+    <form method="POST" action="{{ url_for('officer.add_scholarship') }}" class="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden">
+        <div class="p-8 space-y-6">
+            
+            <section>
+                <h2 class="text-xs font-bold text-blue-600 uppercase tracking-widest mb-4 flex items-center">
+                    <i class="fas fa-file-signature mr-2"></i> ข้อมูลพื้นฐาน
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="md:col-span-1">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">รหัสทุนการศึกษา <span class="text-red-500">*</span></label>
+                        <input type="text" name="scholarship_id" required placeholder="เช่น SCH-001"
+                               class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition font-mono uppercase">
+                    </div>
 
-      <div class="flex items-center gap-4 pt-4 mt-6 border-t border-gray-100">
-        <button
-          type="submit"
-          class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl transition shadow-md transform hover:-translate-y-1"
-        >
-          💾 บันทึกข้อมูล
-        </button>
-        <a
-          href="{{ url_for('officer.list_scholarships') }}"
-          class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 px-8 rounded-xl transition"
-        >
-          ยกเลิก
-        </a>
-      </div>
+                    <div class="md:col-span-1">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">สถานะการเปิดรับ</label>
+                        <select name="status" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="Open">🟢 เปิดรับสมัคร (Open)</option>
+                            <option value="Closed">⚪ ปิดรับสมัคร (Closed)</option>
+                        </select>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">ชื่อทุนการศึกษา <span class="text-red-500">*</span></label>
+                        <input type="text" name="scholarship_name" required placeholder="เช่น ทุนเรียนดีประจำภาคการศึกษา 1/2569"
+                               class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">จำนวนเงินทุน (บาท)</label>
+                        <input type="number" step="0.01" name="amount" placeholder="0.00"
+                               class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
+                    </div>
+                </div>
+            </section>
+
+            <hr class="border-gray-100">
+
+            <section>
+                <h2 class="text-xs font-bold text-blue-600 uppercase tracking-widest mb-4 flex items-center">
+                    <i class="fas fa-user-check mr-2"></i> เกณฑ์การคัดเลือก
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">เกรดเฉลี่ยสะสม (GPAX) ขั้นต่ำ</label>
+                        <input type="number" step="0.01" name="min_gpax" placeholder="เช่น 3.00"
+                               class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">คณะ/สาขาวิชาที่เกี่ยวข้อง</label>
+                        <input type="text" name="faculty_condition" placeholder="ระบุคณะ หรือ 'ทุกคณะ'"
+                               class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
+                    </div>
+                </div>
+            </section>
+
+            <hr class="border-gray-100">
+
+            <section>
+                <h2 class="text-xs font-bold text-blue-600 uppercase tracking-widest mb-4 flex items-center">
+                    <i class="fas fa-calendar-alt mr-2"></i> กำหนดการสมัคร
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">วันที่เปิดรับสมัคร</label>
+                        <input type="date" name="start_date"
+                               class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-red-600 mb-2">วันที่สิ้นสุดการรับสมัคร</label>
+                        <input type="date" name="end_date"
+                               class="w-full px-4 py-2.5 border border-red-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition">
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="bg-gray-50 px-8 py-5 flex justify-end items-center gap-4 border-t border-gray-200">
+            <a href="{{ url_for('officer.list_scholarships') }}" class="px-6 py-2.5 text-gray-600 hover:text-gray-800 font-medium transition">ยกเลิก</a>
+            <button type="submit" class="px-8 py-2.5 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 shadow-md transition transform active:scale-95 flex items-center gap-2">
+                💾 บันทึกข้อมูล
+            </button>
+        </div>
     </form>
-  </div>
 </div>
 {% endblock %}

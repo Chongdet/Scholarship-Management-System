@@ -274,12 +274,32 @@ def apply_scholarship():
         first_name = parts[0]
         last_name = " ".join(parts[1:]) if len(parts) > 1 else ""
         
+        father_inc = getattr(student, 'father_income', None) or 0
+        mother_inc = getattr(student, 'mother_income', None) or 0
+        family_income = father_inc + mother_inc if (father_inc or mother_inc) else ""
+        
+        siblings_lst = getattr(student, 'siblings_list', None)
+        siblings = len(siblings_lst) if siblings_lst else ""
+        
         prefill = {
             "student_id": student.student_id,
             "first_name": first_name,
             "last_name": last_name,
-            "email": student.email,
-            "faculty": student.faculty
+            "email": getattr(student, 'email', ''),
+            "faculty": student.faculty,
+            "phone": getattr(student, 'mobile', ''),
+            "address": getattr(student, 'address_current', ''),
+            "father_name": getattr(student, 'father_name', ''),
+            "father_occupation": getattr(student, 'father_job', ''),
+            "father_income": getattr(student, 'father_income', ''),
+            "mother_name": getattr(student, 'mother_name', ''),
+            "mother_occupation": getattr(student, 'mother_job', ''),
+            "mother_income": getattr(student, 'mother_income', ''),
+            "year_level": getattr(student, 'year', ''),
+            "gpa": getattr(student, 'gpax', ''),
+            "housing_type": getattr(student, 'housing_status', ''),
+            "family_income": family_income,
+            "siblings": siblings
         }
 
     titles = ["นาย", "นางสาว", "นาง"]

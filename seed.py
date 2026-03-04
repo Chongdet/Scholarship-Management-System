@@ -26,7 +26,7 @@ def seed_users():
         ]
 
         for i in range(1, 11):
-            student_id = f"68113400{i:02d}"
+            student_id = f"6811340{i:02d}"
             mock_gpax = round(2.0 + (i * 0.2), 2)
             mock_faculty = faculties[i % len(faculties)]
 

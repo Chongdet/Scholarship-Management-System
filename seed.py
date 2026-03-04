@@ -102,8 +102,8 @@ def seed_users():
         # =========================================
         db.session.commit()
 
-        print("--- ✅ Seeding Complete! ---")
-        print(f"สร้าง Students: 10 คน | Scholarships: {len(scholarships)} ทุน")
+        print("--- Seeding Complete! ---")
+        print(f"Done: 10 Students, {len(scholarships)} Scholarships, 5 Officers")
 
 
 if __name__ == "__main__":

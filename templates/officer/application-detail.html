@@ -57,8 +57,8 @@
                     <div>ชื่อ-นามสกุล: {{ application.student_name }}</div>
                     <div>คณะ: {{ application.faculty }}</div>
                     <div>GPAX: {{ application.gpa }}</div>
-                    <div>เบอร์โทรศัพท์: 081-234-5678</div>
-                    <div>อีเมล: somchai.i@email.com</div>
+                    <div>เบอร์โทรศัพท์: {{ student.mobile if student and student.mobile else '-' }}</div>
+                    <div>อีเมล: {{ student.email if student and student.email else '-' }}</div>
                 </div>
 
                 <div class="text-sm text-gray-700 space-y-2 mb-4 border border-gray-200 bg-gray-50 rounded-lg p-4">

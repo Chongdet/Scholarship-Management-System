@@ -22,12 +22,13 @@ def scoring():
     scholarship_list = []
     for sch in scholarships:
         # ใช้ scholarship_id เป็นกุญแจหลัก
-        total_applicants = Application.query.filter_by(scholarship_id=sch.scholarship_id).count()
-        passed_docs = Application.query.filter_by(scholarship_id=sch.scholarship_id).count()
+        # แก้เป็นแบบนี้ครับ
+        total_applicants = Application.query.filter_by(scholarship_id=sch.id).count()
+        passed_docs = Application.query.filter_by(scholarship_id=sch.id, is_passed=True).count()
 
         scholarship_list.append(
             {
-                "scholarship_id": sch.scholarship_id,
+                "scholarship_id": sch.id,
                 "scholarship_name": sch.scholarship_name,
                 "total_applicants": total_applicants,
                 "passed_docs": passed_docs,

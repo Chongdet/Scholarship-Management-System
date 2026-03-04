@@ -103,7 +103,7 @@ class Scholarship(db.Model):
     status = db.Column(db.String(20), default='open')  # สถานะของทุน open(เปิดรับ),checking=close(กำลังตรวจสอบ,ปิดทุน), interview(รายชื่อสัมภาษณ์), announce(รายชื่อได้รับทุน) 
     interview_file_url = db.Column(db.String(500))    # ลิงก์ไฟล์ประกาศสัมภาษณ์
     announce_file_url = db.Column(db.String(500))     # ลิงก์ไฟล์ประกาศคนได้ทุน
-
+    faculty_condition = db.Column(db.String(100), nullable=True) # หรือเป็น Text ก็ได้
     criteria = db.relationship('Criterion', backref='scholarship', lazy=True)
     applications = db.relationship('Application', backref='scholarship', lazy=True)
 

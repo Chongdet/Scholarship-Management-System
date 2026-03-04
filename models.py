@@ -123,17 +123,17 @@ class Scholarship(db.Model):
 # 2.2 ข้อมูลใบสมัคร
 class Application(db.Model):
     __tablename__ = 'application'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String, primary_key=True)
     student_id = db.Column(db.String(20), nullable=False)
     student_name = db.Column(db.String(100))
     faculty = db.Column(db.String(100))
-    
     scholarship_id = db.Column(db.Integer, db.ForeignKey('scholarship.id'), nullable=False)
     status = db.Column(db.String(20), default='รอตรวจสอบ')
     reviewing_by = db.Column(db.String(50))
     reviewing_at = db.Column(db.DateTime)
     status_description = db.Column(db.Text)
-
+    is_scored = db.Column(db.Boolean, default=False)
+    total_score = db.Column(db.Integer, default=0)
 
 # 2.3 บันทึกการทำงาน (Audit Log)
 class AuditLog(db.Model):
@@ -160,3 +160,4 @@ class Criterion(db.Model):
     
     name = db.Column(db.String(100))  # เช่น 'คะแนนสัมภาษณ์', 'จิตอาสา'
     max_score = db.Column(db.Integer) # คะแนนเต็มของหัวข้อนั้น
+    

@@ -316,3 +316,8 @@ def track_status():
     """ระบบติดตามสถานะการสมัคร"""
     # เติม pass ชั่วคราวเพื่อไม่ให้ระบบพัง (เนื่องจากฟังก์ชันนี้ยังไม่มีโค้ดข้างใน)
     return "หน้าระบบติดตามสถานะการสมัคร กำลังอยู่ในระหว่างการพัฒนา..."
+
+@student_bp.route("/scholarships")
+def announce_scholarships():
+    all_scholarships = Scholarship.query.all()
+    return render_template("student/scholarships.html", scholarships=all_scholarships)

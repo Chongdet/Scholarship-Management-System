@@ -1,68 +1,123 @@
 {% extends "layouts/base_officer.html" %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto p-6">
+<div class="max-w-7xl mx-auto p-6 font-prompt">
+    <div class="mb-6 flex items-center text-sm text-gray-500">
+        <a href="{{ url_for('officer.home') }}" class="hover:text-blue-600 transition">หน้าแรก</a>
+        <span class="mx-2">></span>
+        <span class="font-bold text-gray-800">จัดการทุนการศึกษา</span>
+    </div>
 
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-gray-200 pb-4">
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800">จัดการทุนการศึกษา</h1>
-            <p class="text-gray-500 text-sm mt-2">จัดการข้อมูลทุนและดูจำนวนผู้สมัครในระบบ</p>
+            <h1 class="text-2xl font-bold text-gray-800 mb-1">จัดการทุนการศึกษา</h1>
+            <p class="text-gray-500 text-sm">ตรวจสอบ แก้ไข ลบข้อมูลทุนการศึกษา และดูจำนวนผู้สมัครในระบบ</p>
         </div>
-        <a href="{{ url_for('officer.add_scholarship') }}" class="mt-4 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-5 rounded-xl transition shadow-md flex items-center gap-2 transform hover:-translate-y-1">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-            </svg>
-            เพิ่มทุนใหม่
+        <a href="{{ url_for('officer.add_scholarship') }}" 
+           class="bg-[#4F46E5] hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-lg shadow-indigo-100 transition-all flex items-center justify-center text-sm transform hover:-translate-y-1">
+            <i class="fas fa-plus mr-2 text-xs"></i> เพิ่มทุนการศึกษาใหม่
         </a>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-blue-500 border border-gray-100 flex flex-col justify-center">
+            <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wider mb-1">รวมทั้งหมด</p>
+            <h3 class="text-2xl font-black text-gray-800">{{ scholarships|length }}</h3>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-yellow-400 border border-gray-100 flex flex-col justify-center">
+            <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wider mb-1">เปิดรับสมัครอยู่</p>
+            <h3 class="text-2xl font-black text-gray-800">
+                {{ scholarships | selectattr('status', 'equalto', 'Open') | list | length }}
+            </h3>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-pink-400 border border-gray-100 flex flex-col justify-center">
+            <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wider mb-1">ปิดรับสมัครแล้ว</p>
+            <h3 class="text-2xl font-black text-gray-800">
+                {{ scholarships | selectattr('status', 'equalto', 'Closed') | list | length }}
+            </h3>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-green-400 border border-gray-100 flex flex-col justify-center">
+            <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wider mb-1">ยอดผู้สมัครรวม</p>
+            <h3 class="text-2xl font-black text-gray-800">
+                {% set total_apps = 0 %}
+                {% for s in scholarships %}{% set total_apps = total_apps + s.applications|length %}{% endfor %}
+                {{ total_apps }}
+            </h3>
+        </div>
+    </div>
+
+    <div class="bg-white shadow-xl shadow-gray-100/50 rounded-2xl border border-gray-200 overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm text-gray-600">
-                <thead class="bg-blue-50 text-blue-900 font-bold border-b border-blue-100">
-                    <tr>
-                        <th class="px-6 py-4">#</th>
-                        <th class="px-6 py-4">ชื่อทุนการศึกษา</th>
-                        <th class="px-6 py-4">จำนวนเงิน (บาท)</th>
-                        <th class="px-6 py-4 text-center">จัดการ</th>
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                        <th class="px-6 py-4 text-[11px] font-black text-gray-500 uppercase tracking-widest">รหัส & ชื่อทุน</th>
+                        <th class="px-6 py-4 text-[11px] font-black text-gray-500 uppercase tracking-widest text-center">เกรดขั้นต่ำ</th>
+                        <th class="px-6 py-4 text-[11px] font-black text-gray-500 uppercase tracking-widest text-center">สถานะ</th>
+                        <th class="px-6 py-4 text-[11px] font-black text-gray-500 uppercase tracking-widest text-center">จำนวนผู้สมัคร</th>
+                        <th class="px-6 py-4 text-[11px] font-black text-gray-500 uppercase tracking-widest text-center">จัดการข้อมูล</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     {% for scholarship in scholarships %}
-                    <tr class="hover:bg-blue-50/50 transition duration-150">
-                        <td class="px-6 py-4">{{ loop.index }}</td>
-                        <td class="px-6 py-4 font-bold text-gray-800">{{ scholarship.name }}</td>
-                        <td class="px-6 py-4 text-green-600 font-medium">
-                            {{ "{:,.2f}".format(scholarship.amount) if scholarship.amount else "-" }} ฿
+                    <tr class="hover:bg-indigo-50/30 transition-colors">
+                        <td class="px-6 py-5">
+                            <div class="font-bold text-gray-800 text-sm mb-0.5">{{ scholarship.scholarship_name }}</div>
+                            <span class="px-2 py-0.5 bg-gray-100 text-gray-500 text-[10px] font-mono rounded border border-gray-200">
+                                {{ scholarship.scholarship_id }}
+                            </span>
                         </td>
-                        <td class="px-6 py-4 text-center space-x-2">
-                            
-                            <a href="{{ url_for('officer.applications', scholarship_id=scholarship.id) }}" 
-                               class="inline-block text-blue-600 border border-blue-600 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded-lg transition text-xs font-bold">
-                                👥 ผู้สมัคร
-                            </a>
+                        <td class="px-6 py-5 text-center text-sm font-semibold text-gray-600">
+                            {{ scholarship.min_gpax or '-' }}
+                        </td>
+                        <td class="px-6 py-5 text-center">
+                            {% if scholarship.status == 'Open' %}
+                                <span class="px-3 py-1 rounded-full text-[10px] font-black bg-green-100 text-green-700 border border-green-200">
+                                    ● OPEN
+                                </span>
+                            {% else %}
+                                <span class="px-3 py-1 rounded-full text-[10px] font-black bg-red-50 text-red-600 border border-red-100">
+                                    ● CLOSED
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-5 text-center">
+                            <div class="text-sm font-black text-gray-800">{{ scholarship.applications|length }} คน</div>
+                        </td>
+                        <td class="px-6 py-5 text-center">
+                            <div class="flex items-center justify-center space-x-2">
+                                <a href="{{ url_for('officer.applications', scholarship_id=scholarship.scholarship_id) }}" 
+                                   class="flex items-center px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-600 hover:text-white transition-all">
+                                    <i class="fas fa-users text-xs mr-2"></i>
+                                    <span class="text-[11px] font-bold">ผู้สมัคร</span>
+                                </a>
 
-                            <a href="{{ url_for('officer.edit_scholarship', id=scholarship.id) }}" 
-                               class="inline-block text-yellow-500 border border-yellow-500 hover:bg-yellow-500 hover:text-white px-3 py-1.5 rounded-lg transition text-xs font-bold">
-                                ✏️ แก้ไข
-                            </a>
+                                <a href="{{ url_for('officer.edit_scholarship', scholarship_id=scholarship.scholarship_id) }}" 
+                                   class="flex items-center px-3 py-1.5 rounded-lg bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-600 hover:text-white transition-all">
+                                    <i class="fas fa-edit text-xs mr-2"></i>
+                                    <span class="text-[11px] font-bold">แก้ไข</span>
+                                </a>
 
-                            <form action="{{ url_for('officer.delete_scholarship', id=scholarship.id) }}" method="POST" class="inline-block">
-                                <button type="submit" onclick="return confirm('ยืนยันการลบทุน {{ scholarship.name }} นี้ใช่หรือไม่?')" 
-                                        class="text-red-500 border border-red-500 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-lg transition text-xs font-bold">
-                                    🗑️ ลบ
-                                </button>
-                            </form>
-
+                                <form action="{{ url_for('officer.delete_scholarship', scholarship_id=scholarship.scholarship_id) }}" 
+                                      method="POST" class="inline" onsubmit="return confirm('⚠️ คำเตือน: คุณต้องการลบทุน {{ scholarship.scholarship_name }} ใช่หรือไม่?')">
+                                    <button type="submit" class="flex items-center px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-600 hover:text-white transition-all">
+                                        <i class="fas fa-trash-alt text-xs mr-2"></i>
+                                        <span class="text-[11px] font-bold">ลบ</span>
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="4" class="px-6 py-12 text-center text-gray-400">
+                        <td colspan="5" class="px-6 py-16 text-center text-gray-400 bg-gray-50/50">
                             <div class="flex flex-col items-center justify-center">
-                                <span class="text-4xl mb-3">📭</span>
-                                <p class="text-lg font-medium">ยังไม่มีทุนในระบบ</p>
-                                <p class="text-sm">กดปุ่ม "เพิ่มทุนใหม่" ด้านบนเพื่อเริ่มต้นใช้งาน</p>
+                                <span class="text-5xl mb-4">📭</span>
+                                <p class="text-lg font-bold text-gray-600">ยังไม่มีทุนการศึกษาในระบบ</p>
+                                <p class="text-sm mt-1">กดปุ่ม "เพิ่มทุนการศึกษาใหม่" ด้านบนเพื่อเริ่มต้นเพิ่มข้อมูล</p>
                             </div>
                         </td>
                     </tr>
@@ -72,4 +127,11 @@
         </div>
     </div>
 </div>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;900&display=swap');
+    .font-prompt {
+        font-family: 'Prompt', sans-serif;
+    }
+</style>
 {% endblock %}

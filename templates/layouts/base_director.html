@@ -1,0 +1,14 @@
+{% extends "layouts/base.html" %}
+
+{% block nav_links %}
+    <a href="/director/scoring" class="text-white hover:text-yellow-400 font-medium transition-colors border-b-2 border-transparent hover:border-yellow-400 py-1">พิจารณาทุน</a>
+    
+    <a href="/director/ranking" class="text-white hover:text-yellow-400 font-medium transition-colors border-b-2 border-transparent hover:border-yellow-400 py-1">จัดอันดับและยืนยันผล</a>
+    
+    <a href="/director/audit_log" class="text-white hover:text-yellow-400 font-medium transition-colors border-b-2 border-transparent hover:border-yellow-400 py-1 flex items-center gap-1">
+        <span>บันทึกการทำงาน</span>
+        <span class="text-[10px] bg-blue-700 px-1.5 py-0.5 rounded text-blue-200">LOG</span>
+    </a>
+{% endblock %}
+
+{% block role_name %}กรรมการ{% endblock %}

@@ -1,210 +1,111 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบทุนการศึกษา - Ubon Ratchathani University</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    
-    <style>
-    body { font-family: 'Prompt', sans-serif; }
-    .nav-capsule { display: flex; gap: 8px; }
-    
-    /* สไตล์สำหรับ Slider ประกาศด้านบน */
-    .swiper { width: 100%; height: 380px; border-radius: 1rem; }
-    .swiper-slide img { width: 100%; height: 100%; object-fit: cover; }
-    .swiper-button-next, .swiper-button-prev { color: #ffffff !important; }
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+
+    <div class="swiper mySwiper mb-12 shadow-2xl rounded-3xl overflow-hidden border-4 border-yellow-400 relative">
+        <div class="swiper-wrapper">
+            {% for item in scholarships[:3] %} 
+            <div class="swiper-slide relative h-[450px]">
+                <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1200" 
+                     class="w-full h-full object-cover" alt="Banner">
+                <div class="absolute inset-0 bg-gradient-to-r from-blue-900 via-blue-900/60 to-transparent flex flex-col justify-center px-12 md:px-20 text-white">
+                    <span class="bg-yellow-400 text-blue-900 px-4 py-1 rounded-full text-xs font-bold w-fit mb-4 shadow-lg"> 
+                        🔥 กำลังเปิดรับสมัคร 
+                    </span>
+                    <h2 class="text-4xl md:text-5xl font-bold text-yellow-400 mb-3 drop-shadow-md">
+                        {{ item.name }}
+                    </h2>
+                    <p class="text-xl mb-6 text-blue-50 max-w-md leading-relaxed">
+                        สนับสนุนนักศึกษาที่มีผลการเรียนยอดเยี่ยม และมอบโอกาสเพื่ออนาคตที่ดีกว่า
+                    </p>
+                    <div class="flex items-center gap-6 text-lg font-medium border-l-4 border-yellow-400 pl-6">
+                        <div>
+                            <p class="text-blue-200 text-sm">มูลค่าทุน</p>
+                            <p class="text-white text-2xl font-bold">{{ "{:,.0f}".format(item.amount or 0) }} บาท</p>
+                        </div>
+                        <div class="h-10 w-px bg-blue-700"></div>
+                        <div>
+                            <p class="text-blue-200 text-sm">ช่องทางสมัคร</p>
+                            <p class="text-white font-bold text-xl">UBU Portal</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="swiper-button-next !text-yellow-400"></div>
+        <div class="swiper-button-prev !text-yellow-400"></div>
+        <div class="swiper-pagination"></div>
+    </div>
+
+    <div class="text-center mb-12">
+        <h2 class="text-4xl md:text-5xl font-extrabold text-blue-900 mb-4 italic">ทุนการศึกษาที่เปิดรับ</h2>
+        <div class="h-1.5 w-32 bg-yellow-400 mx-auto rounded-full"></div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+        {% for item in scholarships %}
+        <div class="group bg-white rounded-3xl shadow-md hover:shadow-2xl transition-all duration-500 border border-gray-100 overflow-hidden flex flex-col h-full transform hover:-translate-y-2">
+            
+            <div class="h-48 relative overflow-hidden">
+                <div class="absolute inset-0 bg-blue-900/40 group-hover:bg-blue-900/20 transition-colors z-10"></div>
+                <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=400" 
+                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Scholarship">
+                <div class="absolute bottom-4 left-4 z-20">
+                    <span class="bg-white/90 backdrop-blur text-blue-900 px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
+                        UBU Scholarship
+                    </span>
+                </div>
+            </div>
+            
+            <div class="p-8 flex flex-col flex-grow">
+                <h3 class="font-bold text-xl text-blue-900 mb-4 line-clamp-2 min-h-[3.5rem]">{{ item.name }}</h3>
+                <div class="space-y-3 text-sm text-gray-600 flex-grow">
+                    <div class="flex justify-between items-center p-3 bg-blue-50 rounded-xl">
+                        <span class="text-blue-800 font-semibold">ทุนละ :</span>
+                        <span class="font-black text-blue-700 text-lg">{{ "{:,.0f}".format(item.amount or 0) }} ฿</span>
+                    </div>
+                    <p class="flex justify-between px-1">
+                        <span>หน่วยงาน :</span> 
+                        <span class="font-medium text-gray-800">กองพัฒนานักศึกษา</span>
+                    </p>
+                </div>
+
+                <div class="mt-8">
+                    <a href="{{ url_for('student.apply_scholarship') }}" 
+                       class="block w-full bg-blue-900 text-white text-center font-bold py-3 px-6 rounded-2xl hover:bg-yellow-400 hover:text-blue-900 transition-all shadow-lg active:scale-95">
+                        สมัครทุนนี้
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-span-full text-center py-24 bg-white rounded-3xl border-2 border-dashed border-gray-200">
+            <div class="text-6xl mb-4 text-gray-300">📁</div>
+            <p class="text-gray-400 text-xl font-medium">ขณะนี้ยังไม่มีทุนการศึกษาเปิดให้สมัครในระบบ</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    /* ปรับแต่งสี Pagination ให้เป็นสีเหลืองของ ม.อุบล */
     .swiper-pagination-bullet-active { background: #fbbf24 !important; }
+    .swiper-button-next:after, .swiper-button-prev:after { font-size: 24px !important; font-weight: bold; }
+</style>
 
-    /* ส่วนรูปภาพหัวการ์ดทุน */
-    .scholarship-card-img {
-        width: 100%;
-        height: 240px;
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-position: center;
-        background-color: #f8fafc;
-        transition: transform 0.5s ease;
-    }
-    .group:hover .scholarship-card-img {
-        transform: scale(1.05);
-    }
-    </style>
-</head>
-<body class="bg-sky-50 min-h-screen flex flex-col m-0 p-0">
-    
-    <header class="bg-blue-900 text-white shadow-md w-full">
-        <div class="px-8 py-4 flex justify-between items-center w-full">
-            <div class="flex items-center gap-4">
-                <div class="w-14 h-14 flex items-center justify-center">
-                    <img src="{{ url_for('static', filename='images/ubu_logo.png') }}" alt="UBU Logo" class="w-full h-full object-contain">
-                </div>
-                <div>
-                    <h1 class="text-2xl font-bold text-yellow-400 tracking-wide">ระบบทุนการศึกษา</h1>
-                    <p class="text-sm text-blue-200">Ubon Ratchathani University</p>
-                </div>
-            </div>
-            
-            <nav class="flex items-center gap-6">
-                <div class="nav-capsule">
-                    {% block nav_links %}
-                    <a href="/student/dashboard" class="text-white border-b-4 border-yellow-400 px-1 py-2 text-sm font-bold">ทุนการศึกษา</a>
-                    <a href="/student/scholarships" class="text-white hover:text-yellow-400 px-5 py-2 rounded-full text-sm font-medium transition-all">ระเบียบ/ประกาศ</a>
-                    <a href="/student/status" class="text-white hover:text-yellow-400 px-5 py-2 rounded-full text-sm font-medium transition-all">ติดตามสถานะ</a>
-                    {% endblock %}
-                </div>
-                <div class="bg-blue-800 px-4 py-2 rounded-full text-sm border border-blue-700 flex items-center gap-2 text-yellow-100">
-                    👤 {% block role_name %}นักศึกษา{% endblock %}
-                </div>
-                <a href="/logout" class="bg-yellow-400 text-blue-900 px-5 py-2.5 rounded-full font-bold hover:bg-yellow-300 transition-all shadow-md hover:shadow-lg">ออกจากระบบ 🚪</a>
-            </nav>
-        </div>
-    </header>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+    const swiper = new Swiper('.mySwiper', {
+        loop: true,
+        spaceBetween: 30,
+        effect: 'fade',
+        fadeEffect: { crossFade: true },
+        pagination: { el: '.swiper-pagination', clickable: true },
+        navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+        autoplay: { delay: 5000, disableOnInteraction: false }
+    });
+</script>
 
-    <main class="flex-grow w-full px-8 py-10">
-        {% block content %}
-
-        <div class="swiper mySwiper mb-12 shadow-xl border-4 border-yellow-400 relative">
-            <div class="swiper-wrapper">
-                
-                <div class="swiper-slide relative">
-                    <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&q=80&w=1200" alt="Activity Leader Scholarship">
-                    <div class="absolute inset-0 bg-gradient-to-r from-blue-900/90 to-transparent flex flex-col justify-center px-16 text-white">
-                        <span class="bg-yellow-400 text-blue-900 px-3 py-1 rounded-full text-xs font-bold w-fit mb-3"> กำลังเปิดรับสมัคร</span>
-                        <h2 class="text-4xl font-bold text-yellow-400 mb-2">ทุนเรียนดีดีเด่น</h2>
-                        <p class="text-lg mb-4 text-blue-100">สนับสนุนนักศึกษาที่มีผลการเรียนยอดเยี่ยม</p>
-                        <div class="grid grid-cols-2 gap-y-2 gap-x-8 max-w-lg text-sm border-l-4 border-yellow-400 pl-4">
-                            <p><strong> จำนวน:</strong> 5 ทุน</p>
-                            <p><strong> ทุนละ:</strong> 20,000 บาท</p>
-                            <p><strong> วันที่:</strong> 20 ก.พ. - 20 มี.ค. 2569</p>
-                            <p><strong> สมัครทาง:</strong> ระบบออนไลน์ UBU Portal</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="swiper-slide relative">
-                    <img src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Banner 2">
-                    <div class="absolute inset-0 bg-gradient-to-r from-blue-900/90 to-transparent flex flex-col justify-center px-16 text-white">
-                        <span class="bg-sky-400 text-white px-3 py-1 rounded-full text-xs font-bold w-fit mb-3"> ทุนช่วยเหลือ</span>
-                        <h2 class="text-4xl font-bold text-yellow-400 mb-2">ทุนช่วยเหลือนักศึกษาขาดแคลน</h2>
-                        <p class="text-lg mb-4 text-blue-100">เพราะเราเชื่อว่า "โอกาส" สำคัญกว่าสิ่งใด</p>
-                        <div class="grid grid-cols-2 gap-y-2 gap-x-8 max-w-lg text-sm border-l-4 border-sky-400 pl-4">
-                            <p><strong> จำนวน:</strong> 10 ทุน</p>
-                            <p><strong> ทุนละ:</strong> 15,000 บาท</p>
-                            <p><strong> วันที่:</strong> 1 มี.ค. - 15 เม.ย. 2569</p>
-                            <p><strong> สมัครทาง:</strong> กองพัฒนานักศึกษา ชั้น 2</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="swiper-slide relative">
-                    <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Banner 3">
-                    <div class="absolute inset-0 bg-gradient-to-r from-blue-900/90 to-transparent flex flex-col justify-center px-16 text-white">
-                        <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold w-fit mb-3"> กิจกรรมเด่น</span>
-                        <h2 class="text-4xl font-bold text-yellow-400 mb-2">ทุนส่งเสริมกิจกรรมดีเด่น</h2>
-                        <p class="text-lg mb-4 text-blue-100">สำหรับผู้นำกิจกรรมและผู้สร้างชื่อเสียงให้มหาวิทยาลัย</p>
-                        <div class="grid grid-cols-2 gap-y-2 gap-x-8 max-w-lg text-sm border-l-4 border-green-500 pl-4">
-                            <p><strong> จำนวน:</strong> 3 ทุน</p>
-                            <p><strong> ทุนละ:</strong> 10,000 บาท</p>
-                            <p><strong> วันที่:</strong> 15 มี.ค. - 30 เม.ย. 2569</p>
-                            <p><strong> สมัครทาง:</strong> งานกิจกรรมนักศึกษา</p>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-            <div class="swiper-button-next"></div>
-            <div class="swiper-button-prev"></div>
-            <div class="swiper-pagination"></div>
-        </div>
-        <h2 class="text-5xl font-extrabold text-blue-900 mb-10 text-center">ทุนการศึกษา</h2>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
-    
-    {% set scholarships = [
-        {'name': 'ทุนเรียนดีดีเด่น', 'amount': '5 ทุน', 'value': '20,000 บาท', 'period': '20 ก.พ. - 20 มี.ค. 2569', 'category': 'ทุนภายในมหาวิทยาลัย'},
-        {'name': 'ทุนช่วยเหลือนักศึกษาขาดแคลน', 'amount': '10 ทุน', 'value': '15,000 บาท', 'period': '1 มี.ค. - 15 เม.ย. 2569', 'category': 'ทุนเพื่อสังคม'},
-        {'name': 'ทุนส่งเสริมกิจกรรมดีเด่น', 'amount': '3 ทุน', 'value': '10,000 บาท', 'period': '15 มี.ค. - 30 เม.ย. 2569', 'category': 'ทุนพัฒนาศักยภาพ'},
-        {'name': 'ทุนวิจัยระดับปริญญาตรี', 'amount': '2 ทุน', 'value': '30,000 บาท', 'period': '1 เม.ย. - 31 พ.ค. 2569', 'category': 'ทุนวิจัยและนวัตกรรม'},
-        {'name': 'ทุนกีฬาและศิลปวัฒนธรรม', 'amount': '8 ทุน', 'value': '12,000 บาท', 'period': 'วันนี้ - 10 มี.ค. 2569', 'category': 'ทุนความสามารถพิเศษ'},
-        {'name': 'ทุนแลกเปลี่ยนต่างประเทศ', 'amount': '2 ทุน', 'value': '50,000 บาท', 'period': 'ตลอดเดือน มี.ค. 2569', 'category': 'ทุนสนับสนุนระดับสากล'},
-        {'name': 'ทุนสนับสนุนอุปกรณ์การเรียน', 'amount': '20 ทุน', 'value': '5,000 บาท', 'period': '10 ก.พ. - 10 มี.ค. 2569', 'category': 'ทุนสวัสดิการนักศึกษา'},
-        {'name': 'ทุนทำงานแลกเปลี่ยน (Work Study)', 'amount': '15 ทุน', 'value': 'ตามชั่วโมงงาน', 'period': 'ปีการศึกษา 2569', 'category': 'ทุนจ้างงานพิเศษ'},
-        {'name': 'ทุนบุตรบุคลากร', 'amount': '5 ทุน', 'value': '10,000 บาท', 'period': '1 มิ.ย. - 30 มิ.ย. 2569', 'category': 'ทุนรัฐบาล/หน่วยงาน'}
-    ] %}
-
-{% for item in scholarships %}
-<div class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden flex flex-col h-full">
-    
-    <div class="overflow-hidden">
-        <div class="scholarship-card-img flex items-center justify-center p-4 text-center" 
-             style="background-image: linear-gradient(rgba(30, 58, 138, 0.8), rgba(30, 58, 138, 0.8)), url('https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=400');">
-            <div class="text-white">
-                <h4 class="text-xl font-bold mb-2">{{ item.name }}</h4>
-                <div class="bg-yellow-400 text-blue-900 px-3 py-1 rounded-full text-sm font-bold inline-block mb-1">
-                    จำนวน {{ item.amount }}
-                </div>
-                <p class="text-yellow-200 text-lg font-semibold">ทุนละ {{ item.value }}</p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="p-6 flex flex-col flex-grow">
-        <h3 class="font-bold text-lg text-blue-900 mb-4">{{ item.name }}</h3>
-        <div class="space-y-2 text-sm text-gray-600 flex-grow">
-            <p class="flex justify-between"><span>จำนวนทุน :</span> <span class="font-bold text-blue-600">{{ item.amount }}</span></p>
-            <p class="flex justify-between"><span>ทุนละ :</span> <span class="font-medium">{{ item.value }}</span></p>
-            
-            <p class="flex justify-between"><span>ประเภททุน :</span> <span class="font-medium">{{ item.category }}</span></p>
-            
-            <p class="flex justify-between"><span>วันที่เปิดรับสมัคร :</span> <span class="font-medium">{{ item.period }}</span></p>
-            <p class="flex justify-between"><span>หน่วยงาน :</span> <span class="font-medium italic">สำนักงานพัฒนานักศึกษา</span></p>
-        </div>
-        <div class="mt-6 flex justify-end">
-            <button class="bg-blue-900 text-white font-bold py-2 px-6 rounded-xl hover:bg-yellow-400 hover:text-blue-900 transition-all shadow-md">ดูรายละเอียด</button>
-        </div>
-    </div>
-</div>
-{% endfor %}
-
-</div>
-
-        </div>
-
-        {% endblock %}
-    </main>
-
-    <footer class="bg-blue-950 text-blue-200 py-8 px-8 w-full text-sm mt-auto">
-        <div class="flex justify-between items-start">
-            <div>
-                <strong class="text-yellow-400 text-base">สำนักงานพัฒนานักศึกษา</strong><br>
-                มหาวิทยาลัยอุบลราชธานี<br>
-                85 ถนนสถลมาร์ค ตำบลเมืองศรีไค อำเภอวารินชำราบ จังหวัดอุบลราชธานี 34190
-            </div>
-            <div class="text-right">
-                <strong class="text-yellow-400 text-base">ติดต่อเรา</strong><br>
-                Email: ubustudent.d@ubu.ac.th<br>
-                โทรศัพท์: 045-353000 ต่อ 1210
-            </div>
-        </div>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script>
-        const swiper = new Swiper('.mySwiper', {
-            loop: true,
-            pagination: { el: '.swiper-pagination', clickable: true },
-            navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
-            autoplay: { delay: 5000 }
-        });
-    </script>
-</body>
-</html>
+{% endblock %}

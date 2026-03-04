@@ -1,64 +1,50 @@
-{% extends "base_director.html" %} {% block content %}
-<div class="max-w-5xl mx-auto font-prompt p-6">
-  <nav class="flex items-center text-sm font-medium mb-6 space-x-2 font-prompt">
-    <a
-      href="{{ url_for('director.home') }}"
-      class="text-blue-600 hover:text-blue-800 flex items-center transition"
-    >
-      <svg
-        class="w-4 h-4 mr-1"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M10 19l-7-7m0 0l7-7m-7 7h18"
-        ></path>
-      </svg>
-      กลับหน้าหลัก
+{% extends "layouts/base_director.html" %}
+
+{% block title %}พิจารณาทุน - ระบบทุนการศึกษา{% endblock %}
+
+{% block nav_links %}
+    <a href="/director/scoring" class="text-white border-b-4 border-yellow-400 px-1 py-2 text-sm font-bold">
+        พิจารณาทุน
+    </a>
+    
+    <a href="/director/ranking" class="text-white hover:text-yellow-400 px-5 py-2 rounded-full text-sm font-medium transition-all">
+        จัดอันดับและยืนยันผล
     </a>
 
+    <a href="/director/audit_log" class="text-white hover:text-yellow-400 px-5 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-1">
+        <span>บันทึกการทำงาน</span>
+        <span class="text-[10px] bg-blue-700 px-1.5 py-0.5 rounded text-blue-200 uppercase font-bold">Log</span>
+    </a>
+{% endblock %}
+
+{% block role_name %}กรรมการ{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto font-prompt p-6">
+  <nav class="flex items-center text-sm font-medium mb-6 space-x-2 font-prompt">
+    <a href="{{ url_for('director.home') }}" class="text-blue-600 hover:text-blue-800 flex items-center transition">
+      กลับหน้าหลัก
+    </a>
     <span class="text-gray-400">/</span>
-
-    <a
-      href="{{ url_for('director.home') }}"
-      class="text-gray-500 hover:text-blue-600 transition"
-      >พิจารณาทุน</a
-    >
-
+    <a href="{{ url_for('director.home') }}" class="text-gray-500 hover:text-blue-600 transition">พิจารณาทุน</a>
     <span class="text-gray-400">></span>
-
     <span class="text-gray-800 font-bold">รายชื่อทุน</span>
   </nav>
 
-  <div
-    class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4"
-  >
+  <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
     <h2 class="text-2xl font-extrabold text-gray-800">รายชื่อทุนการศึกษา</h2>
     <div class="relative w-full md:w-64">
-      <input
-        type="text"
-        placeholder="ค้นหาชื่อทุน"
-        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition"
-      />
+      <input type="text" placeholder="ค้นหาชื่อทุน" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition" />
       <span class="absolute left-3 top-2.5 text-gray-400">🔍</span>
     </div>
   </div>
 
   <div class="space-y-3">
     {% for scholarship in scholarships %}
-    <a
-      href="{{ url_for('director.scholarship_students', scholarship_id=scholarship.id) }}"
-      class="block bg-white hover:bg-gray-50 p-5 rounded-xl border border-gray-200 hover:border-blue-300 transition shadow-sm"
-    >
+    <a href="{{ url_for('director.scholarship_students', scholarship_id=scholarship.id) }}" class="block bg-white hover:bg-gray-50 p-5 rounded-xl border border-gray-200 hover:border-blue-300 transition shadow-sm">
       <div class="flex justify-between items-center">
         <div>
-          <h3 class="text-lg font-bold text-gray-800">
-            {{ scholarship.name }}
-          </h3>
+          <h3 class="text-lg font-bold text-gray-800">{{ scholarship.name }}</h3>
           <p class="text-sm text-gray-500">
             ผู้สมัคร {{ scholarship.total_applicants }} คน
             <span class="mx-2">|</span>
@@ -66,23 +52,16 @@
           </p>
         </div>
         <div class="text-gray-400">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M9 5l7 7-7 7"
-            />
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
           </svg>
         </div>
       </div>
     </a>
+    {% else %}
+    <div class="text-center py-10 bg-white rounded-xl border-2 border-dashed border-gray-200 text-gray-400">
+        ไม่พบข้อมูลทุนการศึกษาในระบบ
+    </div>
     {% endfor %}
   </div>
 </div>

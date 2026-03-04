@@ -1,0 +1,77 @@
+{% extends "layouts/base_officer.html" %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto p-6">
+    <!-- Title Section -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-blue-900 mb-2">บันทึกกิจกรรมทั้งหมด</h1>
+        <p class="text-base text-blue-700">แสดงประวัติการดำเนินการทั้งหมดในระบบ (ล่าสุด <span id="totalCount">{{ total_count }}</span> รายการ)</p>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="mb-8 p-5 bg-blue-50 rounded-xl border border-blue-100">
+        <form method="GET" action="{{ url_for('officer.audit_log') }}" class="flex flex-wrap gap-4 items-center">
+            <label class="text-sm font-semibold text-blue-900">กรองตามชื่อเจ้าหน้าที่:</label>
+            <select name="staff" class="px-3 py-2 border border-blue-200 rounded-lg bg-white text-blue-900 text-sm min-w-[200px] focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none">
+                <option value="">ทั้งหมด</option>
+                {% for s in staff_list %}
+                <option value="{{ s }}" {% if selected_staff == s %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition">
+                กรอง
+            </button>
+            <a href="{{ url_for('officer.audit_log') }}" class="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-lg text-sm font-medium transition border border-blue-200">
+                ล้างตัวกรอง
+            </a>
+        </form>
+    </div>
+
+    <!-- Activity Log Section -->
+    <div class="space-y-5">
+        <ul class="space-y-5 list-none p-0 m-0">
+            {% for log in logs %}
+            <li class="bg-white rounded-xl p-5 shadow-md border border-blue-100 flex gap-5 items-start hover:shadow-lg hover:border-blue-200 transition">
+                <div class="flex-shrink-0">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-2xl text-blue-600">&#128196;</div>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-lg font-bold text-blue-900 mb-2">
+                        {{ log.action_title or (
+                            'อนุมัติ' if log.action == 'approved' else
+                            'ปฏิเสธ' if log.action == 'rejected' else
+                            'อนุมัติและนัดสัมภาษณ์' if log.action == 'approved_interview' else
+                            'สร้างทุน' if log.action == 'create_scholarship' else
+                            'ประกาศทุน' if log.action == 'announce_scholarship' else
+                            'แก้ไข' if log.action == 'edit' else
+                            'เข้าสู่ระบบ' if log.action == 'login' else
+                            'ดาวน์โหลด' if log.action == 'download' else log.action
+                        ) }} <span class="text-blue-600 font-semibold">#{{ log.reference_id or log.id }}</span>
+                    </div>
+                    <div class="text-sm text-blue-800 leading-relaxed mb-3">{{ log.details or '-' }}</div>
+                    <div class="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-100 space-y-1 text-sm">
+                        <p><span class="font-semibold text-blue-700">สถานะหลังการกระทำ:</span> <span class="text-blue-800">{{ log.status_after or '-' }}</span></p>
+                        <p><span class="font-semibold text-blue-700">ค่าเดิมก่อนแก้ไข:</span> <span class="text-blue-600">{{ log.previous_value or '-' }}</span></p>
+                    </div>
+                    <div class="flex flex-wrap gap-5 text-sm">
+                        <span class="flex items-center gap-1.5 text-blue-700">
+                            <span class="font-semibold">รหัส:</span> {{ log.officer_id or '-' }}
+                        </span>
+                        <span class="flex items-center gap-1.5 text-blue-600">
+                            &#128100; <span class="font-semibold">เจ้าหน้าที่:</span> {{ log.officer_name or log.officer_label or log.officer_username }}
+                        </span>
+                        <span class="flex items-center gap-1.5 text-blue-500">
+                            &#128340; {{ log.created_at | thai_date }}
+                        </span>
+                    </div>
+                </div>
+            </li>
+            {% else %}
+            <li class="bg-white rounded-xl p-12 text-center text-blue-600 shadow-md border border-blue-100">
+                ไม่พบกิจกรรมที่ตรงกับเงื่อนไข
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

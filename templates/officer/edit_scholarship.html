@@ -1,15 +1,15 @@
-{% extends "base.html" %}
+{% extends "layouts/base.html" %}
 
 {% block nav_links %}
     <a href="{{ url_for('officer.list_scholarships') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">จัดการทุน</a>
-    <a href="{{ url_for('officer.applications') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ตรวจสอบเอกสาร</a>
+    <a href="{{ url_for('officer.applications') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ตรวจสอบใบสมัคร</a>
     <a href="{{ url_for('officer.audit_log') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">บันทึกการทำงาน</a>
 {% endblock %}
 
 {% block role_name %}เจ้าหน้าที่{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto p-6">
+<div class="max-w-4xl mx-auto p-6 font-prompt">
     <div class="mb-6 flex items-center text-sm text-gray-500">
         <a href="{{ url_for('officer.home') }}" class="hover:text-blue-600 transition">หน้าแรก</a>
         <span class="mx-2">></span>
@@ -19,8 +19,10 @@
     </div>
 
     <div class="mb-8 pb-4 border-b border-gray-300">
-        <h1 class="text-2xl font-bold text-gray-800">แก้ไข: {{ scholarship.scholarship_name }}</h1>
-        <p class="text-gray-500 text-sm mt-1">อัปเดตรายละเอียด หรือแก้ไขข้อมูลทุนการศึกษา (ID: {{ scholarship.scholarship_id }})</p>
+        <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+            ✏️ แก้ไข: {{ scholarship.scholarship_name }}
+        </h1>
+        <p class="text-gray-500 text-sm mt-1">อัปเดตรายละเอียด หรือแก้ไขข้อมูลทุนการศึกษา (ID: <span class="font-semibold">{{ scholarship.scholarship_id }}</span>)</p>
     </div>
 
     <form method="POST" action="{{ url_for('officer.edit_scholarship', scholarship_id=scholarship.scholarship_id) }}" class="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden">
@@ -28,31 +30,31 @@
             
             <section>
                 <h2 class="text-xs font-bold text-amber-600 uppercase tracking-widest mb-4 flex items-center">
-                    <i class="fas fa-edit mr-2"></i> ข้อมูลที่ต้องการอัปเดต
+                    <i class="fas fa-edit mr-2"></i> ข้อมูลพื้นฐาน
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div class="md:col-span-1">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">รหัสทุนการศึกษา</label>
-                        <input type="text" name="scholarship_id" required placeholder="เช่น SCH-001"
-                               class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition font-mono uppercase">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">รหัสทุนการศึกษา (ไม่สามารถแก้ไขได้)</label>
+                        <input type="text" value="{{ scholarship.scholarship_id }}" readonly disabled
+                               class="w-full px-4 py-2.5 border border-gray-200 bg-gray-100 rounded-lg outline-none text-gray-500 font-mono uppercase cursor-not-allowed">
                     </div>
                     <div class="md:col-span-1">
                         <label class="block text-sm font-semibold text-gray-700 mb-2">สถานะการเปิดรับ</label>
                         <select name="status" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                            <option value="Open">🟢 เปิดรับสมัคร (Open)</option>
-                            <option value="Closed">⚪ ปิดรับสมัคร (Closed)</option>
+                            <option value="Open" {% if scholarship.status == 'Open' %}selected{% endif %}>🟢 เปิดรับสมัคร (Open)</option>
+                            <option value="Closed" {% if scholarship.status == 'Closed' %}selected{% endif %}>⚪ ปิดรับสมัคร (Closed)</option>
                         </select>
                     </div>
 
                     <div class="md:col-span-2">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">ชื่อทุนการศึกษา</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">ชื่อทุนการศึกษา <span class="text-red-500">*</span></label>
                         <input type="text" name="scholarship_name" value="{{ scholarship.scholarship_name }}" required
                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none transition">
                     </div>
 
                     <div class="md:col-span-2">
                         <label class="block text-sm font-semibold text-gray-700 mb-2">จำนวนเงินทุน (บาท)</label>
-                        <input type="number" name="amount" placeholder="0.00"
+                        <input type="number" step="0.01" name="amount" value="{{ scholarship.amount or '' }}" placeholder="0.00"
                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
                     </div>
                 </div>
@@ -67,12 +69,12 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">เกรดเฉลี่ยสะสม (GPAX) ขั้นต่ำ</label>
-                        <input type="number" step="0.01" name="min_gpax" value="{{ scholarship.min_gpax }}"
+                        <input type="number" step="0.01" name="min_gpax" value="{{ scholarship.min_gpax or '' }}" placeholder="เช่น 3.00"
                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none transition">
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">คณะ/สาขาวิชา</label>
-                        <input type="text" name="faculty_condition" value="{{ scholarship.faculty_condition }}"
+                        <input type="text" name="faculty_condition" value="{{ scholarship.faculty_condition or '' }}" placeholder="ระบุคณะ หรือ 'ทุกคณะ'"
                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none transition">
                     </div>
                 </div>
@@ -88,25 +90,33 @@
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">วันที่เริ่มเปิดรับ</label>
                         <input type="date" name="start_date" 
-                               value="{{ scholarship.start_date.strftime('%Y-%m-%d') if scholarship.start_date }}"
-                               class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none">
+                               value="{{ scholarship.start_date.strftime('%Y-%m-%d') if scholarship.start_date else '' }}"
+                               class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none transition">
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-red-600 mb-2">วันที่สิ้นสุด</label>
                         <input type="date" name="end_date" 
-                               value="{{ scholarship.end_date.strftime('%Y-%m-%d') if scholarship.end_date }}"
-                               class="w-full px-4 py-2.5 border border-red-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none">
+                               value="{{ scholarship.end_date.strftime('%Y-%m-%d') if scholarship.end_date else '' }}"
+                               class="w-full px-4 py-2.5 border border-red-200 rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition">
                     </div>
                 </div>
             </section>
         </div>
 
-        <div class="bg-gray-50 px-8 py-5 flex justify-end gap-4 border-t border-gray-200">
+        <div class="bg-gray-50 px-8 py-5 flex justify-end items-center gap-4 border-t border-gray-200">
             <a href="{{ url_for('officer.list_scholarships') }}" class="px-6 py-2.5 text-gray-600 hover:text-gray-800 transition font-medium">ยกเลิก</a>
-            <button type="submit" class="px-10 py-2.5 bg-amber-600 text-white font-bold rounded-lg hover:bg-amber-700 shadow-md transition transform active:scale-95">
-                บันทึกการเปลี่ยนแปลง
+            <button type="submit" class="px-8 py-2.5 bg-amber-600 text-white font-bold rounded-lg hover:bg-amber-700 shadow-md transition transform active:scale-95 flex items-center gap-2">
+                💾 บันทึกการเปลี่ยนแปลง
             </button>
         </div>
     </form>
 </div>
+
+<style>
+    /* เสริม font Prompt เพื่อความสวยงามแบบไทย */
+    @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap');
+    .font-prompt {
+        font-family: 'Prompt', sans-serif;
+    }
+</style>
 {% endblock %}

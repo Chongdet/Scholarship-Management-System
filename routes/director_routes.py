@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from datetime import datetime
-# ตรวจสอบว่าใน models.py มีการสร้างคลาส AuditLog ตามที่คุยกันไว้ก่อนหน้าแล้ว
-from models import db, Scholarship, Criterion, Application, AuditLog 
+from models import Student, db, Scholarship, Criterion, Application, AuditLog
 
 director_bp = Blueprint("director", __name__)
 
@@ -18,8 +17,10 @@ def scoring():
     scholarship_list = []
     for sch in scholarships:
         total_applicants = Application.query.filter_by(scholarship_id=sch.id).count()
-        passed_docs = Application.query.filter_by(
-            scholarship_id=sch.id, status="approved"
+        # เช็คทั้งสถานะภาษาอังกฤษและภาษาไทยเพื่อความชัวร์
+        passed_docs = Application.query.filter(
+            Application.scholarship_id == sch.id, 
+            Application.status.in_(['approved', 'อนุมัติ'])
         ).count()
 
         scholarship_list.append({
@@ -31,44 +32,65 @@ def scoring():
     return render_template("director/scoring.html", scholarships=scholarship_list)
 
 # ==========================================
-# 2. หน้าแสดงรายชื่อนักศึกษา (แยกตามทุน)
+# 2. หน้าแสดงรายชื่อนักศึกษา (แก้ไขการ Join ข้อมูล)
 # ==========================================
-@director_bp.route("/scoring/<int:scholarship_id>")
+@director_bp.route("/scoring/<string:scholarship_id>")
 def scholarship_students(scholarship_id):
     sch = Scholarship.query.get_or_404(scholarship_id)
-    # แสดงนักศึกษาที่ผ่านเอกสารแล้วเพื่อให้คะแนน
-    candidates = Application.query.filter_by(scholarship_id=scholarship_id, status="approved").all()
-    
+
+    # ดึง Application Join กับ Student เพื่อเอาค่า GPA (gpax)
+    query_results = (
+        db.session.query(Application, Student)
+        .join(Student, Application.student_id == Student.student_id)
+        .filter(Application.scholarship_id == scholarship_id)
+        .all()
+    )
+
+    formatted_candidates = []
+    for app, stu in query_results:
+        formatted_candidates.append({
+            "id": app.id,                # นี่คือ String ID (APP-...)
+            "student_id": stu.student_id,
+            "student_name": stu.name,
+            "gpa": stu.gpax,
+            "is_scored": app.is_scored,
+            "total_score": app.total_score,
+        })
+
     return render_template(
         "director/scoring_students.html",
-        scholarship_id=scholarship_id,
         scholarship_name=sch.name,
-        candidates=candidates,
+        candidates=formatted_candidates,
     )
 
 # ==========================================
-# 3. หน้าให้คะแนน (พร้อมบันทึก Audit Log)
+# 3. หน้าให้คะแนน (แก้ไข ID เป็น String)
 # ==========================================
-@director_bp.route("/score_candidate/<int:app_id>", methods=["GET", "POST"])
+@director_bp.route("/score_candidate/<string:app_id>", methods=["GET", "POST"])
 def give_score(app_id):
     application = Application.query.get_or_404(app_id)
-    criteria = Criterion.query.filter_by(scholarship_id=application.scholarship_id).all()
+    criteria = Criterion.query.filter_by(
+        scholarship_id=application.scholarship_id
+    ).all()
 
     if request.method == "POST":
         total = 0
         for c in criteria:
-            score_val = request.form.get(f"score_{c.id}", 0)
-            total += int(score_val)
+            score_val = request.form.get(f"score_{c.id}", "0")
+            try:
+                total += int(score_val)
+            except ValueError:
+                total += 0
 
         application.total_score = total
         application.is_scored = True
-        
-        # 🟢 บันทึก Audit Log เมื่อมีการให้คะแนน
+
+        # บันทึก Audit Log
         log = AuditLog(
-            user_name="กรรมการ (Admin)", # ในอนาคตเปลี่ยนเป็น current_user.name
+            user_name="กรรมการ (Admin)",
             action="SCORING",
             details=f"ให้คะแนนนักศึกษา {application.student_name} รหัส {application.student_id} ทุน {application.scholarship.name} คะแนนรวม {total}",
-            ip_address=request.remote_addr
+            ip_address=request.remote_addr,
         )
         db.session.add(log)
         db.session.commit()
@@ -79,13 +101,24 @@ def give_score(app_id):
     return render_template("director/give_score.html", student=application, criteria=criteria)
 
 # ==========================================
-# 4. หน้าจัดอันดับและยืนยันผล (พร้อมบันทึก Audit Log)
+# 4. หน้าดูรายละเอียด (แก้ไข ID เป็น String)
 # ==========================================
-@director_bp.route("/ranking/<int:scholarship_id>")
+@director_bp.route("/candidate/<string:app_id>")
+def candidate_detail(app_id):
+    application = Application.query.get_or_404(app_id)
+    return render_template("director/candidate_detail.html", student=application)
+
+# ==========================================
+# 5. การจัดอันดับ (Ranking)
+# ==========================================
+@director_bp.route("/ranking/<string:scholarship_id>")
 def scholarship_ranking(scholarship_id):
     sch = Scholarship.query.get_or_404(scholarship_id)
-    ranked_candidates = Application.query.filter_by(scholarship_id=scholarship_id, is_scored=True)\
-        .order_by(Application.total_score.desc()).all()
+    ranked_candidates = (
+        Application.query.filter_by(scholarship_id=scholarship_id, is_scored=True)
+        .order_by(Application.total_score.desc())
+        .all()
+    )
 
     stats = {
         "total_ranked": len(ranked_candidates),
@@ -94,25 +127,24 @@ def scholarship_ranking(scholarship_id):
     }
     return render_template("director/ranking.html", scholarship=sch, candidates=ranked_candidates, stats=stats)
 
-@director_bp.route("/confirm_selection/<int:scholarship_id>", methods=["POST"])
+@director_bp.route("/confirm_selection/<string:scholarship_id>", methods=["POST"])
 def confirm_selection(scholarship_id):
     sch = Scholarship.query.get_or_404(scholarship_id)
-    candidates = Application.query.filter_by(scholarship_id=scholarship_id, is_scored=True)\
-        .order_by(Application.total_score.desc()).all()
+    candidates = (
+        Application.query.filter_by(scholarship_id=scholarship_id, is_scored=True)
+        .order_by(Application.total_score.desc())
+        .all()
+    )
 
     quota = sch.quota or 0
     for index, app in enumerate(candidates):
-        if index < quota:
-            app.status = "Selected"
-        else:
-            app.status = "Reserved"
+        app.status = "Selected" if index < quota else "Reserved"
 
-    # 🟢 บันทึก Audit Log เมื่อมีการยืนยันผลประกาศชื่อ
     log = AuditLog(
         user_name="กรรมการ (Admin)",
         action="CONFIRM_SELECTION",
-        details=f"ยืนยันผลการคัดเลือกและประกาศชื่อผู้ได้รับทุน {sch.name} (โควตา {quota} ราย)",
-        ip_address=request.remote_addr
+        details=f"ยืนยันผลการคัดเลือกทุน {sch.name} (โควตา {quota} ราย)",
+        ip_address=request.remote_addr,
     )
     db.session.add(log)
     db.session.commit()
@@ -125,16 +157,7 @@ def ranking_selection():
     scholarships = Scholarship.query.all()
     return render_template("director/ranking_selection.html", scholarships=scholarships)
 
-# ==========================================
-# 5. หน้าบันทึกการทำงาน (Audit Log) - ดึงข้อมูลจริงจาก DB
-# ==========================================
 @director_bp.route("/audit_log")
 def audit_log():
-    # ดึงข้อมูลจากฐานข้อมูลจริง เรียงตามเวลาล่าสุด
     all_logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).all()
     return render_template("director/audit_log.html", logs=all_logs)
-
-@director_bp.route("/candidate/<int:app_id>")
-def candidate_detail(app_id):
-    application = Application.query.get_or_404(app_id)
-    return render_template("director/candidate_detail.html", student=application)

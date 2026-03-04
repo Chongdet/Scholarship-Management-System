@@ -204,7 +204,7 @@ def applications():
                          start_index=start_index, end_index=end_index,
                          selected_status=status_filter)
 
-@officer_bp.route('/application/<int:application_id>')
+@officer_bp.route('/application/<string:application_id>')
 def view_application(application_id):
     current_officer = session.get("user_id") if session.get("role") == "officer" else None
     if not current_officer:
@@ -226,7 +226,7 @@ def view_application(application_id):
             
     return render_template('officer/application-detail.html', application=application)
 
-@officer_bp.route('/application/<int:application_id>/decision', methods=['POST'])
+@officer_bp.route('/application/<string:application_id>/decision', methods=['POST'])
 def decide_application(application_id):
     application = Application.query.get_or_404(application_id)
     decision = request.form.get('decision')

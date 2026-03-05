@@ -1,5 +1,6 @@
 import os
 import json
+import uuid
 
 from flask import Blueprint, current_app, render_template, request, session, redirect, url_for, flash
 from werkzeug.utils import secure_filename
@@ -240,6 +241,7 @@ def apply_scholarship():
         
         # บันทึกข้อมูลลงฐานข้อมูล Application
         new_app = Application(
+            id=str(uuid.uuid4())[:12],
             student_id=current_student_id,
             student_name=student_name if student_name else student.name,
             faculty=faculty if faculty else student.faculty,
@@ -300,6 +302,7 @@ def apply_scholarship():
             "housing_type": getattr(student, 'housing_status', ''),
             "family_income": family_income,
             "siblings": siblings,
+            "siblings_list": siblings_lst if siblings_lst else [],
             "parents_status": getattr(student, 'parents_status', '')
         }
 

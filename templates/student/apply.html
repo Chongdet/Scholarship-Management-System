@@ -1,10 +1,10 @@
 {% extends "layouts/base.html" %}
 
 {% block nav_links %}
-<a href="/student/dashboard" class="text-white hover:text-yellow-400 py-2 text-sm font-medium transition-all">หน้าแรก</a>
-<a href="/student/scholarships" class="text-white hover:text-yellow-400 py-2 text-sm font-medium transition-all">ระเบียบ/ประกาศ</a>
-<a href="/student/status" class="text-white hover:text-yellow-400 py-2 text-sm font-medium transition-all">ติดตามสถานะ</a>
-<a href="/student/apply" class="text-white border-b-4 border-yellow-400 py-2 text-sm font-bold transition-all">สมัครทุน</a>
+<a href="/student/dashboard" class="text-white hover:text-yellow-400 px-5 py-2 rounded-full text-sm font-medium transition-all">ทุนการศึกษา</a>
+<a href="/student/scholarships" class="text-white hover:text-yellow-400 px-5 py-2 rounded-full text-sm font-medium transition-all">ระเบียบ/ประกาศ</a>
+<a href="/student/status" class="text-white hover:text-yellow-400 px-5 py-2 rounded-full text-sm font-medium transition-all">ติดตามสถานะ</a>
+<a href="/student/apply" class="text-white border-b-4 border-yellow-400 px-1 py-2 text-sm font-bold">สมัครทุน</a>
 {% endblock %}
 
 {% block content %}
@@ -51,22 +51,9 @@
   }
   .hero-card::before { content:''; position:absolute; right:-40px; top:-40px; width:200px; height:200px; border-radius:50%; background:rgba(245,166,35,.12); }
   .hero-card::after  { content:''; position:absolute; right:60px; bottom:-60px; width:150px; height:150px; border-radius:50%; background:rgba(255,255,255,.05); }
-  .hero-title { font-family:'Prompt',sans-serif; color:var(--gold2); font-size:1rem; font-weight:600; margin-bottom:1.25rem; display:flex; align-items:center; gap:8px; }
-  .hero-grid { display:grid; grid-template-columns:1fr; gap:1rem; position:relative; z-index:1; }
-  .hero-field label { font-size:.7rem; color:rgba(255,255,255,.55); font-weight:600; text-transform:uppercase; letter-spacing:.06em; display:block; margin-bottom:4px; }
-  
-  .hero-select {
-    width: 100%; border-radius: var(--radius-sm); padding: 10px 14px;
-    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white;
-    font-size: 1rem; font-weight: 500; font-family:'Sarabun',sans-serif;
-    transition: all 0.2s; cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: calc(100% - 12px) center;
-  }
-  .hero-select:focus { outline:none; border-color:var(--gold2); box-shadow:0 0 0 3px rgba(251,191,36,.3); }
-  .hero-select option { color: #1e293b; background: white; }
+  .hero-title { font-family:'Prompt',sans-serif; color:var(--gold2); font-size:1.1rem; font-weight:600; margin-bottom:.5rem; display:flex; align-items:center; gap:8px; position:relative; z-index:1; }
+  .hero-subtitle { color:rgba(255,255,255,.8); font-size:.85rem; margin-bottom:1.25rem; position:relative; z-index:1; }
+  .hero-badge { display:inline-block; background:rgba(251,191,36,.2); border:1px solid rgba(251,191,36,.4); color:var(--gold2); font-size:.75rem; font-weight:600; padding:2px 10px; border-radius:99px; position:relative; z-index:1; }
 
   /* Section cards */
   .section-card { background:#fff; border-radius:var(--radius); box-shadow:0 1px 3px rgba(15,45,94,.07),0 4px 16px rgba(15,45,94,.06); margin-bottom:1.25rem; overflow:hidden; }
@@ -78,98 +65,87 @@
   .s-icon.teal   { background:linear-gradient(135deg,#ccfbf1,#99f6e4); }
   .s-icon.purple { background:linear-gradient(135deg,#ede9fe,#ddd6fe); }
   .s-icon.rose   { background:linear-gradient(135deg,#ffe4e6,#fecdd3); }
+  .s-icon.green  { background:linear-gradient(135deg,#d1fae5,#a7f3d0); }
   .s-title { font-family:'Prompt',sans-serif; font-size:.95rem; font-weight:600; color:var(--navy); }
-  .s-badge { font-size:.68rem; background:#f1f5f9; color:var(--slate); border-radius:99px; padding:2px 10px; font-weight:600; margin-left:auto; letter-spacing:.03em; }
+  .s-subtitle { font-size:.7rem; color:var(--slate); margin-left:auto; }
 
   .s-body { padding:1.25rem 1.5rem; }
 
   /* Fields */
-  .field-group { display:flex; flex-direction:column; gap:6px; }
+  .field-group { display:flex; flex-direction:column; gap:4px; }
   .field-label { font-size:.8rem; font-weight:600; color:var(--slate); }
-  .field-note  { font-size:.72rem; font-weight:400; color:var(--muted); margin-left:4px; }
-  .req-star { color: #ef4444; }
+  .field-note  { color:#ef4444; }
 
-  .form-input, .form-textarea, .form-select {
-    width:100%; padding:10px 14px; border-radius:var(--radius-sm);
-    background:#f8faff; border:1.5px solid #e2e8f0;
+  input.form-input, select.form-input, textarea.form-input {
+    width:100%; padding:9px 12px; border-radius:var(--radius-sm);
+    background:#fafcff; border:1.5px solid #e2e8f0;
     color:#1e293b; font-size:.875rem; font-family:'Sarabun',sans-serif;
-    transition:all .2s;
+    transition:all .2s; outline:none;
   }
-  .form-input:focus, .form-textarea:focus, .form-select:focus {
-    outline:none; border-color:var(--navy2); box-shadow:0 0 0 3px rgba(26,63,122,.12); background:#fff;
+  input.form-input:focus, select.form-input:focus, textarea.form-input:focus {
+    border-color:var(--navy2); box-shadow:0 0 0 3px rgba(26,63,122,.12); background:#fff;
   }
 
   /* Grid helpers */
-  .g2 { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
-  .g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.2rem; }
-  .g4 { display:grid; grid-template-columns:repeat(4,1fr); gap:1.2rem; }
+  .g2 { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+  .g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; }
+  .g4 { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; }
   @media(max-width:860px){ .g4{grid-template-columns:1fr 1fr;} .g3{grid-template-columns:1fr 1fr;} }
   @media(max-width:580px){ .g2,.g3,.g4{grid-template-columns:1fr;} }
 
-  /* Parent cards */
-  .parent-card { border-radius:var(--radius-sm); border:1.5px solid #e8f0fe; overflow:hidden; }
-  .parent-header { padding:10px 14px; font-weight:700; font-size:.85rem; display:flex; align-items:center; gap:8px; }
-  .parent-header.father { background:linear-gradient(90deg,#eff6ff,#f0f9ff); color:#1e40af; }
-  .parent-header.mother { background:linear-gradient(90deg,#fdf2f8,#fff0fb); color:#9d174d; }
-  .parent-body { padding:12px 14px; display:flex; flex-direction:column; gap:12px; background:#fafcff; }
+  /* Form Elements */
+  .radio-group { display:flex; flex-wrap:wrap; gap:7px; margin-top:4px; }
+  .rpill { display:flex; align-items:center; gap:6px; padding:6px 14px; border-radius:99px; border:1.5px solid #e2e8f0; background:#fff; font-size:.82rem; color:var(--slate); cursor:pointer; transition:all .15s; user-select:none; }
+  .rpill input { accent-color:var(--navy2); cursor:pointer; }
+  .rpill:hover { background:#f8faff; border-color:#cbd5e1; }
+  .rpill:has(input:checked) { border-color:var(--navy2); background:#eff6ff; color:var(--navy); font-weight:600; }
 
-  /* Radio pills */
-  .radio-group { display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; }
-  .rpill { display:flex; align-items:center; gap:8px; padding:8px 16px; border-radius:99px; border:1.5px solid #e2e8f0; background:#f8faff; font-size:.85rem; color:var(--slate); cursor:pointer; transition:all .15s; user-select:none; }
-  .rpill input { accent-color:var(--navy2); width:16px; height:16px; }
-  .rpill:has(input:checked) { border-color:var(--navy2); background:#eff6ff; color:var(--navy); font-weight:600; box-shadow: 0 2px 6px rgba(15,45,94,.06); }
-
-  /* Divider labels */
-  .div-label { display:flex; align-items:center; gap:10px; margin:1.6rem 0 1rem; color:var(--navy); font-weight:700; font-size:.85rem; text-transform:uppercase; letter-spacing:.04em; }
+  .div-label { display:flex; align-items:center; gap:10px; margin:1.25rem 0 .75rem; color:var(--navy); font-weight:700; font-size:.85rem; text-transform:uppercase; letter-spacing:.04em; }
   .div-label::before,.div-label::after { content:''; flex:1; height:1px; background:#e8f0fe; }
 
-  /* Action bar */
-  .action-bar { position:sticky; bottom:0; z-index:40; background:rgba(255,255,255,.93); backdrop-filter:blur(14px); border-top:1px solid #e8f0fe; padding:.875rem 1.5rem; display:flex; align-items:center; justify-content:space-between; gap:12px; box-shadow:0 -4px 20px rgba(15,45,94,.08); }
-  .action-hint { font-size:.78rem; color:var(--slate); font-style:italic; display:flex; align-items:center; gap:6px; }
-  .action-btns { display:flex; gap:10px; align-items:center; }
-  @media(max-width:580px){ .action-bar{flex-direction:column;padding:.75rem 1rem;} .action-btns{width:100%;justify-content:flex-end;} }
-
-  .btn-draft { display:flex; align-items:center; gap:8px; background:#f1f5f9; color:var(--slate); font-weight:700; font-size:.875rem; padding:10px 24px; border-radius:99px; border:none; cursor:pointer; transition:all .2s; font-family:'Prompt',sans-serif; }
+  /* Buttons */
+  .btn-save { display:flex; align-items:center; justify-content:center; gap:8px; background:linear-gradient(135deg,#0f2d5e,#1a3f7a); color:#fff; font-weight:700; font-size:.9rem; padding:10px 32px; border-radius:99px; border:none; box-shadow:0 2px 8px rgba(15,45,94,.3); transition:all .2s; font-family:'Prompt',sans-serif; cursor:pointer; }
+  .btn-save:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(15,45,94,.4); }
+  .btn-draft { display:flex; align-items:center; justify-content:center; gap:8px; background:#f1f5f9; color:var(--slate); font-weight:600; font-size:.875rem; padding:10px 24px; border-radius:99px; border:1.5px solid #e2e8f0; transition:all .2s; font-family:'Prompt',sans-serif; cursor:pointer; }
   .btn-draft:hover { background:#e2e8f0; color:var(--navy); }
-  .btn-save { display:flex; align-items:center; gap:8px; background:linear-gradient(135deg,#0f2d5e,#1a3f7a); color:#fff; font-weight:700; font-size:.9rem; padding:10px 32px; border-radius:99px; border:none; box-shadow:0 2px 8px rgba(15,45,94,.3); transition:all .2s; font-family:'Prompt',sans-serif; }
-  .btn-save:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(15,45,94,.4); cursor:pointer; background:linear-gradient(135deg,#f5a623,#f59e0b); color:var(--navy); }
+  .btn-cancel { color:var(--slate); font-weight:600; font-size:.875rem; text-decoration:none; transition:color .15s; }
+  .btn-cancel:hover { color:var(--navy); }
+
+  /* Drop zone */
+  #drop-zone { border:2px dashed #93c5fd; background:#f8faff; border-radius:var(--radius); padding:2rem; text-align:center; cursor:pointer; transition:all .2s; margin-bottom:1rem; }
+  #drop-zone:hover { border-color:var(--navy2); background:#eff6ff; }
+  #drop-zone.drag-over { border-color:var(--navy2); background:#eff6ff; }
+
+  /* Sticky action bar */
+  .action-bar { position:sticky; bottom:0; z-index:40; background:rgba(255,255,255,.93); backdrop-filter:blur(14px); border-top:1px solid #e8f0fe; padding:.875rem 1.5rem; display:flex; align-items:center; justify-content:space-between; gap:12px; box-shadow:0 -4px 20px rgba(15,45,94,.08); }
+  .action-btns { display:flex; gap:10px; align-items:center; }
+  @media(max-width:580px){ .action-bar{flex-direction:column;padding:.75rem 1rem;} .action-btns{width:100%;justify-content:space-between;} .btn-save{flex:1;} }
   
-  /* Upload Zone */
-  .upload-zone { border: 2px dashed #93c5fd; background: #fafcff; border-radius: var(--radius); padding: 2.5rem 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 1rem; }
-  .upload-zone:hover, .upload-zone.drag-over { border-color: var(--navy2); background: #eff6ff; }
-  .upload-icon { font-size: 2.5rem; margin-bottom: 0.5rem; display: inline-block; }
-  .upload-text { font-weight: 600; color: var(--navy); font-size: 1rem; margin-bottom: 0.25rem; }
-  .upload-sub { font-size: 0.75rem; color: var(--muted); }
-  
-  /* Required Docs Box */
-  .req-docs { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: var(--radius-sm); padding: 1rem 1.25rem; margin-bottom: 1.5rem; }
-  .req-title { font-weight: 700; color: #1e40af; font-size: 0.85rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 6px; }
-  .req-list { list-style: disc; padding-left: 1.5rem; color: #1d4ed8; font-size: 0.8rem; line-height: 1.6; }
-
-  /* Animation for Flash */
-  @keyframes slide-in { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
-  .animate-slide-in { animation: slide-in 0.3s ease-out; }
-
-  /* Siblings */
-  .sib-table-wrap { border:1.5px solid #e2e8f0; border-radius:var(--radius-sm); overflow:hidden; }
-  .sib-table { width:100%; border-collapse:collapse; font-size:.8rem; }
-  .sib-table thead th { background:#f1f5f9; color:var(--navy2); font-weight:700; padding:10px 12px; font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; text-align:left; }
-  .sib-table tbody tr { border-top:1px solid #f1f5f9; }
-  .sib-table tbody tr:hover { background:#fafcff; }
-  .sib-table tbody td { padding:7px 10px; }
-  .sib-footer { padding:.75rem 1rem; display:flex; justify-content:flex-end; align-items:center; gap:8px; border-top:1px solid #f1f5f9; }
-
-  .btn-add { display:flex; align-items:center; gap:5px; background:#dcfce7; color:#166534; font-weight:600; font-size:.78rem; padding:6px 14px; border-radius:8px; border:1.5px solid #bbf7d0; cursor:pointer; transition:all .15s; font-family:'Sarabun',sans-serif; }
-  .btn-add:hover { background:#bbf7d0; }
-  .btn-pg { padding:6px 13px; border-radius:8px; font-size:.78rem; font-weight:600; border:1.5px solid #e2e8f0; cursor:pointer; transition:all .15s; font-family:'Sarabun',sans-serif; }
-  .btn-pg.prev { background:#f1f5f9; color:var(--slate); }
-  .btn-pg.prev:hover { background:#e2e8f0; }
-  .btn-pg.next { background:#dbeafe; color:var(--navy2); }
-  .btn-pg.next:hover { background:#bfdbfe; }
+  /* Messages */
+  .flash-message { display:flex; align-items:start; gap:12px; padding:1rem 1.25rem; border-radius:var(--radius-sm); margin-bottom:1rem; box-shadow:0 2px 8px rgba(0,0,0,.08); color:#fff; animation:slideIn .3s ease-out; }
+  .flash-message.success { background:#22c55e; }
+  .flash-message.error { background:#ef4444; }
+  @keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
 </style>
 
 <div class="page-bg">
 <div class="container">
+
+  {# Flash Messages #}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div id="flash-container" class="fixed top-20 right-8 z-50 space-y-2 w-96">
+      {% for category, message in messages %}
+        <div class="flash-message {{ 'success' if category == 'success' else 'error' }}">
+          <span style="font-size:1.25rem;">{{ '✓' if category == 'success' else '✕' }}</span>
+          <span class="flex-1 text-sm leading-relaxed" style="font-family:'Prompt',sans-serif;">{{ message }}</span>
+          <button onclick="this.parentElement.remove()" style="background:none;border:none;color:#fff;font-size:1.25rem;cursor:pointer;opacity:.8;">&times;</button>
+        </div>
+      {% endfor %}
+      </div>
+      <script>setTimeout(()=>{const fc=document.getElementById('flash-container');if(fc){fc.querySelectorAll('.flash-message').forEach(m=>{m.style.transition='opacity 0.5s,transform 0.5s';m.style.opacity='0';m.style.transform='translateX(100%)';setTimeout(()=>m.remove(),500)});}},4000);</script>
+    {% endif %}
+  {% endwith %}
 
   {# Breadcrumb #}
   <div class="breadcrumb">
@@ -181,519 +157,566 @@
     <span class="cur">ฟอร์มสมัครทุนการศึกษา</span>
   </div>
 
-  <!-- FLASH MESSAGES (ถ้ามี) -->
-  {% if message %}
-  <div id="flash-container" class="fixed top-20 right-8 z-50 space-y-2 w-96">
-      <div class="flash-message animate-slide-in flex items-start gap-3 px-5 py-4 rounded-xl shadow-lg {{ 'bg-green-500' if category == 'success' else 'bg-red-500' }} text-white">
-          <span class="text-xl mt-0.5">{{ '✓' if category == 'success' else '✕' }}</span>
-          <span class="flex-1 text-sm leading-relaxed">{{ message }}</span>
-          <button onclick="this.parentElement.remove()" class="ml-2 text-white hover:text-gray-200 font-bold text-xl leading-none">&times;</button>
-      </div>
-  </div>
-  <script>
-      setTimeout(()=>{const fc=document.getElementById('flash-container');if(fc){fc.querySelectorAll('.flash-message').forEach(m=>{m.style.transition='opacity 0.5s,transform 0.5s';m.style.opacity='0';m.style.transform='translateX(100%)';setTimeout(()=>m.remove(),500)});}},4000);
-  </script>
-  {% endif %}
-
   <form id="apply-form" method="POST" action="{{ url_for('student.apply_scholarship') }}" enctype="multipart/form-data">
-  
-    {# ══ HERO: เลือกทุน ══ #}
+    <input type="hidden" name="upload_student_id" id="upload-student-id" value="{{ prefill.get('student_id', '') }}">
+
+    {# Hero #}
     <div class="hero-card">
-      <div class="hero-title" style="justify-content: space-between; width: 100%;">
-        <span style="display: flex; align-items: center; gap: 8px;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-          ฟอร์มสมัครทุนการศึกษา
-        </span>
-        <span style="background:rgba(245,166,35,0.2); padding: 4px 12px; border-radius: 999px; font-size: 0.75rem; color: #fbbf24; display: flex; align-items: center; gap: 5px;">
-           <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path d="M10.478 1.647a.5.5 0 1 0-.956-.294l-4 13a.5.5 0 0 0 .956.294l4-13zM4.854 4.146a.5.5 0 0 1 0 .708L1.707 8l3.147 3.146a.5.5 0 0 1-.708.708l-3.5-3.5a.5.5 0 0 1 0-.708l3.5-3.5a.5.5 0 0 1 .708 0zm6.292 0a.5.5 0 0 0 0 .708L14.293 8l-3.147 3.146a.5.5 0 0 0 .708.708l3.5-3.5a.5.5 0 0 0 0-.708l-3.5-3.5a.5.5 0 0 0-.708 0z"/></svg> Auto-Fill แล้ว
-        </span>
+      <div class="hero-title">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        ฟอร์มสมัครทุนการศึกษา
       </div>
-      <div class="hero-grid">
-        <div class="hero-field">
-            <label>ทุนการศึกษาที่ต้องการสมัคร <span class="req-star">*</span></label>
-            <select name="scholarship_id" required class="hero-select">
-                <option value="">-- เลือกทุนการศึกษา --</option>
-                {% for sch in scholarships %}
-                <option value="{{ sch.id }}" {{ 'selected' if prefill.get('scholarship_id') == sch.id else '' }}>{{ sch.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-      </div>
+      <div class="hero-subtitle">กรอกข้อมูลให้ครบถ้วนแล้วแนบเอกสารประกอบการสมัคร</div>
+      <div class="hero-badge">✨ Auto-Fill จากข้อมูล Profile แล้ว</div>
     </div>
 
-    {# ══ 1. ข้อมูลส่วนตัว ══ #}
+    {# ทุนการศึกษาที่ต้องการสมัคร #}
     <div class="section-card">
       <div class="section-header">
-        <div class="s-icon blue">📋</div>
-        <span class="s-title">1. ข้อมูลส่วนตัว</span>
-        <span class="s-badge">Personal Info</span>
+        <div class="s-icon gold">★</div>
+        <span class="s-title">ทุนการศึกษาที่ต้องการสมัคร</span>
       </div>
       <div class="s-body">
-        <div class="g3">
-            <div class="field-group">
-                <span class="field-label">คำนำหน้า <span class="req-star">*</span></span>
-                <select name="title" required class="form-select">
-                    <option value="">-- เลือก --</option>
-                    {% for t in titles %}
-                    <option value="{{ t }}" {{ 'selected' if prefill.get('title') == t else '' }}>{{ t }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="field-group">
-                <span class="field-label">ชื่อ <span class="req-star">*</span></span>
-                <input type="text" name="first_name" value="{{ prefill.get('first_name', '') }}" placeholder="ชื่อ" required class="form-input">
-            </div>
-            <div class="field-group">
-                <span class="field-label">นามสกุล <span class="req-star">*</span></span>
-                <input type="text" name="last_name" value="{{ prefill.get('last_name', '') }}" placeholder="นามสกุล" required class="form-input">
-            </div>
-
-            <div class="field-group"><span class="field-label">ชื่อ (ภาษาอังกฤษ)</span><input type="text" name="first_name_en" value="{{ prefill.get('first_name_en', '') }}" placeholder="First Name" class="form-input"></div>
-            <div class="field-group"><span class="field-label">นามสกุล (ภาษาอังกฤษ)</span><input type="text" name="last_name_en" value="{{ prefill.get('last_name_en', '') }}" placeholder="Last Name" class="form-input"></div>
-            <div class="field-group"><span class="field-label">เลขบัตรประชาชน <span class="req-star">*</span></span><input type="text" name="national_id" value="{{ prefill.get('national_id', '') }}" placeholder="x-xxxx-xxxxx-xx-x" maxlength="13" required class="form-input"></div>
-            
-            <div class="field-group"><span class="field-label">วันเดือนปีเกิด <span class="req-star">*</span></span><input type="date" name="birth_date" value="{{ prefill.get('birth_date', '') }}" required class="form-input"></div>
-            <div class="field-group">
-                <span class="field-label">เพศ <span class="req-star">*</span></span>
-                <select name="gender" required class="form-select">
-                    <option value="">-- เลือก --</option>
-                    {% for g in genders %}
-                    <option value="{{ g }}" {{ 'selected' if prefill.get('gender') == g else '' }}>{{ g }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="field-group"><span class="field-label">สัญชาติ</span><input type="text" name="nationality" value="{{ prefill.get('nationality', 'ไทย') }}" class="form-input"></div>
-
-            <div class="field-group"><span class="field-label">ศาสนา</span><input type="text" name="religion" value="{{ prefill.get('religion', '') }}" placeholder="เช่น พุทธ" class="form-input"></div>
-            <div class="field-group"><span class="field-label">เบอร์โทรศัพท์ <span class="req-star">*</span></span><input type="tel" name="phone" value="{{ prefill.get('phone', '') }}" placeholder="0xx-xxx-xxxx" required class="form-input"></div>
-            <div class="field-group"><span class="field-label">อีเมล</span><input type="email" name="email" value="{{ prefill.get('email', '') }}" placeholder="example@ubu.ac.th" class="form-input"></div>
-        </div>
-      </div>
-    </div>
-
-    {# ══ 2. ที่อยู่ปัจจุบัน ══ #}
-    <div class="section-card">
-      <div class="section-header">
-        <div class="s-icon teal">🏠</div>
-        <span class="s-title">2. ที่อยู่ปัจจุบัน</span>
-        <span class="s-badge">Current Address</span>
-      </div>
-      <div class="s-body">
-        <div class="field-group" style="margin-bottom: 1.2rem;">
-            <span class="field-label">บ้านเลขที่ / หมู่ที่ / ถนน / ซอย <span class="req-star">*</span></span>
-            <input type="text" name="address" value="{{ prefill.get('address', '') }}" placeholder="เช่น 99 หมู่ 5 ถนนเจริญราษฎร์" required class="form-input">
-        </div>
-        <div class="g4">
-            <div class="field-group"><span class="field-label">ตำบล/แขวง <span class="req-star">*</span></span><input type="text" name="sub_district" value="{{ prefill.get('sub_district', '') }}" placeholder="ตำบล" required class="form-input"></div>
-            <div class="field-group"><span class="field-label">อำเภอ/เขต <span class="req-star">*</span></span><input type="text" name="district" value="{{ prefill.get('district', '') }}" placeholder="อำเภอ" required class="form-input"></div>
-            <div class="field-group"><span class="field-label">จังหวัด <span class="req-star">*</span></span><input type="text" name="province" value="{{ prefill.get('province', '') }}" placeholder="จังหวัด" required class="form-input"></div>
-            <div class="field-group"><span class="field-label">รหัสไปรษณีย์</span><input type="text" name="postal_code" value="{{ prefill.get('postal_code', '') }}" placeholder="xxxxx" maxlength="5" class="form-input"></div>
-        </div>
-      </div>
-    </div>
-
-    {# ══ 3. ข้อมูลการศึกษา ══ #}
-    <div class="section-card">
-      <div class="section-header">
-        <div class="s-icon purple">🎓</div>
-        <span class="s-title">3. ข้อมูลการศึกษา</span>
-        <span class="s-badge">Academic Info</span>
-      </div>
-      <div class="s-body">
-        <div class="g3">
-            <div class="field-group"><span class="field-label">รหัสนักศึกษา <span class="req-star">*</span></span><input type="text" id="student_id" name="student_id" value="{{ prefill.get('student_id', '') }}" placeholder="เช่น 68114540001" maxlength="20" required class="form-input"></div>
-            <div class="field-group">
-                <span class="field-label">คณะ <span class="req-star">*</span></span>
-                <select id="faculty" name="faculty" required class="form-select">
-                    <option value="">-- เลือกคณะ --</option>
-                    {% for f in faculties %}
-                    <option value="{{ f }}" {{ 'selected' if prefill.get('faculty') == f else '' }}>{{ f }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="field-group"><span class="field-label">สาขาวิชา <span class="req-star">*</span></span><input type="text" name="major" value="{{ prefill.get('major', '') }}" placeholder="สาขาวิชา" required class="form-input"></div>
-            <div class="field-group">
-                <span class="field-label">ชั้นปีที่ <span class="req-star">*</span></span>
-                <select name="year_level" required class="form-select">
-                    <option value="">-- เลือก --</option>
-                    {% for y in year_levels %}
-                    <option value="{{ y }}" {{ 'selected' if prefill.get('year_level')|string == y|string else '' }}>ปีที่ {{ y }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="field-group"><span class="field-label">เกรดเฉลี่ยสะสม (GPA) <span class="req-star">*</span></span><input type="number" name="gpa" value="{{ prefill.get('gpa', '') }}" placeholder="เช่น 3.50" step="0.01" min="0.00" max="4.00" required class="form-input"></div>
-            <div class="field-group"><span class="field-label">ปีการศึกษา</span><input type="text" name="academic_year" value="{{ prefill.get('academic_year', '') }}" placeholder="เช่น 2567" class="form-input"></div>
-        </div>
-      </div>
-    </div>
-
-    {# ══ 4. ข้อมูลผู้ปกครอง ══ #}
-    <div class="section-card">
-      <div class="section-header">
-        <div class="s-icon rose">👨‍👩‍👦</div>
-        <span class="s-title">4. ข้อมูลบิดา-มารดา / ผู้ปกครอง</span>
-        <span class="s-badge">Parents Info</span>
-      </div>
-      <div class="s-body">
-        <div class="g2" style="margin-bottom: 2rem;">
-            <div class="parent-card">
-                <div class="parent-header father">👨 ข้อมูลบิดา</div>
-                <div class="parent-body">
-                    <div class="field-group"><span class="field-label">ชื่อ-นามสกุลบิดา</span><input type="text" name="father_name" value="{{ prefill.get('father_name', '') }}" placeholder="ชื่อ-นามสกุล" class="form-input"></div>
-                    <div class="field-group"><span class="field-label">อาชีพ</span><input type="text" name="father_occupation" value="{{ prefill.get('father_occupation', '') }}" placeholder="อาชีพ" class="form-input"></div>
-                    <div class="g2">
-                        <div class="field-group"><span class="field-label">รายได้ต่อปี (฿)</span><input type="number" name="father_income" value="{{ prefill.get('father_income', '') }}" placeholder="0" min="0" class="form-input"></div>
-                        <div class="field-group"><span class="field-label">เบอร์โทรศัพท์</span><input type="tel" name="father_phone" value="{{ prefill.get('father_phone', '') }}" placeholder="0xx-xxx-xxxx" class="form-input"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="parent-card">
-                <div class="parent-header mother">👩 ข้อมูลมารดา</div>
-                <div class="parent-body">
-                    <div class="field-group"><span class="field-label">ชื่อ-นามสกุลมารดา</span><input type="text" name="mother_name" value="{{ prefill.get('mother_name', '') }}" placeholder="ชื่อ-นามสกุล" class="form-input"></div>
-                    <div class="field-group"><span class="field-label">อาชีพ</span><input type="text" name="mother_occupation" value="{{ prefill.get('mother_occupation', '') }}" placeholder="อาชีพ" class="form-input"></div>
-                    <div class="g2">
-                        <div class="field-group"><span class="field-label">รายได้ต่อปี (฿)</span><input type="number" name="mother_income" value="{{ prefill.get('mother_income', '') }}" placeholder="0" min="0" class="form-input"></div>
-                        <div class="field-group"><span class="field-label">เบอร์โทรศัพท์</span><input type="tel" name="mother_phone" value="{{ prefill.get('mother_phone', '') }}" placeholder="0xx-xxx-xxxx" class="form-input"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div class="field-group">
-            <span class="field-label" style="font-size: 0.9rem;">สถานภาพสมรสบิดา-มารดา <span class="req-star">*</span></span>
-            <div class="radio-group" style="gap: 12px; margin-top: 8px;">
-                {% set ps = prefill.get('parents_status') %}
-                {% for status in ['อยู่ด้วยกัน','แยกกันอยู่','หย่าร้าง','บิดาเสียชีวิต','มารดาเสียชีวิต','ทั้งสองเสียชีวิต'] %}
-                <label class="rpill">
-                    <input type="radio" name="parents_status" value="{{ status }}" {% if ps == status %}checked{% endif %} required>
-                    {{ status }}
-                </label>
-                {% endfor %}
-            </div>
-        </div>
-      </div>
-    </div>
-
-    {# ══ 5. รายได้ครอบครัว ══ #}
-    <div class="section-card">
-      <div class="section-header">
-        <div class="s-icon gold">💰</div>
-        <span class="s-title">5. ข้อมูลรายได้ครอบครัวและที่พักอาศัย</span>
-        <span class="s-badge">Family Income</span>
-      </div>
-      <div class="s-body">
-        <div class="g3">
-            <div class="field-group"><span class="field-label">รายได้รวมทั้งครอบครัวต่อปี (บาท) <span class="req-star">*</span></span><input type="number" name="family_income" value="{{ prefill.get('family_income', '') }}" placeholder="0" min="0" required class="form-input"></div>
-            <div class="field-group"><span class="field-label">จำนวนพี่น้อง</span><input type="number" name="siblings" value="{{ prefill.get('siblings', '') }}" placeholder="0" min="0" class="form-input"></div>
-            <div class="field-group"><span class="field-label">เป็นบุตรคนที่</span><input type="number" name="birth_order" value="{{ prefill.get('birth_order', '') }}" placeholder="เช่น 2" min="1" class="form-input"></div>
-        </div>
-
-        <div class="div-label">ที่อยู่อาศัยปัจจุบัน</div>
-        <div class="radio-group" style="gap: 12px; margin-bottom: 1.5rem;">
-            {% for ht in housing_types %}
-            <label class="rpill">
-                <input type="radio" name="housing_type" value="{{ ht }}" {{ 'checked' if prefill.get('housing_type') == ht else '' }}> 
-                {{ ht }}
-            </label>
+          <span class="field-label">ทุนการศึกษา <span class="field-note">*</span></span>
+          <select name="scholarship_id" required class="form-input">
+            <option value="">-- เลือกทุนการศึกษา --</option>
+            {% for sch in scholarships %}
+              <option value="{{ sch.id }}" {{ 'selected' if prefill.get('scholarship_id') == sch.id else '' }}>{{ sch.name }}</option>
             {% endfor %}
-        </div>
-
-        <div class="field-group">
-            <span class="field-label">หมายเหตุ / ข้อมูลเพิ่มเติมด้านรายได้ครอบครัว</span>
-            <textarea name="income_note" rows="2" placeholder="ระบุรายละเอียดเพิ่มเติม (ถ้ามี)" class="form-textarea">{{ prefill.get('income_note', '') }}</textarea>
+          </select>
         </div>
       </div>
     </div>
 
-    {# ══ 6. ข้อมูลเพิ่มเติม ══ #}
+    {# 1. ข้อมูลส่วนตัว #}
     <div class="section-card">
       <div class="section-header">
-        <div class="s-icon blue">📝</div>
-        <span class="s-title">6. ข้อมูลเพิ่มเติม</span>
-        <span class="s-badge">Additional Info</span>
+        <div class="s-icon blue">1</div>
+        <span class="s-title">ข้อมูลส่วนตัว</span>
+        <span class="s-subtitle">Personal Information</span>
       </div>
       <div class="s-body">
-        <div class="g2">
-            <div class="field-group" style="grid-column: 1 / -1;">
-                <span class="field-label">เคยได้รับทุนการศึกษามาก่อนหรือไม่?</span>
-                <div class="radio-group">
-                    <label class="rpill"><input type="radio" name="prev_scholarship" value="yes" {{ 'checked' if prefill.get('prev_scholarship') == 'yes' else '' }}> เคย</label>
-                    <label class="rpill"><input type="radio" name="prev_scholarship" value="no" {{ 'checked' if prefill.get('prev_scholarship') == 'no' else '' }}> ไม่เคย</label>
-                </div>
-            </div>
-            <div class="field-group" style="grid-column: 1 / -1;"><span class="field-label">ระบุชื่อทุนและปีที่ได้รับ (ถ้าเคย)</span><input type="text" name="prev_scholarship_detail" value="{{ prefill.get('prev_scholarship_detail', '') }}" placeholder="เช่น ทุน กสศ. ปี 2565" class="form-input"></div>
-            
-            <div class="field-group" style="grid-column: 1 / -1;">
-                <span class="field-label">กิจกรรมที่เคยเข้าร่วม / ความสามารถพิเศษ</span>
-                <textarea name="activities" rows="3" placeholder="ระบุกิจกรรม หรือความสามารถพิเศษ (ถ้ามี)" class="form-textarea">{{ prefill.get('activities', '') }}</textarea>
-            </div>
-            
-            <div class="field-group" style="grid-column: 1 / -1;">
-                <span class="field-label">เหตุผลที่ต้องการสมัครทุน <span class="req-star">*</span></span>
-                <textarea name="reason" rows="3" placeholder="อธิบายเหตุผลและความจำเป็นในการสมัครทุน" required class="form-textarea">{{ prefill.get('reason', '') }}</textarea>
-            </div>
-        </div>
-      </div>
-    </div>
-
-    {# ══ 7. ข้อมูลพี่น้อง ══ #}
-    <div class="section-card">
-      <div class="section-header">
-        <div class="s-icon rose">👦👧</div>
-        <span class="s-title">7. ข้อมูลพี่น้อง</span>
-        <span class="s-badge">Siblings Info</span>
-      </div>
-      <div class="s-body">
-        <div class="div-label">จำนวนพี่น้องร่วมบิดามารดาเดียวกัน <span style="font-size:.72rem;font-weight:400;color:var(--muted);margin-left:4px;">(รวมตัวผู้สมัคร)</span></div>
-        <div class="sib-table-wrap">
-          <table class="sib-table">
-            <thead>
-              <tr>
-                <th style="width:52px;text-align:center;">ลำดับ</th>
-                <th>ชื่อ - นามสกุล</th>
-                <th style="width:80px;text-align:center;">อายุ</th>
-                <th>อาชีพ / ระดับชั้น</th>
-                <th>สถานที่ทำงาน / สถานศึกษา</th>
-              </tr>
-            </thead>
-            <tbody id="siblingsTableBody">
-              <tr>
-                <td colspan="5" style="text-align:center;padding:2.5rem;color:var(--muted);font-size:.875rem;">
-                  ยังไม่มีข้อมูลพี่น้อง
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="sib-footer">
-            <button type="button" id="addSiblingBtn" class="btn-add">＋ เพิ่มพี่น้อง</button>
-            <button type="button" id="prevSiblingBtn" class="btn-pg prev">← ก่อนหน้า</button>
-            <button type="button" id="nextSiblingBtn" class="btn-pg next">ถัดไป →</button>
+        <div class="g3">
+          <div class="field-group">
+            <span class="field-label">คำนำหน้า <span class="field-note">*</span></span>
+            <select name="title" required class="form-input">
+              <option value="">-- เลือก --</option>
+              {% for t in titles %}
+                <option value="{{ t }}" {{ 'selected' if prefill.get('title') == t else '' }}>{{ t }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="field-group">
+            <span class="field-label">ชื่อ <span class="field-note">*</span></span>
+            <input type="text" name="first_name" value="{{ prefill.get('first_name', '') }}" placeholder="ชื่อ" required class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">นามสกุล <span class="field-note">*</span></span>
+            <input type="text" name="last_name" value="{{ prefill.get('last_name', '') }}" placeholder="นามสกุล" required class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">ชื่อ (ภาษาอังกฤษ)</span>
+            <input type="text" name="first_name_en" value="{{ prefill.get('first_name_en', '') }}" placeholder="First Name" class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">นามสกุล (ภาษาอังกฤษ)</span>
+            <input type="text" name="last_name_en" value="{{ prefill.get('last_name_en', '') }}" placeholder="Last Name" class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">เลขบัตรประชาชน <span class="field-note">*</span></span>
+            <input type="text" name="national_id" value="{{ prefill.get('national_id', '') }}" placeholder="x-xxxx-xxxxx-xx-x" maxlength="13" required class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">วันเดือนปีเกิด <span class="field-note">*</span></span>
+            <input type="date" name="birth_date" value="{{ prefill.get('birth_date', '') }}" required class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">เพศ <span class="field-note">*</span></span>
+            <select name="gender" required class="form-input">
+              <option value="">-- เลือก --</option>
+              {% for g in genders %}
+                <option value="{{ g }}" {{ 'selected' if prefill.get('gender') == g else '' }}>{{ g }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="field-group">
+            <span class="field-label">สัญชาติ</span>
+            <input type="text" name="nationality" value="{{ prefill.get('nationality', 'ไทย') }}" class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">ศาสนา</span>
+            <input type="text" name="religion" value="{{ prefill.get('religion', '') }}" placeholder="เช่น พุทธ" class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">เบอร์โทรศัพท์ <span class="field-note">*</span></span>
+            <input type="tel" name="phone" value="{{ prefill.get('phone', '') }}" placeholder="0xx-xxx-xxxx" required class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">อีเมล</span>
+            <input type="email" name="email" value="{{ prefill.get('email', '') }}" placeholder="example@ubu.ac.th" class="form-input">
           </div>
         </div>
       </div>
     </div>
-    
-    <input type="hidden" name="siblings_json" id="siblings_json_input" value="[]">
 
-    {# ══ 8. แนบเอกสาร ══ #}
+    {# 2. ที่อยู่ปัจจุบัน #}
     <div class="section-card">
       <div class="section-header">
-        <div class="s-icon teal">📂</div>
-        <span class="s-title">8. แนบเอกสารประกอบการสมัคร</span>
-        <span class="s-badge">Documents</span>
+        <div class="s-icon teal">2</div>
+        <span class="s-title">ที่อยู่ปัจจุบัน</span>
+        <span class="s-subtitle">Current Address</span>
       </div>
       <div class="s-body">
-        <input type="hidden" name="upload_student_id" id="upload-student-id" value="{{ prefill.get('student_id', '') }}">
+        <div class="field-group" style="margin-bottom:1rem;">
+          <span class="field-label">บ้านเลขที่ / หมู่ที่ / ถนน / ซอย / อาคาร <span class="field-note">*</span></span>
+          <textarea name="address" rows="2" placeholder="เช่น 99 หมู่ 5 ถนนเจริญราษฎร์" required class="form-input">{{ prefill.get('address', '') }}</textarea>
+        </div>
+        <div class="g4">
+          <div class="field-group">
+            <span class="field-label">ตำบล/แขวง <span class="field-note">*</span></span>
+            <input type="text" name="sub_district" value="{{ prefill.get('sub_district', '') }}" placeholder="ตำบล" required class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">อำเภอ/เขต <span class="field-note">*</span></span>
+            <input type="text" name="district" value="{{ prefill.get('district', '') }}" placeholder="อำเภอ" required class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">จังหวัด <span class="field-note">*</span></span>
+            <input type="text" name="province" value="{{ prefill.get('province', '') }}" placeholder="จังหวัด" required class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">รหัสไปรษณีย์</span>
+            <input type="text" name="postal_code" value="{{ prefill.get('postal_code', '') }}" placeholder="xxxxx" maxlength="5" class="form-input">
+          </div>
+        </div>
+      </div>
+    </div>
 
-        <div class="req-docs">
-            <div class="req-title">📋 เอกสารที่ต้องแนบ</div>
-            <ul class="req-list">
-                <li>สำเนาบัตรประชาชน (1 ฉบับ)</li>
-                <li>สำเนาทะเบียนบ้าน (1 ฉบับ)</li>
-                <li>ใบผลการเรียน (Transcript) ล่าสุด</li>
-                <li>หนังสือรับรองความประพฤติ (จากอาจารย์ที่ปรึกษา)</li>
-                <li>เอกสารอื่นๆ ที่เกี่ยวข้อง (ถ้ามี)</li>
-            </ul>
+    {# 3. ข้อมูลการศึกษา #}
+    <div class="section-card">
+      <div class="section-header">
+        <div class="s-icon rose">3</div>
+        <span class="s-title">ข้อมูลการศึกษา</span>
+        <span class="s-subtitle">Academic Information</span>
+      </div>
+      <div class="s-body">
+        <div class="g3">
+          <div class="field-group">
+            <span class="field-label">รหัสนักศึกษา <span class="field-note">*</span></span>
+            <input type="text" id="student_id" name="student_id" value="{{ prefill.get('student_id', '') }}" placeholder="เช่น 68114540001" maxlength="20" required class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">คณะ <span class="field-note">*</span></span>
+            <select id="faculty" name="faculty" required class="form-input">
+              <option value="">-- เลือกคณะ --</option>
+              {% for f in faculties %}
+                <option value="{{ f }}" {{ 'selected' if prefill.get('faculty') == f else '' }}>{{ f }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="field-group">
+            <span class="field-label">สาขาวิชา <span class="field-note">*</span></span>
+            <input type="text" name="major" value="{{ prefill.get('major', '') }}" placeholder="สาขาวิชา" required class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">ชั้นปีที่ <span class="field-note">*</span></span>
+            <select name="year_level" required class="form-input">
+              <option value="">-- เลือก --</option>
+              {% for y in year_levels %}
+                <option value="{{ y }}" {{ 'selected' if prefill.get('year_level')|string == y|string else '' }}>ปีที่ {{ y }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="field-group">
+            <span class="field-label">เกรดเฉลี่ยสะสม (GPA) <span class="field-note">*</span></span>
+            <input type="number" name="gpa" value="{{ prefill.get('gpa', '') }}" placeholder="เช่น 3.50" step="0.01" min="0.00" max="4.00" required class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">ปีการศึกษา</span>
+            <input type="text" name="academic_year" value="{{ prefill.get('academic_year', '') }}" placeholder="เช่น 2567" class="form-input">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# 4. ข้อมูลผู้ปกครอง #}
+    <div class="section-card">
+      <div class="section-header">
+        <div class="s-icon green">4</div>
+        <span class="s-title">ข้อมูลผู้ปกครอง / บิดา-มารดา</span>
+        <span class="s-subtitle">Parent / Guardian Info</span>
+      </div>
+      <div class="s-body">
+        <div class="div-label" style="margin-top:0;">👨 บิดา</div>
+        <div class="g4">
+          <div class="field-group">
+            <span class="field-label">ชื่อ-นามสกุลบิดา</span>
+            <input type="text" name="father_name" value="{{ prefill.get('father_name', '') }}" placeholder="ชื่อ-นามสกุล" class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">อาชีพ</span>
+            <input type="text" name="father_occupation" value="{{ prefill.get('father_occupation', '') }}" placeholder="อาชีพ" class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">รายได้ต่อปี (บาท)</span>
+            <input type="number" name="father_income" value="{{ prefill.get('father_income', '') }}" placeholder="0" min="0" class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">เบอร์โทรศัพท์</span>
+            <input type="tel" name="father_phone" value="{{ prefill.get('father_phone', '') }}" placeholder="0xx-xxx-xxxx" class="form-input">
+          </div>
         </div>
 
-        <div id="drop-zone" class="upload-zone" onclick="document.getElementById('file-input').click()">
-            <span class="upload-icon">📄</span>
-            <div class="upload-text">คลิกหรือลากไฟล์มาวางที่นี่</div>
-            <div class="upload-sub">รองรับ PDF, PNG, JPG — ขนาดไม่เกิน 5 MB ต่อไฟล์</div>
+        <div class="div-label">👩 มารดา</div>
+        <div class="g4">
+          <div class="field-group">
+            <span class="field-label">ชื่อ-นามสกุลมารดา</span>
+            <input type="text" name="mother_name" value="{{ prefill.get('mother_name', '') }}" placeholder="ชื่อ-นามสกุล" class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">อาชีพ</span>
+            <input type="text" name="mother_occupation" value="{{ prefill.get('mother_occupation', '') }}" placeholder="อาชีพ" class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">รายได้ต่อปี (บาท)</span>
+            <input type="number" name="mother_income" value="{{ prefill.get('mother_income', '') }}" placeholder="0" min="0" class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">เบอร์โทรศัพท์</span>
+            <input type="tel" name="mother_phone" value="{{ prefill.get('mother_phone', '') }}" placeholder="0xx-xxx-xxxx" class="form-input">
+          </div>
         </div>
 
-        <input type="file" id="file-input" name="documents" accept=".pdf,.png,.jpg,.jpeg" multiple class="hidden">
-        <ul id="file-list" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 1rem;"></ul>
+        <div class="div-label">สถานภาพสมรสบิดา-มารดา <span class="field-note" style="margin-left:4px;">*</span></div>
+        <div class="radio-group">
+          {% set ps = prefill.get('parents_status') %}
+          {% for status in ['อยู่ด้วยกัน','แยกกันอยู่','หย่าร้าง','บิดาเสียชีวิต','มารดาเสียชีวิต','ทั้งสองเสียชีวิต'] %}
+            <label class="rpill">
+              <input type="radio" name="parents_status" value="{{ status }}" {% if ps == status %}checked{% endif %} required>
+              {{ status }}
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
 
+    {# 5. รายได้ครอบครัว #}
+    <div class="section-card">
+      <div class="section-header">
+        <div class="s-icon purple">5</div>
+        <span class="s-title">รายได้ครอบครัว</span>
+        <span class="s-subtitle">Family Income</span>
+      </div>
+      <div class="s-body">
+        <div class="g3" style="margin-bottom:1.25rem;">
+          <div class="field-group">
+            <span class="field-label">รายได้รวมทั้งครอบครัวต่อปี (บาท) <span class="field-note">*</span></span>
+            <input type="number" name="family_income" value="{{ prefill.get('family_income', '') }}" placeholder="0" min="0" required class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">จำนวนพี่น้อง</span>
+            <input type="number" name="siblings" value="{{ prefill.get('siblings', '') }}" placeholder="0" min="0" class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">เป็นบุตรคนที่</span>
+            <input type="number" name="birth_order" value="{{ prefill.get('birth_order', '') }}" placeholder="เช่น 2" min="1" class="form-input">
+          </div>
+        </div>
+
+        <div class="field-group" style="margin-bottom:1rem;">
+          <span class="field-label">ที่อยู่อาศัยปัจจุบัน</span>
+          <div class="radio-group">
+            {% for ht in housing_types %}
+              <label class="rpill">
+                <input type="radio" name="housing_type" value="{{ ht }}" {{ 'checked' if prefill.get('housing_type') == ht else '' }}>
+                {{ ht }}
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="field-group">
+          <span class="field-label">หมายเหตุ / ข้อมูลเพิ่มเติมด้านรายได้ครอบครัว</span>
+          <textarea name="income_note" rows="2" placeholder="ระบุรายละเอียดเพิ่มเติม (ถ้ามี)" class="form-input">{{ prefill.get('income_note', '') }}</textarea>
+        </div>
+      </div>
+    </div>
+
+    {# 6. ข้อมูลเพิ่มเติม #}
+    <div class="section-card">
+      <div class="section-header">
+        <div class="s-icon blue">6</div>
+        <span class="s-title">ข้อมูลเพิ่มเติม</span>
+        <span class="s-subtitle">Additional Information</span>
+      </div>
+      <div class="s-body">
+        <div class="field-group" style="margin-bottom:1.25rem;">
+          <span class="field-label">เคยได้รับทุนการศึกษามาก่อนหรือไม่?</span>
+          <div class="radio-group">
+            <label class="rpill">
+              <input type="radio" name="prev_scholarship" value="yes" {{ 'checked' if prefill.get('prev_scholarship') == 'yes' else '' }}> เคย
+            </label>
+            <label class="rpill">
+              <input type="radio" name="prev_scholarship" value="no" {{ 'checked' if prefill.get('prev_scholarship') == 'no' else '' }}> ไม่เคย
+            </label>
+          </div>
+        </div>
+        <div class="field-group" style="margin-bottom:1.25rem;">
+          <span class="field-label">ระบุชื่อทุนและปีที่ได้รับ (ถ้าเคย)</span>
+          <input type="text" name="prev_scholarship_detail" value="{{ prefill.get('prev_scholarship_detail', '') }}" placeholder="เช่น ทุน กสศ. ปี 2565" class="form-input">
+        </div>
+        <div class="field-group" style="margin-bottom:1.25rem;">
+          <span class="field-label">กิจกรรมที่เคยเข้าร่วม / ความสามารถพิเศษ</span>
+          <textarea name="activities" rows="3" placeholder="ระบุกิจกรรม หรือความสามารถพิเศษ (ถ้ามี)" class="form-input">{{ prefill.get('activities', '') }}</textarea>
+        </div>
+        <div class="field-group">
+          <span class="field-label">เหตุผลที่ต้องการสมัครทุน <span class="field-note">*</span></span>
+          <textarea name="reason" rows="3" placeholder="อธิบายเหตุผลและความจำเป็นในการสมัครทุน" required class="form-input">{{ prefill.get('reason', '') }}</textarea>
+        </div>
+      </div>
+    </div>
+
+    {# 7. รายได้ของนักศึกษาและข้อมูลพี่น้อง #}
+    <div class="section-card">
+      <div class="section-header">
+        <div class="s-icon teal">7</div>
+        <span class="s-title">รายได้ของนักศึกษาและข้อมูลพี่น้อง</span>
+        <span class="s-subtitle">Student Income & Siblings</span>
+      </div>
+      <div class="s-body">
+        <div class="div-label" style="margin-top:0;">รายได้ที่นักศึกษาได้รับต่อเดือน</div>
+        <div class="g3">
+          <div class="field-group">
+            <span class="field-label">ได้รับจากบิดา (บาท)</span>
+            <input type="number" name="inc_father" value="{{ prefill.get('inc_father', '') }}" placeholder="0" class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">ได้รับจากมารดา (บาท)</span>
+            <input type="number" name="inc_mother" value="{{ prefill.get('inc_mother', '') }}" placeholder="0" class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">ได้รับจากผู้อุปการะ (บาท)</span>
+            <input type="number" name="inc_guardian" value="{{ prefill.get('inc_guardian', '') }}" placeholder="0" class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">ได้รับจากทุนการศึกษา (เฉลี่ยรายเดือน)</span>
+            <input type="number" name="inc_scholarship" value="{{ prefill.get('inc_scholarship', '') }}" placeholder="0" class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">ได้รับจากการทำงาน (Part time)</span>
+            <input type="number" name="inc_parttime" value="{{ prefill.get('inc_parttime', '') }}" placeholder="0" class="form-input">
+          </div>
+        </div>
+
+        <div class="div-label">ข้อมูลพี่น้องร่วมบิดามารดาเดียวกัน</div>
+        <div style="border:1px solid #e2e8f0; border-radius:var(--radius-sm); overflow-x:auto;">
+          <table style="width:100%; border-collapse:collapse; min-width:600px; font-size:.8rem;">
+            <thead style="background:#f8faff; color:var(--navy2); text-transform:uppercase; font-size:.72rem;">
+              <tr>
+                <th style="padding:10px;text-align:center;width:50px;">ลำดับ</th>
+                <th style="padding:10px;text-align:left;">ชื่อ - นามสกุล</th>
+                <th style="padding:10px;text-align:center;width:70px;">อายุ</th>
+                <th style="padding:10px;text-align:left;">อาชีพ / ระดับชั้น</th>
+                <th style="padding:10px;text-align:left;">สถานที่ทำงาน / ศึกษา</th>
+                <th style="padding:10px;text-align:center;width:120px;">รายได้/เดือน (฿)</th>
+                <th style="padding:10px;text-align:center;width:40px;"></th>
+              </tr>
+            </thead>
+            <tbody id="siblingsTbody">
+              {% if prefill.get('siblings_list') %}
+                {% for s in prefill['siblings_list'] %}
+                  <tr style="border-top:1px solid #e2e8f0;">
+                    <td style="padding:8px;text-align:center;" class="sib-index">{{ loop.index }}</td>
+                    <td style="padding:8px;"><input type="text" name="sibling_name[]" value="{{ s.get('name', '') }}" class="form-input" style="padding:6px;font-size:.8rem;"></td>
+                    <td style="padding:8px;"><input type="number" name="sibling_age[]" value="{{ s.get('age', '') }}" class="form-input" style="padding:6px;font-size:.8rem;"></td>
+                    <td style="padding:8px;"><input type="text" name="sibling_job[]" value="{{ s.get('job', '') }}" class="form-input" style="padding:6px;font-size:.8rem;"></td>
+                    <td style="padding:8px;"><input type="text" name="sibling_place[]" value="{{ s.get('place', '') }}" class="form-input" style="padding:6px;font-size:.8rem;"></td>
+                    <td style="padding:8px;"><input type="number" name="sibling_income[]" value="{{ s.get('income', '') }}" class="form-input" style="padding:6px;font-size:.8rem;"></td>
+                    <td style="padding:8px;text-align:center;">
+                      <button type="button" onclick="deleteSiblingRow(this)" style="color:#ef4444;background:#fee2e2;border:none;border-radius:4px;padding:4px 8px;cursor:pointer;" title="ลบพี่น้อง">✕</button>
+                    </td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                  <tr style="border-top:1px solid #e2e8f0;">
+                    <td style="padding:8px;text-align:center;" class="sib-index">1</td>
+                    <td style="padding:8px;"><input type="text" name="sibling_name[]" class="form-input" style="padding:6px;font-size:.8rem;" placeholder="ชื่อ-นามสกุล"></td>
+                    <td style="padding:8px;"><input type="number" name="sibling_age[]" class="form-input" style="padding:6px;font-size:.8rem;" placeholder="อายุ"></td>
+                    <td style="padding:8px;"><input type="text" name="sibling_job[]" class="form-input" style="padding:6px;font-size:.8rem;" placeholder="อาชีพ/ชั้น"></td>
+                    <td style="padding:8px;"><input type="text" name="sibling_place[]" class="form-input" style="padding:6px;font-size:.8rem;" placeholder="สถานที่"></td>
+                    <td style="padding:8px;"><input type="number" name="sibling_income[]" class="form-input" style="padding:6px;font-size:.8rem;" placeholder="รายได้"></td>
+                    <td style="padding:8px;text-align:center;">
+                      <button type="button" onclick="deleteSiblingRow(this)" style="color:#ef4444;background:#fee2e2;border:none;border-radius:4px;padding:4px 8px;cursor:pointer;" title="ลบพี่น้อง">✕</button>
+                    </td>
+                  </tr>
+              {% endif %}
+            </tbody>
+          </table>
+          <div style="padding:10px; display:flex; justify-content:flex-end; border-top:1px solid #e2e8f0;">
+            <button type="button" class="btn-draft" onclick="addSiblingRow()" style="padding:6px 14px;font-size:.75rem;">＋ เพิ่มพี่น้อง</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# 8. แนบเอกสาร #}
+    <div class="section-card">
+      <div class="section-header">
+        <div class="s-icon gold">8</div>
+        <span class="s-title">แนบเอกสารประกอบการสมัคร</span>
+        <span class="s-subtitle" style="display:flex;align-items:center;gap:4px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          PDF, PNG, JPG — ไม่เกิน 5MB ต่อไฟล์
+        </span>
+      </div>
+      <div class="s-body">
+        <div style="background:#f0fdfa;border:1.5px solid #ccfbf1;border-radius:var(--radius-sm);padding:1rem;margin-bottom:1.25rem;">
+          <div style="font-weight:700;color:#0f766e;font-size:.85rem;margin-bottom:.5rem;">📋 เอกสารที่ต้องแนบ</div>
+          <ul style="list-style:disc inside;color:#0f766e;font-size:.8rem;opacity:.9;line-height:1.6;">
+            <li>สำเนาบัตรประชาชน (1 ฉบับ)</li>
+            <li>สำเนาทะเบียนบ้าน (1 ฉบับ)</li>
+            <li>ใบผลการเรียน (Transcript) ล่าสุด</li>
+            <li>หนังสือรับรองความประพฤติ (จากอาจารย์ที่ปรึกษา)</li>
+            <li>เอกสารอื่นๆ ที่เกี่ยวข้อง (ถ้ามี)</li>
+          </ul>
+        </div>
+
+        <div id="drop-zone" onclick="document.getElementById('file-input').click()">
+          <div style="font-size:2.5rem;margin-bottom:.5rem;">📂</div>
+          <div style="font-weight:600;font-size:.9rem;color:var(--navy);">คลิกหรือลากไฟล์มาวางที่นี่</div>
+          <div style="font-size:.75rem;color:var(--slate);margin-top:4px;">รองรับนามสกุล .pdf, .png, .jpg, .jpeg</div>
+        </div>
+
+        <input type="file" id="file-input" name="documents" accept=".pdf,.png,.jpg,.jpeg" multiple style="display:none;">
+        <ul id="file-list" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;"></ul>
+      </div>
+    </div>
+
+    {# Sticky Action Bar #}
+    <div class="action-bar">
+      <a href="/student/dashboard" class="btn-cancel">← ยกเลิกการสมัคร</a>
+      <div class="action-btns">
+        <button type="submit" name="action" value="save_draft" class="btn-draft">
+          💾 บบันทึกแบบร่าง
+        </button>
+        <button type="submit" name="action" value="submit" class="btn-save">
+          📨 ยืนยันการสมัคร
+        </button>
       </div>
     </div>
 
   </form>
 
-  {# ══ STICKY ACTION BAR ══ #}
-  <div class="action-bar">
-    <p class="action-hint">
-      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-      ตรวจสอบข้อมูลให้ครบถ้วนก่อนยืนยันการสมัคร
-    </p>
-    <div class="action-btns">
-      <button type="submit" form="apply-form" name="action" value="save_draft" class="btn-draft">
-        💾 บันทึกร่าง
-      </button>
-      <button type="submit" form="apply-form" name="action" value="submit" class="btn-save">
-        📨 ยืนยันการสมัคร
-      </button>
-    </div>
-  </div>
-
-</div>{# /container #}
-</div>{# /page-bg #}
+</div>
+</div>
 
 <script>
-    /* Sync student_id to upload hidden field */
-    const stuInput = document.getElementById('student_id');
-    if (stuInput) {
-        stuInput.addEventListener('input', function () {
-            document.getElementById('upload-student-id').value = this.value;
-        });
-    }
+  /* Sync student_id to upload hidden field */
+  document.getElementById('student_id')?.addEventListener('input', function () {
+    const hiddenUpload = document.getElementById('upload-student-id');
+    if (hiddenUpload) hiddenUpload.value = this.value;
+  });
 
-    /* Drop Zone */
-    const dropZone  = document.getElementById('drop-zone');
-    const fileInput = document.getElementById('file-input');
-    const fileList  = document.getElementById('file-list');
+  /* Drop Zone */
+  const dropZone  = document.getElementById('drop-zone');
+  const fileInput = document.getElementById('file-input');
+  const fileList  = document.getElementById('file-list');
 
-    function updateFileList(files) {
-        fileList.innerHTML = '';
-        Array.from(files).forEach(file => {
-            const sizeMB = (file.size / (1024*1024)).toFixed(2);
-            const isOk   = file.size <= 5*1024*1024;
-            const ext    = file.name.split('.').pop().toLowerCase();
-            const typeOk = ['pdf','png','jpg','jpeg'].includes(ext);
-            const icon   = file.type.startsWith('image/') ? '🖼️' : '📄';
-            
-            const li = document.createElement('li');
-            li.style.display = 'flex';
-            li.style.alignItems = 'center';
-            li.style.justifyContent = 'space-between';
-            li.style.padding = '10px 16px';
-            li.style.borderRadius = '8px';
-            li.style.fontSize = '0.85rem';
-            li.style.border = '1px solid';
-            
-            if (isOk && typeOk) {
-                li.style.backgroundColor = '#f0fdf4';
-                li.style.borderColor = '#bbf7d0';
-                li.style.color = '#166534';
-            } else {
-                li.style.backgroundColor = '#fef2f2';
-                li.style.borderColor = '#fecaca';
-                li.style.color = '#991b1b';
-            }
+  function updateFileList(files) {
+    fileList.innerHTML = '';
+    Array.from(files).forEach(file => {
+      const sizeMB = (file.size / (1024*1024)).toFixed(2);
+      const isOk   = file.size <= 5*1024*1024;
+      const ext    = file.name.split('.').pop().toLowerCase();
+      const typeOk = ['pdf','png','jpg','jpeg'].includes(ext);
+      const icon   = file.type.startsWith('image/') ? '🖼️' : '📄';
 
-            li.innerHTML = `
-                <span style="display: flex; align-items: center; gap: 8px; flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
-                    <span>${icon}</span>
-                    <span style="font-weight: 500; overflow: hidden; text-overflow: ellipsis;">${file.name}</span>
-                </span>
-                <span style="margin-left: 1rem; flex-shrink: 0; font-weight: 600;">${sizeMB} MB</span>
-                ${!typeOk ? '<span style="margin-left: 8px; font-size: 0.75rem; color: #dc2626;">ไม่รองรับชนิดไฟล์นี้</span>' : ''}
-                ${typeOk && !isOk ? '<span style="margin-left: 8px; font-size: 0.75rem; color: #dc2626;">ไฟล์ใหญ่เกิน 5 MB</span>' : ''}
-            `;
-            fileList.appendChild(li);
-        });
-    }
+      const li = document.createElement('li');
+      li.style.display = 'flex';
+      li.style.alignItems = 'center';
+      li.style.justifyContent = 'space-between';
+      li.style.padding = '10px 14px';
+      li.style.borderRadius = '8px';
+      li.style.fontSize = '.85rem';
+      
+      if (isOk && typeOk) {
+        li.style.background = '#f0fdf4';
+        li.style.border = '1px solid #bbf7d0';
+        li.style.color = '#166534';
+      } else {
+        li.style.background = '#fef2f2';
+        li.style.border = '1px solid #fecaca';
+        li.style.color = '#991b1b';
+      }
 
-    if (fileInput && dropZone) {
-        fileInput.addEventListener('change', () => updateFileList(fileInput.files));
-        dropZone.addEventListener('dragover',  e  => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-        dropZone.addEventListener('drop', e => {
-            e.preventDefault();
-            dropZone.classList.remove('drag-over');
-            fileInput.files = e.dataTransfer.files;
-            updateFileList(e.dataTransfer.files);
-        });
-    }
+      let errorMsg = '';
+      if (!typeOk) errorMsg = '<span style="color:#dc2626;font-size:.75rem;margin-left:8px;font-weight:600;">(ชนิดไฟล์ไม่รองรับ)</span>';
+      else if (!isOk) errorMsg = '<span style="color:#dc2626;font-size:.75rem;margin-left:8px;font-weight:600;">(ไฟล์ใหญ่เกิน 5MB)</span>';
 
-    /* Siblings Data Setup */
-    let siblingsRaw = '{{ (prefill.get("siblings_list", [])) | tojson | safe }}';
-    let siblings = [];
-    try {
-        if (siblingsRaw && siblingsRaw !== '""') {
-            siblings = JSON.parse(siblingsRaw);
-        }
-    } catch(e) {
-        console.error("Error parsing siblings data");
-    }
-    
-    let currentPage = 0;
-    const rowsPerPage = 3;
-
-    const tableBody = document.getElementById("siblingsTableBody");
-    const addBtn    = document.getElementById("addSiblingBtn");
-    const prevBtn   = document.getElementById("prevSiblingBtn");
-    const nextBtn   = document.getElementById("nextSiblingBtn");
-    const sibJson   = document.getElementById('siblings_json_input');
-    const applyForm = document.getElementById('apply-form');
-
-    function syncSiblingsJson() {
-        const rows = tableBody.querySelectorAll('tr[data-idx]');
-        rows.forEach(row => {
-            const idx = parseInt(row.dataset.idx);
-            if (idx >= 0 && idx < siblings.length) {
-                siblings[idx].name  = row.querySelector('input[name="sibling_name[]"]')?.value  ?? '';
-                siblings[idx].age   = row.querySelector('input[name="sibling_age[]"]')?.value   ?? '';
-                siblings[idx].job   = row.querySelector('input[name="sibling_job[]"]')?.value   ?? '';
-                siblings[idx].place = row.querySelector('input[name="sibling_place[]"]')?.value ?? '';
-            }
-        });
-        if(sibJson) {
-            sibJson.value = JSON.stringify(siblings);
-        }
-    }
-
-    if(applyForm) {
-        applyForm.addEventListener('submit', () => {
-            syncSiblingsJson();
-        });
-    }
-
-    function renderSiblings() {
-        if (siblings.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:2.5rem;color:var(--muted);font-size:.875rem;">ยังไม่มีข้อมูลพี่น้อง</td></tr>`;
-            return;
-        }
-        const start = currentPage * rowsPerPage;
-        tableBody.innerHTML = siblings.slice(start, start + rowsPerPage).map((s, i) => `
-            <tr data-idx="${start + i}">
-                <td style="text-align:center;font-weight:600;color:#475569;">${start + i + 1}</td>
-                <td><input type="text"   name="sibling_name[]"  value="${s.name  ?? ''}" placeholder="ชื่อ-นามสกุล"              class="form-input" style="padding:6px 10px; font-size:0.85rem;"></td>
-                <td><input type="number" name="sibling_age[]"   value="${s.age   ?? ''}" placeholder="อายุ"                       class="form-input" style="padding:6px 10px; font-size:0.85rem; max-width:70px;"></td>
-                <td><input type="text"   name="sibling_job[]"   value="${s.job   ?? ''}" placeholder="อาชีพ / ระดับชั้น"          class="form-input" style="padding:6px 10px; font-size:0.85rem;"></td>
-                <td><input type="text"   name="sibling_place[]" value="${s.place ?? ''}" placeholder="สถานที่ทำงาน / สถานศึกษา" class="form-input" style="padding:6px 10px; font-size:0.85rem;"></td>
-            </tr>`).join('');
-    }
-
-    function saveCurrentPage() {
-        const rows = tableBody.querySelectorAll('tr[data-idx]');
-        rows.forEach(row => {
-            const idx = parseInt(row.dataset.idx);
-            if (idx >= 0 && idx < siblings.length) {
-                siblings[idx].name  = row.querySelector('input[name="sibling_name[]"]')?.value  ?? '';
-                siblings[idx].age   = row.querySelector('input[name="sibling_age[]"]')?.value   ?? '';
-                siblings[idx].job   = row.querySelector('input[name="sibling_job[]"]')?.value   ?? '';
-                siblings[idx].place = row.querySelector('input[name="sibling_place[]"]')?.value ?? '';
-            }
-        });
-    }
-
-    if(addBtn) {
-        addBtn.addEventListener("click", () => {
-            saveCurrentPage();
-            siblings.push({ name:"", age:"", job:"", place:"" });
-            currentPage = Math.floor((siblings.length - 1) / rowsPerPage);
-            renderSiblings();
-        });
-    }
-    
-    if(prevBtn) {
-        prevBtn.addEventListener("click", () => { 
-            if (currentPage > 0) { saveCurrentPage(); currentPage--; renderSiblings(); } 
-        });
-    }
-    
-    if(nextBtn) {
-        nextBtn.addEventListener("click", () => { 
-            if ((currentPage+1)*rowsPerPage < siblings.length) { saveCurrentPage(); currentPage++; renderSiblings(); } 
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        if (siblings.length > 0) renderSiblings();
+      li.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          <span>${icon}</span>
+          <span style="font-weight:600;">${file.name}</span>
+        </div>
+        <div style="flex-shrink:0;display:flex;align-items:center;gap:12px;">
+          <span>${sizeMB} MB</span>
+          ${errorMsg}
+        </div>
+      `;
+      fileList.appendChild(li);
     });
+  }
+
+  if (fileInput) {
+    fileInput.addEventListener('change', () => updateFileList(fileInput.files));
+  }
+  if (dropZone) {
+    dropZone.addEventListener('dragover',  e  => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+      if (fileInput) {
+        fileInput.files = e.dataTransfer.files;
+        updateFileList(e.dataTransfer.files);
+      }
+    });
+  }
+
+  function addSiblingRow() {
+    const tbody = document.getElementById('siblingsTbody');
+    const tr = document.createElement('tr');
+    tr.style.borderTop = '1px solid #e2e8f0';
+    tr.innerHTML = `
+      <td style="padding:8px;text-align:center;" class="sib-index"></td>
+      <td style="padding:8px;"><input type="text" name="sibling_name[]" class="form-input" style="padding:6px;font-size:.8rem;" placeholder="ชื่อ-นามสกุล"></td>
+      <td style="padding:8px;"><input type="number" name="sibling_age[]" class="form-input" style="padding:6px;font-size:.8rem;" placeholder="อายุ"></td>
+      <td style="padding:8px;"><input type="text" name="sibling_job[]" class="form-input" style="padding:6px;font-size:.8rem;" placeholder="อาชีพ/ชั้น"></td>
+      <td style="padding:8px;"><input type="text" name="sibling_place[]" class="form-input" style="padding:6px;font-size:.8rem;" placeholder="สถานที่"></td>
+      <td style="padding:8px;"><input type="number" name="sibling_income[]" class="form-input" style="padding:6px;font-size:.8rem;" placeholder="รายได้"></td>
+      <td style="padding:8px;text-align:center;">
+        <button type="button" onclick="deleteSiblingRow(this)" style="color:#ef4444;background:#fee2e2;border:none;border-radius:4px;padding:4px 8px;cursor:pointer;" title="ลบพี่น้อง">✕</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+    updateSiblingIndexes();
+  }
+
+  function deleteSiblingRow(btn) {
+    const tbody = document.getElementById('siblingsTbody');
+    const tr = btn.closest('tr');
+    tr.remove();
+    updateSiblingIndexes();
+  }
+
+  function updateSiblingIndexes() {
+    const tbody = document.getElementById('siblingsTbody');
+    const rows = tbody.querySelectorAll('tr');
+    rows.forEach((row, idx) => {
+      row.querySelector('.sib-index').textContent = idx + 1;
+    });
+  }
 </script>
 
 {% endblock %}

@@ -1,27 +1,5 @@
 {% extends "layouts/base.html" %}
 
-{% block nav_links %}
-<nav class="flex items-center gap-8">
-    <div class="flex items-center gap-8">
-        <a href="{{ url_for('student.dashboard') }}" 
-           class="text-white hover:text-yellow-400 hover:border-b-4 hover:border-yellow-400 px-1 py-2 text-sm font-medium transition-all">
-            หน้าแรก
-        </a>
-        <a href="{{ url_for('student.apply_scholarship') }}" 
-           class="text-white hover:text-yellow-400 hover:border-b-4 hover:border-yellow-400 px-1 py-2 text-sm font-medium transition-all">
-            ประกาศ/ระเบียบ
-        </a>
-        <a href="{{ url_for('student.track_status') }}" 
-           class="text-white border-b-4 border-yellow-400 px-1 py-2 text-sm font-bold tracking-wide transition-all">
-            ติดตามสถานะ
-        </a>
-    </div>
-    <div class="h-8 w-px bg-blue-700/60 shadow-sm"></div>
-</nav>
-{% endblock %}
-
-{% block role_name %}นักศึกษา{% endblock %}
-
 {% block content %}
 <div class="max-w-[90%] mx-auto py-10">
     <div class="bg-gray-200 rounded-3xl shadow-xl p-8 min-h-[570px] flex flex-col">
@@ -40,37 +18,51 @@
                         <th class="p-4 border-b text-center">สถานะ</th>
                     </tr>
                 </thead>
-                <tbody class="text-gray-700 text-xls">
+                <tbody class="text-gray-700">
                     {% for app in applications %}
                     <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="p-4 border-b text-center font-bold">{{ loop.index }}</td>
-                        <td class="p-4 border-b font-medium">
-                            <a href="{{ url_for('student.status_detail', app_id=app.id) }}" class="text-blue-900 hover:underline">
-                                {{ app.scholarship_name }}
-                            </a>
+                        <td class="p-4 border-b text-center">{{ loop.index }}</td>
+                        
+                        <td class="p-4 border-b font-semibold text-blue-900">
+                            {{ app.scholarship.name }}
                         </td>
-                        <td class="p-4 border-b text-center">{{ app.scholarship_type }}</td>
-                        <td class="p-4 border-b text-center">{{ app.faculty }}</td>
-                        <td class="p-4 border-b text-center text-[10px]">
-                            {{ app.open_date.strftime('%d/%m/%Y') }} - {{ app.close_date.strftime('%d/%m/%Y') }}
+                        
+                        <td class="p-4 border-b text-center text-sm">
+                            {{ app.scholarship.category or 'ทั่วไป' }}
                         </td>
-                        <td class="p-4 border-b text-center">
-                            <div class="flex justify-center gap-1.5">
-                                {% for file in app.files %}
-                                <span title="{{ file.name }}" class="text-lg cursor-help hover:scale-125 transition-transform">📄</span>
-                                {% endfor %}
-                            </div>
+                        
+                        <td class="p-4 border-b text-center text-sm">
+                            {{ app.scholarship.faculty_condition }}
                         </td>
+                        
+                        <td class="p-4 border-b text-center text-xs">
+                            {{ app.scholarship.start_date.strftime('%d/%m/%Y') }} - {{ app.scholarship.end_date.strftime('%d/%m/%Y') }}
+                        </td>
+
                         <td class="p-4 border-b text-center">{{ app.created_at.strftime('%d/%m/%Y') }}</td>
+
                         <td class="p-4 border-b text-center">
-                            <span class="px-3 py-1 rounded-full font-bold text-[10px] 
-                                {% if app.status == 'รอตรวจสอบ' %}  text-yellow-700
-                                {% elif app.status == 'เรียกสัมภาษณ์' %}  text-blue-700
-                                {% elif app.status == 'ปฏิเสธ' %}  text-red-700
-                                {% elif app.status == 'ได้รับทุน' %}  text-green-700
-                                {% else %} bg-gray-100 text-gray-700 {% endif %}">
+                            <span class="px-3 py-1 rounded-full font-bold text-xs 
+                                {% if app.status == 'รอตรวจสอบ' %} bg-yellow-100 text-yellow-700
+                                {% elif app.status == 'เรียกสัมภาษณ์' %} bg-blue-100 text-blue-700
+                                {% elif app.status == 'ได้รับทุน' %} bg-green-100 text-green-700
+                                {% elif app.status == 'ปฏิเสธ' %} bg-red-100 text-red-700
+                                {% else %} bg-gray-100 text-gray-700 {% endif %} border">
                                 {{ app.status }}
                             </span>
+                        </td>
+
+                        <td class="p-4 border-b text-center">
+                            <a href="{{ url_for('student.status_detail', app_id=app.id) }}" 
+                            class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-blue-700 transition-all">
+                                รายละเอียด
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="p-10 text-center text-gray-500 ">
+                            คุณยังไม่มีประวัติการสมัครทุนการศึกษา
                         </td>
                     </tr>
                     {% endfor %}

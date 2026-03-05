@@ -90,7 +90,7 @@ class Student(db.Model):
 # 2.1 ข้อมูลทุนการศึกษา
 class Scholarship(db.Model):
     __tablename__ = 'scholarship'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(20), primary_key=True)
     name = db.Column(db.String(100), nullable=False) # ชื่อทุน
     quota = db.Column(db.Integer, default=0) # จำนวนกี่ทุน
     amount = db.Column(db.Float, nullable=True) # ทุนละเท่าไหร่
@@ -123,17 +123,18 @@ class Scholarship(db.Model):
 # 2.2 ข้อมูลใบสมัคร
 class Application(db.Model):
     __tablename__ = 'application'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String, primary_key=True)
     student_id = db.Column(db.String(20), nullable=False)
     student_name = db.Column(db.String(100))
     faculty = db.Column(db.String(100))
     
-    scholarship_id = db.Column(db.Integer, db.ForeignKey('scholarship.id'), nullable=False)
+    scholarship_id = db.Column(db.String(20), db.ForeignKey('scholarship.id'), nullable=False)
     status = db.Column(db.String(20), default='รอตรวจสอบ')
     reviewing_by = db.Column(db.String(50))
     reviewing_at = db.Column(db.DateTime)
     status_description = db.Column(db.Text)
-
+    is_scored = db.Column(db.Boolean, default=False)
+    total_score = db.Column(db.Integer, default=0)
 
 # 2.3 บันทึกการทำงาน (Audit Log)
 class AuditLog(db.Model):
@@ -156,7 +157,24 @@ class Criterion(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     
     # ✅ แก้ไขตรงนี้: เปลี่ยนเป็น db.Integer และอ้างอิงไปที่ scholarship.id
-    scholarship_id = db.Column(db.Integer, db.ForeignKey('scholarship.id'))
+    scholarship_id = db.Column(db.String(20), db.ForeignKey('scholarship.id'))
     
     name = db.Column(db.String(100))  # เช่น 'คะแนนสัมภาษณ์', 'จิตอาสา'
     max_score = db.Column(db.Integer) # คะแนนเต็มของหัวข้อนั้น
+    
+class AuditLog(db.Model):
+    __tablename__ = 'audit_logs'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.now)
+    user_name = db.Column(db.String(100), nullable=False)
+    action = db.Column(db.String(100), nullable=False)  # เช่น 'GIVE_SCORE', 'CONFIRM_SELECTION'
+    details = db.Column(db.Text, nullable=True)         # เช่น 'ให้คะแนนนักศึกษา นาย A รวม 85 คะแนน'
+    ip_address = db.Column(db.String(45), nullable=True)
+
+    def __init__(self, user_name, action, details, ip_address):
+        self.user_name = user_name
+        self.action = action
+        self.details = details
+        self.ip_address = ip_address
+    

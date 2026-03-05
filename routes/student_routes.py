@@ -1,5 +1,6 @@
 import os
 import json
+import uuid
 
 from flask import Blueprint, current_app, render_template, request, session, redirect, url_for, flash
 from werkzeug.utils import secure_filename
@@ -240,6 +241,7 @@ def apply_scholarship():
         
         # บันทึกข้อมูลลงฐานข้อมูล Application
         new_app = Application(
+            id=f"APP-{current_student_id}-{scholarship_id}", # สร้าง String ID ที่นี่
             student_id=current_student_id,
             student_name=student_name if student_name else student.name,
             faculty=faculty if faculty else student.faculty,
@@ -316,8 +318,3 @@ def track_status():
     """ระบบติดตามสถานะการสมัคร"""
     # เติม pass ชั่วคราวเพื่อไม่ให้ระบบพัง (เนื่องจากฟังก์ชันนี้ยังไม่มีโค้ดข้างใน)
     return "หน้าระบบติดตามสถานะการสมัคร กำลังอยู่ในระหว่างการพัฒนา..."
-
-@student_bp.route("/scholarships")
-def announce_scholarships():
-    all_scholarships = Scholarship.query.all()
-    return render_template("student/scholarships.html", scholarships=all_scholarships)

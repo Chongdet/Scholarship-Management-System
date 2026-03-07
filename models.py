@@ -129,12 +129,18 @@ class Application(db.Model):
     faculty = db.Column(db.String(100))
     
     scholarship_id = db.Column(db.String(20), db.ForeignKey('scholarship.id'), nullable=False)
-    status = db.Column(db.String(20), default='รอตรวจสอบ')
+    status = db.Column(db.String(20), default='pending')
     reviewing_by = db.Column(db.String(50))
     reviewing_at = db.Column(db.DateTime)
     status_description = db.Column(db.Text)
     is_scored = db.Column(db.Boolean, default=False)
     total_score = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow) #เก็บวันที่สมัคร
+
+    reject_reason = db.Column(db.Text, nullable=True) #เหตุผลจากเจ้าหน้าที่
+    interview_date = db.Column(db.Date, nullable=True) # วันที่นัดสัมภาษณ์
+    interview_time = db.Column(db.String(100), nullable=True) # เเวลานัดสัมภาษณ์
+    interview_location = db.Column(db.String(255), nullable=True) #สถานที่นัดสัมภาษณ์
 
 # 2.3 บันทึกการทำงาน (Audit Log)
 class AuditLog(db.Model):

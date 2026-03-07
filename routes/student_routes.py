@@ -315,6 +315,30 @@ def logout():
 
 @student_bp.route("/status")
 def track_status():
-    """ระบบติดตามสถานะการสมัคร"""
-    # เติม pass ชั่วคราวเพื่อไม่ให้ระบบพัง (เนื่องจากฟังก์ชันนี้ยังไม่มีโค้ดข้างใน)
-    return "หน้าระบบติดตามสถานะการสมัคร กำลังอยู่ในระหว่างการพัฒนา..."
+    student_id = session.get("user_id")
+    if not student_id:
+        return redirect(url_for("student.login"))
+
+    page = request.args.get('page', 1, type=int)
+    # ดึงทุกอย่างที่ student_id นี้สมัครไว้ ไม่ว่าจะสถานะอะไรก็ตาม
+    pagination = Application.query.filter_by(student_id=student_id)\
+        .order_by(Application.created_at.desc())\
+        .paginate(page=page, per_page=5, error_out=False)
+
+    return render_template("student/status.html", pagination=pagination)
+
+@student_bp.route("/status/detail/<app_id>")
+def status_detail(app_id):
+    # เช็ก Login
+    if "user_id" not in session:
+        return redirect(url_for("student.login"))
+        
+    # ดึงข้อมูล Application พร้อม Join Scholarship มาโชว์ชื่อทุน
+    application = Application.query.get_or_404(app_id)
+    
+    return render_template("student/status_detail.html", app=application)
+
+@student_bp.route("/scholarships")
+def announce_scholarships():
+    all_scholarships = Scholarship.query.all()
+    return render_template("student/scholarships.html", scholarships=all_scholarships)

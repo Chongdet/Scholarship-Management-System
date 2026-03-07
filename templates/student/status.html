@@ -3,71 +3,94 @@
 {% block content %}
 <div class="max-w-[90%] mx-auto py-10">
     <div class="bg-gray-200 rounded-3xl shadow-xl p-8 min-h-[570px] flex flex-col">
-        <h2 class="text-3xl font-bold mb-8 text-blue-900">ข้อมูลการยื่นสมัครทุนการศึกษา</h2>
-        <div class="overflow-x-auto bg-white rounded-2xl shadow-sm">
+        <h2 class="text-3xl font-bold mb-8 text-blue-900">ทุนการศึกษาที่ยื่นสมัคร</h2>
+        
+        <div class="overflow-x-auto bg-white rounded-2xl shadow-sm p-4">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-gray-50 text-gray-600 uppercase text-xl font-bold">
+                    <tr class="bg-gray-50 text-gray-600 text-sm">
                         <th class="p-4 border-b text-center">ลำดับ</th>
-                        <th class="p-4 border-b">ชื่อทุนการศึกษา</th>
-                        <th class="p-4 border-b text-center">ประเภททุน</th>
+                        <th class="p-4 border-b text-center">ชื่อทุน</th>
+                        <th class="p-4 border-b text-center">ประเภท</th>
                         <th class="p-4 border-b text-center">หน่วยงาน</th>
-                        <th class="p-4 border-b text-center">ระยะเวลาสมัคร</th>
-                        <th class="p-4 border-b text-center">ไฟล์แนบ</th>
+                        <th class="p-4 border-b text-center">ไฟล์ที่แนบ</th>
                         <th class="p-4 border-b text-center">วันที่สมัคร</th>
                         <th class="p-4 border-b text-center">สถานะ</th>
+                        <th class="p-4 border-b text-center">ข้อมูลเพิ่มเติม</th>
                     </tr>
                 </thead>
-                <tbody class="text-gray-700">
-                    {% for app in applications %}
+                <tbody>
+                    {% for app in pagination.items %}
                     <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="p-4 border-b text-center">{{ loop.index }}</td>
-                        
-                        <td class="p-4 border-b font-semibold text-blue-900">
-                            {{ app.scholarship.name }}
-                        </td>
-                        
-                        <td class="p-4 border-b text-center text-sm">
-                            {{ app.scholarship.category or 'ทั่วไป' }}
-                        </td>
-                        
-                        <td class="p-4 border-b text-center text-sm">
-                            {{ app.scholarship.faculty_condition }}
-                        </td>
-                        
-                        <td class="p-4 border-b text-center text-xs">
-                            {{ app.scholarship.start_date.strftime('%d/%m/%Y') }} - {{ app.scholarship.end_date.strftime('%d/%m/%Y') }}
+                        <td class="p-4 border-b text-center">{{ loop.index + (pagination.page - 1) * pagination.per_page }}</td>
+                        <td class="p-4 border-b font-medium">{{ app.scholarship.name }}</td>
+                        <td class="p-4 border-b">{{ app.scholarship.category if app.scholarship.category else 'ทุนทั่วไป' }}</td>
+                        <td class="p-4 border-b">{{ app.provider if app.provider else 'มหาวิทยาลัย'}}</td>
+                        <td class="p-4 border-b text-center">
+                            {% if app.application_file %}
+                                <a href="{{ url_for('static', filename='uploads/' + app.application_file) }}" 
+                                target="_blank" 
+                                class="inline-flex items-center px-3 py-1 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 transition-all text-xs font-medium border border-blue-100">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 000 2.828l7 7a2 2 0 002.828 0l7-7a2 2 0 000-2.828l-7-7z" />
+                                    </svg>
+                                    เปิดไฟล์
+                                </a>
+                            {% else %}
+                                <span class="text-gray-400 text-xs ">ไม่มีไฟล์</span>
+                            {% endif %}
                         </td>
 
-                        <td class="p-4 border-b text-center">{{ app.created_at.strftime('%d/%m/%Y') }}</td>
+                        <td class="p-4 border-b text-sm">{{ app.created_at.strftime('%d/%m/%Y') if app.created_at else '-' }}</td>
 
                         <td class="p-4 border-b text-center">
-                            <span class="px-3 py-1 rounded-full font-bold text-xs 
-                                {% if app.status == 'รอตรวจสอบ' %} bg-yellow-100 text-yellow-700
-                                {% elif app.status == 'เรียกสัมภาษณ์' %} bg-blue-100 text-blue-700
-                                {% elif app.status == 'ได้รับทุน' %} bg-green-100 text-green-700
-                                {% elif app.status == 'ปฏิเสธ' %} bg-red-100 text-red-700
-                                {% else %} bg-gray-100 text-gray-700 {% endif %} border">
-                                {{ app.status }}
-                            </span>
+                            {% if app.status in ['interview', 'เรียกสัมภาษณ์'] %}
+                                <span class="px-3 py-1 rounded-full text-xs font-bold border bg-blue-100 text-blue-700 border-blue-200">เรียกสัมภาษณ์</span>
+                            {% elif app.status in ['approved', 'ได้รับทุน', 'Selected'] %}
+                                <span class="px-3 py-1 rounded-full text-xs font-bold border bg-green-100 text-green-700 border-green-200">ได้รับทุนการศึกษา</span>
+                            {% elif app.status in ['needs_edit', 'รอเเก้ไข'] %}
+                                <span class="px-3 py-1 rounded-full text-xs font-bold border bg-orange-100 text-yellow-700 border-orange-200">แก้ไขเอกสาร</span>
+                            {% elif app.status in ['Reserved'] %}
+                                <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-bold">ตัวสำรอง</span>
+                            {% elif app.status == 'pending' , 'รอตรวจสอบ' , 'รอการตรวจสอบ' %}
+                                <span class="px-3 py-1 rounded-full text-xs font-bold border bg-yellow-100 text-yellow-700 border-yellow-200">รอตรวจสอบ</span>
+                            {% endif %}
                         </td>
 
-                        <td class="p-4 border-b text-center">
+                       <td class="p-4 border-b text-center">
                             <a href="{{ url_for('student.status_detail', app_id=app.id) }}" 
-                            class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-blue-700 transition-all">
+                               class="inline-flex items-center px-4 py-2 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition-all font-bold text-sm border border-blue-100">
                                 รายละเอียด
                             </a>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="8" class="p-10 text-center text-gray-500 ">
-                            คุณยังไม่มีประวัติการสมัครทุนการศึกษา
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
+
+            <div class="mt-6 flex justify-between items-center border-t pt-4">
+                <div class="text-gray-600 font-medium text-sm pl-2">
+                    Showing page {{ pagination.page }} of {{ pagination.pages }}
+                </div>
+
+                <div class="flex gap-2 pr-2">
+                    {# ปุ่มก่อนหน้า: แสดงทุกหน้ายกเว้นหน้าแรก #}
+                    {% if pagination.page > 1 %}
+                        <a href="{{ url_for('student.track_status', page=pagination.prev_num) }}" 
+                           class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all shadow-sm text-sm">
+                           ก่อนหน้า
+                        </a>
+                    {% endif %}
+
+                    {# ปุ่มถัดไป: แสดงจนถึงก่อนหน้าสุดท้าย #}
+                    {% if pagination.page < pagination.pages %}
+                        <a href="{{ url_for('student.track_status', page=pagination.next_num) }}" 
+                           class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-sm text-sm font-medium">
+                           ถัดไป
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
 </div>

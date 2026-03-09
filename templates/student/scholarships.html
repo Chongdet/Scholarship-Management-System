@@ -1,30 +1,5 @@
 {% extends "layouts/base.html" %}
 
-{% block nav_links %}
-<nav class="flex items-center gap-8">
-    <div class="flex items-center gap-8">
-        <a href="{{ url_for('student.dashboard') }}" 
-           class="text-white hover:text-yellow-400 hover:border-b-4 hover:border-yellow-400 px-1 py-2 text-sm font-medium transition-all">
-            หน้าแรก
-        </a>
-        
-        <a href="{{ url_for('student.apply_scholarship') }}" 
-           class="text-white border-b-4 border-yellow-400 px-1 py-2 text-sm font-bold tracking-wide transition-all">
-            ประกาศ/ระเบียบ
-        </a>
-        
-        <a href="{{ url_for('student.track_status') }}" 
-           class="text-white hover:text-yellow-400 hover:border-b-4 hover:border-yellow-400 px-1 py-2 text-sm font-medium transition-all">
-            ติดตามสถานะ
-        </a>
-    </div>
-
-    <div class="h-8 w-px bg-blue-700/60 shadow-sm"></div>
-</nav>
-{% endblock %}
-
-{% block role_name %}นักศึกษา{% endblock %}
-
 {% block content %}
 <style>
     .card-hover:hover {
@@ -125,7 +100,7 @@
                 ประกาศรายชื่อผู้ได้รับทุน
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16 max-w-7xl mx-auto">
-            {% for item in scholarships if item.status == 'interview' %}
+            {% for item in scholarships if item.status == 'announce' %}
                 <div class="bg-white rounded-[2rem] overflow-hidden shadow-lg flex flex-col hover:shadow-2xl transition-all border border-gray-100 group">
 
                     <div class="relative h-60 w-full overflow-hidden">

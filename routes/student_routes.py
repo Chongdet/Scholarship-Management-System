@@ -1,5 +1,6 @@
 import os
 import json
+import uuid
 
 from flask import Blueprint, current_app, render_template, request, session, redirect, url_for, flash
 from werkzeug.utils import secure_filename
@@ -240,6 +241,7 @@ def apply_scholarship():
         
         # บันทึกข้อมูลลงฐานข้อมูล Application
         new_app = Application(
+            id=f"APP-{current_student_id}-{scholarship_id}", # สร้าง String ID ที่นี่
             student_id=current_student_id,
             student_name=student_name if student_name else student.name,
             faculty=faculty if faculty else student.faculty,
@@ -254,12 +256,28 @@ def apply_scholarship():
         os.makedirs(upload_folder, exist_ok=True)
             
         files = request.files.getlist("documents")
+
+        # สร้างตัวแปรไว้จำชื่อไฟล์แรก
+        first_filename = None
+
         for file in files:
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
+
+                # สร้างชื่อใหม่ที่ไม่ซ้ำกัน เพื่อไม่ให้ไฟล์ทับกัน
+                unique_filename = f"app_{new_app.id}_{uuid.uuid4().hex[:8]}_{filename}"
+
+                if not first_filename:
+                    first_filename = unique_filename
+
                 # ผูกไฟล์กับ Application ID เพื่อไม่ให้สับสน
-                save_path = os.path.join(upload_folder, f"app_{new_app.id}_{filename}")
+                save_path = os.path.join(upload_folder, unique_filename)
                 file.save(save_path)
+
+        # บันทึกชื่อไฟล์กลับลงไปในตาราง Application ใน Database
+        if first_filename:
+            new_app.application_file = first_filename
+            db.session.commit()
         
         flash("บันทึกข้อมูลการสมัครเรียบร้อยแล้ว", "success")
         return redirect(url_for("student.dashboard"))
@@ -313,6 +331,40 @@ def logout():
 
 @student_bp.route("/status")
 def track_status():
-    """ระบบติดตามสถานะการสมัคร"""
-    # เติม pass ชั่วคราวเพื่อไม่ให้ระบบพัง (เนื่องจากฟังก์ชันนี้ยังไม่มีโค้ดข้างใน)
-    return "หน้าระบบติดตามสถานะการสมัคร กำลังอยู่ในระหว่างการพัฒนา..."
+    student_id = session.get("user_id")
+    if not student_id:
+        return redirect(url_for("student.login"))
+
+    page = request.args.get('page', 1, type=int)
+    pagination = Application.query.filter_by(student_id=student_id)\
+        .order_by(Application.created_at.desc())\
+        .paginate(page=page, per_page=5, error_out=False)
+
+    for app in pagination.items:
+        # กำหนด Path ไปยังโฟลเดอร์ของนักศึกษา
+        user_upload_dir = os.path.join(current_app.static_folder, 'uploads', str(student_id))
+        app.all_files = [] # สร้างตัวแปรชั่วคราวเก็บรายชื่อไฟล์
+        
+        if os.path.exists(user_upload_dir):
+            # อ่านไฟล์ทั้งหมดในโฟลเดอร์ออกมา
+            all_entries = os.listdir(user_upload_dir)
+            # เราใช้ startswith เพื่อดึงทุกไฟล์ที่ขึ้นต้นด้วยรหัสใบสมัครเดียวกัน
+            app.all_files = [f for f in all_entries if f.startswith(f"app_{app.id}")]
+
+    return render_template("student/status.html", pagination=pagination)
+
+@student_bp.route("/status/detail/<app_id>")
+def status_detail(app_id):
+    # เช็ก Login
+    if "user_id" not in session:
+        return redirect(url_for("student.login"))
+        
+    # ดึงข้อมูล Application พร้อม Join Scholarship มาโชว์ชื่อทุน
+    application = Application.query.get_or_404(app_id)
+    
+    return render_template("student/status_detail.html", app=application)
+
+@student_bp.route("/scholarships")
+def announce_scholarships():
+    all_scholarships = Scholarship.query.all()
+    return render_template("student/scholarships.html", scholarships=all_scholarships)

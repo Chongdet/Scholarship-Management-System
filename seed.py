@@ -70,6 +70,7 @@ def seed_users():
 
         scholarships = [
             Scholarship(
+                id="SCH001",
                 name="ทุนเรียนดี (GPA > 3.5)",
                 amount=20000,
                 min_gpax=3.5,
@@ -78,6 +79,7 @@ def seed_users():
                 end_date=now + timedelta(days=30)
             ),
             Scholarship(
+                id="SCH002",
                 name="ทุนเฉพาะทางวิศวกรรมศาสตร์",
                 amount=15000,
                 min_gpax=2.5,
@@ -86,6 +88,7 @@ def seed_users():
                 end_date=now + timedelta(days=15)
             ),
             Scholarship(
+                id="SCH003",
                 name="ทุนช่วยเหลือฉุกเฉิน (ปิดรับแล้ว)",
                 amount=5000,
                 min_gpax=2.0,

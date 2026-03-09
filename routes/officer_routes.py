@@ -65,17 +65,17 @@ def add_scholarship():
         # Server-side validation: require id and name
         if not s_id:
             print("ERROR: scholarship_id is empty")
-            flash('กรุณากรอก รหัสทุนการศึกษา', 'danger')
+            flash('กรุณากรอก รหัสทุนการศึกษา', 'error')
             return render_template('officer/add_scholarship.html')
         if not s_name:
             print("ERROR: scholarship_name is empty")
-            flash('กรุณากรอก ชื่อทุนการศึกษา', 'danger')
+            flash('กรุณากรอก ชื่อทุนการศึกษา', 'error')
             return render_template('officer/add_scholarship.html')
 
         # Prevent duplicate IDs
         if Scholarship.query.filter_by(id=s_id).first():
             print(f"ERROR: scholarship_id '{s_id}' already exists")
-            flash(f'รหัสทุน {s_id} มีอยู่ในระบบแล้ว กรุณาใช้รหัสอื่น', 'danger')
+            flash(f'รหัสทุน {s_id} มีอยู่ในระบบแล้ว กรุณาใช้รหัสอื่น', 'error')
             return render_template('officer/add_scholarship.html')
         
         # 2. แปลงข้อมูล

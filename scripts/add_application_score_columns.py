@@ -16,6 +16,9 @@ def migrate():
     if "is_scored" not in cols:
         cur.execute("ALTER TABLE application ADD COLUMN is_scored INTEGER DEFAULT 0")
         print("Added is_scored")
+    if "notes" not in cols:
+        cur.execute("ALTER TABLE application ADD COLUMN notes TEXT")
+        print("Added notes")
     conn.commit()
     conn.close()
     print("Done.")

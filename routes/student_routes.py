@@ -225,6 +225,15 @@ def apply_scholarship():
         last_name = request.form.get("last_name", "")
         student_name = f"{first_name} {last_name}".strip()
         faculty = request.form.get("faculty", "")
+        email = request.form.get("email", "").strip()
+        phone = request.form.get("phone", "").strip()
+        gpa_val = request.form.get("gpa")
+        address = request.form.get("address", "")
+        reason = request.form.get("reason", "").strip()
+
+        # รวบรวมข้อมูลทั้งหมดจากฟอร์มเพื่อเก็บไว้แสดงเจ้าหน้าที่
+        form_data_dict = {k: (v.strip() if isinstance(v, str) else v) for k, v in request.form.items()
+                          if k not in ('scholarship_id', 'action', 'upload_student_id') and v}
         
         if not scholarship_id:
             flash("กรุณาเลือกทุนการศึกษา", "error")
@@ -238,15 +247,37 @@ def apply_scholarship():
         
         # จัดการสถานะ (บันทึกร่าง หรือ ส่งใบสมัคร)
         status = "draft" if action == "save_draft" else "pending"
+        form_data_json = json.dumps(form_data_dict, ensure_ascii=False) if form_data_dict else None
+
+        # อัปเดตข้อมูล Student จากฟอร์ม (เพื่อให้เจ้าหน้าที่เห็นข้อมูลถูกต้อง) (เพื่อให้เจ้าหน้าที่เห็นข้อมูลถูกต้อง)
+        if student:
+            if student_name:
+                student.name = student_name
+            if faculty:
+                student.faculty = faculty
+            if email:
+                student.email = email
+            if phone:
+                student.mobile = phone
+            if address:
+                student.address_current = address
+            if gpa_val:
+                try:
+                    student.gpax = float(gpa_val)
+                except (ValueError, TypeError):
+                    pass
+            db.session.commit()
         
         # บันทึกข้อมูลลงฐานข้อมูล Application
         new_app = Application(
-            id=f"APP-{current_student_id}-{scholarship_id}", # สร้าง String ID ที่นี่
+            id=f"APP-{current_student_id}-{scholarship_id}",
             student_id=current_student_id,
-            student_name=student_name if student_name else student.name,
-            faculty=faculty if faculty else student.faculty,
+            student_name=student_name if student_name else (student.name if student else ""),
+            faculty=faculty if faculty else (student.faculty if student else ""),
             scholarship_id=scholarship_id,
-            status=status
+            status=status,
+            notes=reason if reason else None,
+            form_data=form_data_json
         )
         db.session.add(new_app)
         db.session.commit()
@@ -287,6 +318,10 @@ def apply_scholarship():
     
     # ดึงข้อมูลนักศึกษามาแสดงไว้ก่อน (Prefill)
     prefill = {}
+    # Pre-select ทุนจากลิงก์ dashboard (สมัครทุนนี้)
+    req_sch_id = request.args.get("scholarship_id")
+    if req_sch_id:
+        prefill["scholarship_id"] = req_sch_id
     if student:
         parts = student.name.split() if student.name else [""]
         first_name = parts[0]
@@ -296,8 +331,11 @@ def apply_scholarship():
             "student_id": student.student_id,
             "first_name": first_name,
             "last_name": last_name,
-            "email": student.email,
-            "faculty": student.faculty
+            "email": student.email or "",
+            "phone": student.mobile or "",
+            "faculty": student.faculty or "",
+            "gpa": student.gpax if student.gpax is not None else "",
+            "address": student.address_current or "",
         }
 
     titles = ["นาย", "นางสาว", "นาง"]

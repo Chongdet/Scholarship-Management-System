@@ -39,10 +39,13 @@ def create_app():
     # Configuration
     # -------------------------
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-key")
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
-        "DATABASE_URL",
-        "sqlite:///" + os.path.join(os.path.abspath(os.path.dirname(__file__)), "scholarship.db")
-    )
+    db_url = os.getenv("DATABASE_URL") or ("sqlite:///" + os.path.join(os.path.abspath(os.path.dirname(__file__)), "scholarship.db"))
+    # ใช้ path แบบ absolute เพื่อให้ student และ officer ใช้ไฟล์ db เดียวกันเสมอ
+    if db_url.startswith("sqlite:///") and not db_url.startswith("sqlite:////"):
+        rel_path = db_url.replace("sqlite:///", "")
+        abs_path = os.path.abspath(os.path.join(os.path.dirname(__file__), rel_path))
+        db_url = "sqlite:///" + abs_path
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  # 10MB upload limit
 

@@ -151,12 +151,19 @@ class Application(db.Model):
     interview_date = db.Column(db.Date, nullable=True) # วันที่นัดสัมภาษณ์
     interview_time = db.Column(db.String(100), nullable=True) # เเวลานัดสัมภาษณ์
     interview_location = db.Column(db.String(255), nullable=True) #สถานที่นัดสัมภาษณ์
+    notes = db.Column(db.Text, nullable=True) # เหตุผล/ข้อมูลเพิ่มเติมจากนักศึกษา
+    form_data = db.Column(db.Text, nullable=True) # JSON ข้อมูลเต็มจากฟอร์มสมัคร
 
     @property
     def gpa(self):
         """GPA จาก Student (gpax)"""
         s = Student.query.filter_by(student_id=self.student_id).first()
         return s.gpax if s and s.gpax is not None else "-"
+
+    @property
+    def application_date(self):
+        """วันที่สมัคร (alias ของ created_at)"""
+        return self.created_at.strftime('%d/%m/%Y') if self.created_at else "-"
 
 # 2.3 บันทึกการทำงาน (Audit Log)
 class AuditLog(db.Model):

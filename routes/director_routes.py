@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from datetime import datetime
-from models import Student, db, Scholarship, Criterion, Application, AuditLog
+from models import Student, db, Scholarship, Criterion, Application, DirectorAuditLog
 
 director_bp = Blueprint("director", __name__)
 
@@ -17,10 +17,10 @@ def scoring():
     scholarship_list = []
     for sch in scholarships:
         total_applicants = Application.query.filter_by(scholarship_id=sch.id).count()
-        # เช็คทั้งสถานะภาษาอังกฤษและภาษาไทยเพื่อความชัวร์
+        # ผ่านเอกสาร = เจ้าหน้าที่อนุมัติสัมภาษณ์ (interview) หรือกรรมการอนุมัติ (approved/อนุมัติ)
         passed_docs = Application.query.filter(
-            Application.scholarship_id == sch.id, 
-            Application.status.in_(['approved', 'อนุมัติ'])
+            Application.scholarship_id == sch.id,
+            Application.status.in_(['interview', 'approved', 'อนุมัติ'])
         ).count()
 
         scholarship_list.append({
@@ -38,27 +38,32 @@ def scoring():
 def scholarship_students(scholarship_id):
     sch = Scholarship.query.get_or_404(scholarship_id)
 
-    # ดึง Application Join กับ Student เพื่อเอาค่า GPA (gpax)
+    # ดึงเฉพาะคนที่เจ้าหน้าที่อนุมัติสัมภาษณ์ (interview) หรือกรรมการอนุมัติ (approved) + Join Student เพื่อเอาค่า GPA
     query_results = (
         db.session.query(Application, Student)
         .join(Student, Application.student_id == Student.student_id)
-        .filter(Application.scholarship_id == scholarship_id)
+        .filter(
+            Application.scholarship_id == scholarship_id,
+            Application.status.in_(['interview', 'approved'])
+        )
         .all()
     )
 
     formatted_candidates = []
     for app, stu in query_results:
         formatted_candidates.append({
-            "id": app.id,                # นี่คือ String ID (APP-...)
+            "id": app.id,
             "student_id": stu.student_id,
-            "student_name": stu.name,
+            "student_name": stu.name or app.student_name,
             "gpa": stu.gpax,
             "is_scored": app.is_scored,
             "total_score": app.total_score,
+            "status": app.status,
         })
 
     return render_template(
         "director/scoring_students.html",
+        scholarship_id=scholarship_id,
         scholarship_name=sch.name,
         candidates=formatted_candidates,
     )
@@ -84,9 +89,10 @@ def give_score(app_id):
 
         application.total_score = total
         application.is_scored = True
+        if request.form.get("approve_scholarship") == "1":
+            application.status = "approved"
 
-        # บันทึก Audit Log
-        log = AuditLog(
+        log = DirectorAuditLog(
             user_name="กรรมการ (Admin)",
             action="SCORING",
             details=f"ให้คะแนนนักศึกษา {application.student_name} รหัส {application.student_id} ทุน {application.scholarship.name} คะแนนรวม {total}",
@@ -101,7 +107,21 @@ def give_score(app_id):
     return render_template("director/give_score.html", student=application, criteria=criteria)
 
 # ==========================================
-# 4. หน้าดูรายละเอียด (แก้ไข ID เป็น String)
+# 4. อนุมัติได้รับทุน (ตั้ง status=approved)
+# ==========================================
+@director_bp.route("/approve/<string:app_id>", methods=["POST"])
+def approve_scholarship(app_id):
+    application = Application.query.get_or_404(app_id)
+    if application.is_scored and application.status == "interview":
+        application.status = "approved"
+        db.session.commit()
+    return redirect(
+        url_for("director.scholarship_students", scholarship_id=application.scholarship_id)
+    )
+
+
+# ==========================================
+# 5. หน้าดูรายละเอียดนักศึกษา
 # ==========================================
 @director_bp.route("/candidate/<string:app_id>")
 def candidate_detail(app_id):
@@ -140,7 +160,7 @@ def confirm_selection(scholarship_id):
     for index, app in enumerate(candidates):
         app.status = "Selected" if index < quota else "Reserved"
 
-    log = AuditLog(
+    log = DirectorAuditLog(
         user_name="กรรมการ (Admin)",
         action="CONFIRM_SELECTION",
         details=f"ยืนยันผลการคัดเลือกทุน {sch.name} (โควตา {quota} ราย)",
@@ -159,5 +179,5 @@ def ranking_selection():
 
 @director_bp.route("/audit_log")
 def audit_log():
-    all_logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).all()
+    all_logs = DirectorAuditLog.query.order_by(DirectorAuditLog.timestamp.desc()).all()
     return render_template("director/audit_log.html", logs=all_logs)

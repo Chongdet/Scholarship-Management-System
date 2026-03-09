@@ -147,11 +147,16 @@ class Application(db.Model):
     total_score = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow) #เก็บวันที่สมัคร
     application_file = db.Column(db.String(200), nullable=True) #เอกสารไฟล์เเนบของนักศึกษา
-
     reject_reason = db.Column(db.Text, nullable=True) #เหตุผลจากเจ้าหน้าที่
     interview_date = db.Column(db.Date, nullable=True) # วันที่นัดสัมภาษณ์
     interview_time = db.Column(db.String(100), nullable=True) # เเวลานัดสัมภาษณ์
     interview_location = db.Column(db.String(255), nullable=True) #สถานที่นัดสัมภาษณ์
+
+    @property
+    def gpa(self):
+        """GPA จาก Student (gpax)"""
+        s = Student.query.filter_by(student_id=self.student_id).first()
+        return s.gpax if s and s.gpax is not None else "-"
 
 # 2.3 บันทึกการทำงาน (Audit Log)
 class AuditLog(db.Model):
@@ -178,20 +183,14 @@ class Criterion(db.Model):
     
     name = db.Column(db.String(100))  # เช่น 'คะแนนสัมภาษณ์', 'จิตอาสา'
     max_score = db.Column(db.Integer) # คะแนนเต็มของหัวข้อนั้น
-    
-class AuditLog(db.Model):
-    __tablename__ = 'audit_logs'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.DateTime, default=datetime.now)
-    user_name = db.Column(db.String(100), nullable=False)
-    action = db.Column(db.String(100), nullable=False)  # เช่น 'GIVE_SCORE', 'CONFIRM_SELECTION'
-    details = db.Column(db.Text, nullable=True)         # เช่น 'ให้คะแนนนักศึกษา นาย A รวม 85 คะแนน'
-    ip_address = db.Column(db.String(45), nullable=True)
 
-    def __init__(self, user_name, action, details, ip_address):
-        self.user_name = user_name
-        self.action = action
-        self.details = details
-        self.ip_address = ip_address
-    
+
+# บันทึกการทำงานฝั่งกรรมการ (Director) - ตาราง audit_logs
+class DirectorAuditLog(db.Model):
+    __tablename__ = 'audit_logs'
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    user_name = db.Column(db.String(100), nullable=False)
+    action = db.Column(db.String(100), nullable=False)
+    details = db.Column(db.Text, nullable=True)
+    ip_address = db.Column(db.String(45), nullable=True)

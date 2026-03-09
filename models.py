@@ -136,6 +136,7 @@ class Application(db.Model):
     is_scored = db.Column(db.Boolean, default=False)
     total_score = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow) #เก็บวันที่สมัคร
+    application_file = db.Column(db.String(200), nullable=True) #เอกสารไฟล์เเนบของนักศึกษา
 
     reject_reason = db.Column(db.Text, nullable=True) #เหตุผลจากเจ้าหน้าที่
     interview_date = db.Column(db.Date, nullable=True) # วันที่นัดสัมภาษณ์

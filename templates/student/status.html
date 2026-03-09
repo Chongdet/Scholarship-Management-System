@@ -6,17 +6,17 @@
         <h2 class="text-3xl font-bold mb-8 text-blue-900">ทุนการศึกษาที่ยื่นสมัคร</h2>
         
         <div class="overflow-x-auto bg-white rounded-2xl shadow-sm p-4">
-            <table class="w-full text-left border-collapse">
+            <table class="w-full text-left border-collapse table-auto">
                 <thead>
                     <tr class="bg-gray-50 text-gray-600 text-sm">
-                        <th class="p-4 border-b text-center">ลำดับ</th>
-                        <th class="p-4 border-b text-center">ชื่อทุน</th>
-                        <th class="p-4 border-b text-center">ประเภท</th>
-                        <th class="p-4 border-b text-center">หน่วยงาน</th>
-                        <th class="p-4 border-b text-center">ไฟล์ที่แนบ</th>
-                        <th class="p-4 border-b text-center">วันที่สมัคร</th>
-                        <th class="p-4 border-b text-center">สถานะ</th>
-                        <th class="p-4 border-b text-center">ข้อมูลเพิ่มเติม</th>
+                        <th class="p-4 border-b text-center whitespace-nowrap">ลำดับ</th>
+                        <th class="p-4 border-b text-center whitespace-nowrap">ชื่อทุน</th>
+                        <th class="p-4 border-b text-center whitespace-nowrap">ประเภท</th>
+                        <th class="p-4 border-b text-center whitespace-nowrap">หน่วยงาน</th>
+                        <th class="p-4 border-b text-center whitespace-nowrap">ไฟล์ที่แนบ</th>
+                        <th class="p-4 border-b text-center whitespace-nowrap">วันที่สมัคร</th>
+                        <th class="p-4 border-b text-center whitespace-nowrap">สถานะ</th>
+                        <th class="p-4 border-b text-center whitespace-nowrap">ข้อมูลเพิ่มเติม</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -24,21 +24,29 @@
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="p-4 border-b text-center">{{ loop.index + (pagination.page - 1) * pagination.per_page }}</td>
                         <td class="p-4 border-b font-medium">{{ app.scholarship.name }}</td>
-                        <td class="p-4 border-b">{{ app.scholarship.category if app.scholarship.category else 'ทุนทั่วไป' }}</td>
-                        <td class="p-4 border-b">{{ app.provider if app.provider else 'มหาวิทยาลัย'}}</td>
+                        <td class="p-4 border-b text-center">{{ app.scholarship.category if app.scholarship.category else 'ทุนทั่วไป' }}</td>
+                        <td class="p-4 border-b text-center">{{ app.provider if app.provider else 'มหาวิทยาลัย'}}</td>
                         <td class="p-4 border-b text-center">
-                            {% if app.application_file %}
-                                <a href="{{ url_for('static', filename='uploads/' + app.application_file) }}" 
-                                target="_blank" 
-                                class="inline-flex items-center px-3 py-1 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 transition-all text-xs font-medium border border-blue-100">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 000 2.828l7 7a2 2 0 002.828 0l7-7a2 2 0 000-2.828l-7-7z" />
-                                    </svg>
-                                    เปิดไฟล์
-                                </a>
-                            {% else %}
-                                <span class="text-gray-400 text-xs ">ไม่มีไฟล์</span>
-                            {% endif %}
+                            <div class="flex flex-wrap gap-2 justify-center max-w-[120px] mx-auto">
+                                {% if app.all_files %}
+                                    {% for file_name in app.all_files %}
+                                        <a href="{{ url_for('static', filename='uploads/' + app.student_id|string + '/' + file_name) }}" 
+                                        target="_blank" 
+                                        title="{{ file_name.split('_')[-1] }}"
+                                        class="flex items-center justify-center w-8 h-8 bg-gray-50 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all shadow-sm border border-gray-200 group relative">
+                                            
+                                            <span class="text-xl">📄</span>
+
+                                            <span class="absolute hidden group-hover:block bg-black text-white text-[10px] p-1 rounded -bottom-8 z-20 whitespace-nowrap">
+                                                {{ file_name.split('_')[-1] }}
+                                            </span>
+                                        </a>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-gray-400 text-xs italic">ไม่มีไฟล์</span>
+                                {% endif %}
+                            </div>
+                        </td>
                         </td>
 
                         <td class="p-4 border-b text-sm">{{ app.created_at.strftime('%d/%m/%Y') if app.created_at else '-' }}</td>
@@ -52,7 +60,7 @@
                                 <span class="px-3 py-1 rounded-full text-xs font-bold border bg-orange-100 text-yellow-700 border-orange-200">แก้ไขเอกสาร</span>
                             {% elif app.status in ['Reserved'] %}
                                 <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-bold">ตัวสำรอง</span>
-                            {% elif app.status == 'pending' , 'รอตรวจสอบ' , 'รอการตรวจสอบ' %}
+                            {% elif app.status == 'pending' or app.status == 'รอตรวจสอบ' or app.status == 'รอการตรวจสอบ' %}
                                 <span class="px-3 py-1 rounded-full text-xs font-bold border bg-yellow-100 text-yellow-700 border-yellow-200">รอตรวจสอบ</span>
                             {% endif %}
                         </td>
@@ -64,17 +72,28 @@
                             </a>
                         </td>
                     </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="p-20 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <span class="text-6xl mb-4">📄</span>
+                                <p class="text-gray-500 text-xl font-bold">ยังไม่เคยสมัครทุนใดๆ</p>
+                                <p class="text-gray-400 text-sm mt-2">สามารถเลือกดูทุนที่เปิดรับได้ที่หน้าแรก</p>
+                            </div>
+                        </td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
 
+            {# แสดงส่วนนี้เฉพาะเมื่อมีข้อมูลเท่านั้น #}
+            {% if pagination.pages > 0 %}
             <div class="mt-6 flex justify-between items-center border-t pt-4">
                 <div class="text-gray-600 font-medium text-sm pl-2">
                     Showing page {{ pagination.page }} of {{ pagination.pages }}
                 </div>
 
                 <div class="flex gap-2 pr-2">
-                    {# ปุ่มก่อนหน้า: แสดงทุกหน้ายกเว้นหน้าแรก #}
                     {% if pagination.page > 1 %}
                         <a href="{{ url_for('student.track_status', page=pagination.prev_num) }}" 
                            class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all shadow-sm text-sm">
@@ -82,7 +101,6 @@
                         </a>
                     {% endif %}
 
-                    {# ปุ่มถัดไป: แสดงจนถึงก่อนหน้าสุดท้าย #}
                     {% if pagination.page < pagination.pages %}
                         <a href="{{ url_for('student.track_status', page=pagination.next_num) }}" 
                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-sm text-sm font-medium">
@@ -91,6 +109,7 @@
                     {% endif %}
                 </div>
             </div>
+            {% endif %}
         </div>
     </div>
 </div>

@@ -1,0 +1,123 @@
+{% extends "layouts/base_director.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto font-prompt p-6">
+    <nav class="flex items-center text-sm text-gray-500 mb-6 no-print">
+        <a href="{{ url_for('director.ranking_selection') }}" class="hover:text-blue-600 transition">จัดอันดับและยืนยันผล</a>
+        <span class="mx-2">></span>
+        <span class="font-bold text-gray-800 italic">สรุปอันดับคะแนน</span>
+    </nav>
+
+    <div class="bg-gradient-to-r from-indigo-700 via-blue-800 to-blue-900 rounded-2xl p-8 text-white shadow-xl mb-8 relative overflow-hidden">
+        <div class="absolute top-0 right-0 -mt-4 -mr-4 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+        
+        <div class="flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
+            <div>
+                <h1 class="text-3xl font-bold mb-2 flex items-center gap-2">
+                    <span>สรุปผลการจัดอันดับ</span>
+                    <span class="text-yellow-400">🏆</span>
+                </h1>
+                <p class="text-blue-100 text-lg opacity-90">{{ scholarship.name }}</p>
+                
+                <div class="flex flex-wrap gap-4 mt-6">
+                    <div class="bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/20">
+                        <p class="text-xs text-blue-200 uppercase tracking-wider mb-1">จำนวนโควตา</p>
+                        <p class="text-2xl font-black">{{ scholarship.quota }} <span class="text-sm font-normal">ทุน</span></p>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/20">
+                        <p class="text-xs text-blue-200 uppercase tracking-wider mb-1">ผู้เข้าเกณฑ์ทั้งหมด</p>
+                        <p class="text-2xl font-black text-green-400">{{ candidates|length }} <span class="text-sm font-normal text-white">คน</span></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                <button onclick="window.print()" class="bg-white/10 hover:bg-white/20 text-white px-6 py-2.5 rounded-xl transition flex items-center justify-center gap-2 border border-white/20 no-print font-bold">
+                    <span>🖨️</span> พิมพ์รายงาน
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white shadow-2xl rounded-3xl border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50/80">
+                    <tr>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-widest">อันดับ</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-widest">ข้อมูลนักศึกษา</th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-widest">คะแนนรวม</th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-widest">ผลการพิจารณาเบื้องต้น</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 bg-white">
+                    {% for app in candidates %}
+                    {% set in_quota = loop.index <= scholarship.quota %}
+                    <tr class="{% if in_quota %}bg-emerald-50/40{% endif %} hover:bg-blue-50/30 transition-colors">
+                        <td class="px-6 py-5 text-center">
+                            <span class="inline-flex items-center justify-center w-9 h-9 rounded-xl {% if in_quota %}bg-emerald-600 text-white shadow-lg shadow-emerald-200{% else %}bg-gray-100 text-gray-500{% endif %} font-black text-base">
+                                {{ loop.index }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-5">
+                            <div class="flex items-center">
+                                <div>
+                                    <div class="text-base font-bold text-gray-900">{{ app.student_name }}</div>
+                                    <div class="text-xs text-gray-500 mt-0.5">ID: {{ app.student_id }} | {{ app.faculty }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-5 text-center">
+                            <span class="text-xl font-black text-indigo-700">{{ app.total_score }}</span>
+                        </td>
+                        <td class="px-6 py-5 text-center">
+                            {% if in_quota %}
+                                <span class="bg-emerald-100 text-emerald-700 px-4 py-1.5 rounded-full text-xs font-bold border border-emerald-200 inline-flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                                    ได้รับทุนการศึกษา
+                                </span>
+                            {% else %}
+                                <span class="bg-amber-100 text-amber-700 px-4 py-1.5 rounded-full text-xs font-bold border border-amber-200">
+                                    ตัวสำรองอันดับ {{ loop.index - scholarship.quota }}
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="px-6 py-24 text-center text-gray-400 italic">
+                            <div class="flex flex-col items-center">
+                                <span class="text-5xl mb-4">🔍</span>
+                                <p>ไม่พบข้อมูลผู้ได้รับคะแนนในทุนนี้</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mt-8 flex flex-col md:flex-row justify-between items-center gap-6 no-print">
+        <div class="text-sm text-gray-500 bg-gray-100 px-4 py-2 rounded-lg border border-gray-200">
+            📌 <strong>หมายเหตุ:</strong> ระบบเรียงลำดับตามคะแนนรวม (Total Score) จากมากไปน้อยโดยอัตโนมัติ
+        </div>
+        
+        <form action="{{ url_for('director.confirm_selection', scholarship_id=scholarship.id) }}" method="POST" onsubmit="return confirm('⚠️ ยืนยันการประกาศรายชื่อผู้ได้รับทุนใช่หรือไม่?\n(ระบบจะส่งสถานะไปยังนักศึกษาทุกคนทันที)')">
+            <button type="submit" class="group bg-indigo-600 hover:bg-indigo-700 text-white px-12 py-4 rounded-2xl transition-all shadow-xl shadow-indigo-200 font-bold flex items-center gap-3 active:scale-95">
+                <span>ประกาศรายชื่อผู้ได้รับทุนอย่างเป็นทางการ</span>
+                <svg class="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 5l7 7-7 7M5 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </button>
+        </form>
+    </div>
+</div>
+
+<style>
+    @media print {
+        .no-print, nav, form, button { display: none !important; }
+        .max-w-6xl { max-width: 100% !important; padding: 0 !important; }
+        .shadow-2xl, .shadow-xl { box-shadow: none !important; border: 1px solid #eee !important; }
+        body { background: white !important; }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto py-10 px-4">
+    <a href="{{ url_for('student.track_status') }}" class="flex items-center text-gray-600 hover:text-blue-900 mb-6 transition-all font-medium">
+        <span class="mr-2 text-3xl">←</span> กลับไปหน้าทุนการศึกษาที่ยื่นสมัคร
+    </a>
+
+    <div class="bg-white rounded-3xl p-8 shadow-lg border border-gray-200">
+            <div>
+                <h2 class="text-3xl font-bold text-blue-900 mb-2">ข้อมูลทุนการศึกษาที่ยื่นสมัคร</h2>
+                <p class="text-gray-500 text-lg ">ทุนการศึกษา "{{ app.scholarship.name }}"</p>
+            </div>
+                
+                <div class="mt-6">
+            <div class="flex items-center gap-3 mb-6">
+                <h3 class="text-xl font-bold text-blue-600">สถานะใบสมัคร:</h3>
+                <span class="px-4 py-1 rounded-full font-bold border text-sm
+                    {% if app.status in ['needs_edit', 'รอแก้ไข'] %} bg-orange-100 text-yellow-700 border-orange-200
+                    {% elif app.status in ['interview', 'เรียกสัมภาษณ์'] %} bg-blue-100 text-blue-700 border-blue-300
+                    {% elif app.status in ['approved', 'ได้รับทุน', 'Selected'] %} bg-green-100 text-green-700 border-green-300
+                    {% elif app.status in ['Reserved'] %} bg-orange-100 text-orange-700 rounded-full text-xs font-bold
+                    {% elif app.status == 'pending' , 'รอตรวจสอบ' , 'รอการตรวจสอบ' %} bg-yellow-100 text-yellow-700 border-yellow-300 {% endif %}">
+
+                    
+                    {% if app.status in ['needs_edit', 'รอแก้ไข'] %} แก้ไขเอกสาร
+                    {% elif app.status in ['interview', 'เรียกสัมภาษณ์'] %} เรียกสัมภาษณ์
+                    {% elif app.status in ['Reserved'] %} ตัวสำรอง
+                    {% elif app.status in ['approved', 'ได้รับทุน', 'Selected'] %} ได้รับทุนการศึกษา
+                    {% else %} รอตรวจสอบ {% endif %}
+                </span>
+            </div>
+
+            {# --- ส่วนที่ 1: ถ้าต้องแก้ไขเอกสาร --- #}
+            {% if app.status in ['needs_edit', 'รอแก้ไข', 'แก้ไข'] %}
+            <div class="mt-6 p-6 bg-orange-50  rounded-xl shadow-md">
+                <h4 class="text-xl font-bold text-blue-800 mb-4">เหตุผลที่ต้องแก้ไข</h4>
+                <p><strong>เนื่องจาก:</strong> {{ app.reject_reason if app.reject_reason }}</p>
+                <div class="mt-4">
+                    <a href="{{ url_for('student.apply_scholarship', scholarship_id=app.scholarship_id) }}" 
+                    class="inline-block px-6 py-2 bg-orange-600 text-white rounded-lg font-bold hover:bg-orange-700 shadow-md">
+                    คลิกที่นี่เพื่อแก้ไขข้อมูล
+                    </a>
+                </div>
+            </div>
+
+            {# --- ส่วนที่ 2: ถ้านัดสัมภาษณ์ --- #}
+            {% elif app.status in ['interview', 'เรียกสัมภาษณ์'] %}
+            <div class="mt-6 p-6 bg-blue-50 rounded-xl shadow-md">
+                <h4 class="text-xl font-bold text-blue-800 mb-4">รายละเอียดนัดสัมภาษณ์</h4>
+                <div class="grid grid-cols-1 md:grid-cols-1 gap-4 text-lg">
+                    <p><strong>วันที่:</strong> {{ app.interview_date.strftime('%d/%m/%Y') if app.interview_date  }}</p>
+                    <p><strong>เวลา:</strong> {{ app.interview_time if app.interview_time  }} </p>
+                    <p><strong>สถานที่:</strong> {{ app.interview_location if app.interview_location }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                </div>
+
+
+            <div class="grid grid-cols-1 md:grid-cols-1 gap-8">
+                <div class="space-y-4">
+                    <h3 class="mt-8 text-2xl font-bold text-gray-800 border-l-4 border-blue-500 pl-3">ข้อมูลทุน</h3>
+                    <div class="bg-gray-50 p-6 rounded-2xl space-y-3 shadow-sm">
+                        <p><strong class="text-xl text-gray-600">ชื่อทุน:</strong> <span class="text-xl text-gray-800 font-medium">{{ app.scholarship.name }}</span></p>
+                        <p><strong class="text-xl text-gray-600">จำนวนทุน:</strong> <span class="text-xl text-gray-800">{{ app.scholarship.quota if app.scholarship.category else 'ไม่จำกัดจำนวน' }} ทุน</span></p>
+                        <p><strong class="text-xl text-gray-600">ทุนละ:</strong> <span class="text-xl text-gray-800">{{ app.scholarship.amount }} บาท</span></p>
+                        <p><strong class="text-xl text-gray-600">ประเภททุน:</strong> <span class="text-xl text-gray-800">{{ app.scholarship.category if app.scholarship.category else 'ทุนทั่วไป' }}</span></p>
+                        <p><strong class="text-xl text-gray-600">คณะ/หน่วยงาน:</strong> <span class="text-xl text-gray-800">{{ app.scholarship.provider if app.scholarship.provider else 'มหาวิทยาลัย' }}</span></p>
+                        <p><strong class="text-xl text-gray-600">ระยะเวลาเปิดรับสมัคร:</strong> 
+                            <span class="text-xl text-gray-800">
+                                {{ app.scholarship.start_date.strftime('%d/%m/%Y') }} - {{ app.scholarship.end_date.strftime('%d/%m/%Y') }}
+                            </span>
+                        <p><strong class="text-xl text-gray-600">วันที่สมัครทุน:</strong> <span class="text-xl text-gray-800">{{ app.created_at.strftime('%d/%m/%Y') if app.created_at else '-' }}</span></p>
+                        <p><strong class="text-xl text-gray-600">วันที่อัปเดตสถานะล่าสุด:</strong> 
+                           <span class="text-xl text-gray-800">{{ app.reviewing_at.strftime('%d/%m/%Y %H:%M') if app.reviewing_at else app.created_at.strftime('%d/%m/%Y') }}</span>
+                        </p>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {% if app.reviewing_at %}
+        <div class="mt-8 pt-6 border-t text-sm text-gray-400 text-right">
+            ตรวจเช็คล่าสุดเมื่อ: {{ app.reviewing_at.strftime('%d/%m/%Y %H:%M') }} 
+            {% if app.reviewing_by %} โดยเจ้าหน้าที่ดูแลระบบ {% endif %}
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

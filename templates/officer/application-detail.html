@@ -3,6 +3,7 @@
 {% block nav_links %}
     <a href="{{ url_for('officer.list_scholarships') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">จัดการทุน</a>
     <a href="{{ url_for('officer.applications') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ตรวจสอบใบสมัคร</a>
+    <a href="{{ url_for('officer.final_announcement') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ประกาศทุน</a>
     <a href="{{ url_for('officer.audit_log') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">บันทึกการทำงาน</a>
 {% endblock %}
 
@@ -33,15 +34,11 @@
                         {% if application.status == 'pending' %}
                         รอตรวจสอบ
                         {% elif application.status == 'reviewing' %}
-                        กำลังตรวจสอบ
-                        {% elif application.status == 'needs_edit' %}
                         รอแก้ไข
                         {% elif application.status == 'interview' %}
                         เรียกสัมภาษณ์
                         {% elif application.status == 'approved' %}
                         ผ่านแล้ว
-                        {% elif application.status == 'needs_edit' %}
-                        รอแก้ไข
                         {% endif %}
                     </div>
                     {% if application.status == 'reviewing' and application.reviewing_by %}
@@ -56,8 +53,8 @@
                     <div>ชื่อ-นามสกุล: {{ application.student_name }}</div>
                     <div>คณะ: {{ application.faculty }}</div>
                     <div>GPAX: {{ application.gpa }}</div>
-                    <div>เบอร์โทรศัพท์: 081-234-5678</div>
-                    <div>อีเมล: somchai.i@email.com</div>
+                    <div>เบอร์โทรศัพท์: {{ student.mobile if student and student.mobile else '-' }}</div>
+                    <div>อีเมล: {{ student.email if student and student.email else '-' }}</div>
                 </div>
 
                 <div class="text-sm text-gray-700 space-y-2 mb-4 border border-gray-200 bg-gray-50 rounded-lg p-4">

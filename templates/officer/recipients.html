@@ -1,4 +1,13 @@
-{% extends "layouts/base_officer.html" %}
+{% extends "layouts/base.html" %}
+
+{% block nav_links %}
+    <a href="{{ url_for('officer.list_scholarships') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">จัดการทุน</a>
+    <a href="{{ url_for('officer.applications') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ตรวจสอบใบสมัคร</a>
+    <a href="{{ url_for('officer.final_announcement') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ประกาศทุน</a>
+    <a href="{{ url_for('officer.audit_log') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">บันทึกการทำงาน</a>
+{% endblock %}
+
+{% block role_name %}เจ้าหน้าที่{% endblock %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto p-6">
@@ -33,8 +42,8 @@
                     <td class="px-4 py-3">{{ app.student_id }}</td>
                     <td class="px-4 py-3">{{ app.student_name }}</td>
                     <td class="px-4 py-3">{{ app.faculty }}</td>
-                    <td class="px-4 py-3">{{ getattr(app, 'gpa', '-') }}</td>
-                    <td class="px-4 py-3">{{ app.reviewing_at.strftime('%Y-%m-%d') if app.reviewing_at else '-' }}</td>
+                    <td class="px-4 py-3">{{ app.gpa }}</td>
+                    <td class="px-4 py-3">{{ app.application_date }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

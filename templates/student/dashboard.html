@@ -1,160 +1,134 @@
 {% extends "layouts/base.html" %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
-    <div class="swiper mySwiper mb-12 shadow-2xl rounded-3xl overflow-hidden border-4 border-yellow-400 relative">
+<div class="max-w-7xl mx-auto px-4 pt-6">
+    <div class="swiper mySwiper mb-12 shadow-2xl rounded-3xl overflow-hidden border-4 border-yellow-400 relative h-[450px]">
         <div class="swiper-wrapper">
             {% for item in scholarships[:3] %} 
-            <div class="swiper-slide relative h-[450px]">
+            <div class="swiper-slide relative">
                 <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1200" 
-                     class="w-full h-full object-cover" alt="Banner">
+                     class="absolute inset-0 w-full h-full object-cover" alt="Banner">
+                
                 <div class="absolute inset-0 bg-gradient-to-r from-blue-900 via-blue-900/60 to-transparent flex flex-col justify-center px-12 md:px-20 text-white">
-                    <span class="bg-yellow-400 text-blue-900 px-4 py-1 rounded-full text-xs font-bold w-fit mb-4 shadow-lg"> 
-                        🔥 กำลังเปิดรับสมัคร 
-                    </span>
-                    <h2 class="text-4xl md:text-5xl font-bold text-yellow-400 mb-3 drop-shadow-md">
-                        {{ item.name }}
-                    </h2>
-                    <p class="text-xl mb-6 text-blue-50 max-w-md leading-relaxed">
-                        สนับสนุนนักศึกษาที่มีผลการเรียนยอดเยี่ยม และมอบโอกาสเพื่ออนาคตที่ดีกว่า
+                    <span class="bg-yellow-400 text-blue-900 px-3 py-1 rounded-full text-xs font-bold w-fit mb-4">กำลังเปิดรับสมัคร 🔥</span>
+                    <h2 class="text-4xl md:text-5xl font-bold text-yellow-400 mb-2">{{ item.name }}</h2>
+                    
+                    <p class="text-lg mb-6 text-blue-100 font-medium">
+                        หน่วยงาน: {{ item.provider if item.provider else 'มหาวิทยาลัยอุบลราชธานี' }}
                     </p>
-                    <div class="flex items-center gap-6 text-lg font-medium border-l-4 border-yellow-400 pl-6">
+
+                    <div class="flex items-center gap-10 border-l-4 border-yellow-400 pl-6 mb-8">
                         <div>
-                            <p class="text-blue-200 text-sm">มูลค่าทุน</p>
-                            <p class="text-white text-2xl font-bold">{{ "{:,.0f}".format(item.amount or 0) }} บาท</p>
+                            <p class="text-blue-200 text-xs uppercase font-bold tracking-widest mb-1">มูลค่าทุนละ</p>
+                            <p class="text-white text-3xl font-black">{{ "{:,.0f}".format(item.amount) }} <span class="text-lg">บาท</span></p>
                         </div>
-                        <div class="h-10 w-px bg-blue-700"></div>
+                        
                         <div>
-                            <p class="text-blue-200 text-sm">ช่องทางสมัคร</p>
-                            <p class="text-white font-bold text-xl">UBU Portal</p>
+                            <p class="text-blue-200 text-xs uppercase font-bold tracking-widest mb-1">จำนวนทุน</p>
+                            <p class="text-white text-3xl font-black">{{ item.quota if item.quota else '-' }} <span class="text-lg">ทุน</span></p>
                         </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 text-sm text-blue-50 bg-white/10 w-fit px-4 py-2 rounded-lg backdrop-blur-sm border border-blue-400/30">
+                        <span class="text-yellow-400">📅</span> 
+                        รับสมัคร: <span class="font-bold text-white ml-1">
+                            {{ item.start_date.strftime('%d/%m/%Y') if item.start_date else 'ไม่ระบุ' }} 
+                            - {{ item.end_date.strftime('%d/%m/%Y') if item.end_date else 'ไม่ระบุ' }}
+                        </span>
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
-        <div class="swiper-button-next !text-yellow-400"></div>
-        <div class="swiper-button-prev !text-yellow-400"></div>
+        <div class="swiper-button-next !text-white"></div>
+        <div class="swiper-button-prev !text-white"></div>
         <div class="swiper-pagination"></div>
     </div>
 
     <div class="text-center mb-12">
-        <h2 class="text-4xl md:text-5xl font-extrabold text-blue-900 mb-4 italic">ทุนการศึกษาที่เปิดรับ</h2>
-        <div class="h-1.5 w-32 bg-yellow-400 mx-auto rounded-full"></div>
+        <h2 class="text-5xl font-extrabold text-blue-900 inline-block relative">
+            ทุนการศึกษาที่เปิดรับ
+            <div class="h-1.5 w-full bg-yellow-400 mt-2 rounded-full"></div>
+        </h2>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-        {% for item in scholarships %}
-        <div class="group bg-white rounded-3xl shadow-md hover:shadow-2xl transition-all duration-500 border border-gray-100 overflow-hidden flex flex-col h-full transform hover:-translate-y-2">
-            
-            <div class="h-48 relative overflow-hidden">
-                <div class="absolute inset-0 bg-blue-900/40 group-hover:bg-blue-900/20 transition-colors z-10"></div>
-                <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=400" 
-                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Scholarship">
-                <div class="absolute bottom-4 left-4 z-20">
-                    <span class="bg-white/90 backdrop-blur text-blue-900 px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
+        {% if scholarships %}
+            {% for item in scholarships %}
+            <div class="bg-white rounded-[2.5rem] overflow-hidden shadow-lg hover:shadow-2xl transition-all border border-gray-100 group flex flex-col">
+                <div class="relative h-56 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=600" 
+                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                         alt="Cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    <div class="absolute top-4 right-4 bg-yellow-400 px-3 py-1 rounded-full text-[10px] font-bold text-blue-900 shadow-sm uppercase">
                         UBU Scholarship
-<<<<<<< HEAD
-                    </span>
-=======
                     </div>
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
-                    
                 </div>
 
-                <div class="p-8 pb-0 flex flex-col h-full">
-                    <h2 class="text-2xl font-bold text-blue-900 mb-8 border-l-8 border-yellow-600 pl-4">
+                <div class="p-8 flex flex-col flex-grow">
+                    <h3 class="text-xl font-bold text-blue-900 mb-6 line-clamp-2 min-h-[3.5rem] border-l-4 border-yellow-500 pl-3">
                         {{ item.name }}
                     </h3>
 
-                    <div class="space-y-3 text-gray-800 font-medium mb-8">
-                        <div class="flex justify-between items-center border-b border-gray-100 pb-2">
-                            <span class="font-bold text-black text-l">จำนวนทุน :</span>
-                            <span class="font-bold text-blue-800">{{ item.quota if item.quota else 'ไม่จำกัดจำนวน' }} ทุน</span>
+                    <div class="space-y-4 mb-8 flex-grow">
+                        <div class="flex justify-between items-center border-b border-gray-50 pb-2">
+                            <span class="text-gray-500 text-sm font-bold">จำนวนทุน</span>
+                            <span class="text-blue-800 font-bold">{{ item.quota if item.quota else 'ไม่จำกัด' }} ทุน</span>
                         </div>
-
-                        <div class="flex justify-between items-center border-b border-gray-100 pb-2">
-                            <span class="font-bold text-black text-l">ทุนละ :</span>
-                            <span class="font-bold text-blue-800">{{ "{:,.0f}".format(item.amount) }} บาท</span>
+                        <div class="flex justify-between items-center border-b border-gray-50 pb-2">
+                            <span class="text-gray-500 text-sm font-bold">ทุนละ</span>
+                            <span class="text-blue-800 font-black text-lg">{{ "{:,.0f}".format(item.amount) }} ฿</span>
                         </div>
-
-                        <div class="flex justify-between items-center border-b border-gray-100 pb-2">
-                            <span class="font-bold text-black text-l">ประเภททุน :</span>
-                            <span class="font-bold text-blue-800">{{ item.category if item.category else 'ทุนทั่วไป' }}</span>
+                        <div class="flex justify-between items-center border-b border-gray-50 pb-2">
+                            <span class="text-gray-500 text-sm font-bold">ประเภท</span>
+                            <span class="text-blue-800 font-bold">{{ item.category if item.category else 'ทุนทั่วไป' }}</span>
                         </div>
-
-                        <div class="flex justify-between items-start border-b border-gray-100 pb-2">
-                            <span class="font-bold text-black text-sm whitespace-nowrap">วันที่เปิดรับสมัคร :</span>
-                            <span class="font-bold text-blue-800 text-[13px] text-right ml-4">
-                                {{ item.start_date.strftime('%d/%m/%Y') if item.start_date else 'ไม่ระบุ' }} 
-                                <br class="md:hidden"> - {{ item.end_date.strftime('%d/%m/%Y') if item.end_date else 'ไม่ระบุ' }}
-                            </span>
-                        </div>
-
-                        <div class="flex justify-between items-center">
-                            <span class="font-bold text-black text-l">หน่วยงาน :</span>
-                            <span class="font-bold text-blue-800">{{ item.provider if item.provider else 'มหาวิทยาลัย' }}</span>
+                        <div class="flex justify-between items-start border-b border-gray-50 pb-2">
+                            <span class="text-gray-500 text-sm font-bold">สิ้นสุดรับสมัคร</span>
+                            <span class="text-red-500 font-bold">{{ item.end_date.strftime('%d/%m/%Y') if item.end_date else 'ไม่ระบุ' }}</span>
                         </div>
                     </div>
 
-                    <div class="mt-2">
-                        <a href="{{ url_for('student.scholarship_detail', scholarship_id=item.id) }}" 
-                           class="w-full block text-center bg-blue-900 text-white py-4 rounded-2xl font-black text-l hover:bg-yellow-400 hover:text-blue-900 transition-all transform active:scale-95 shadow-md">
-                            ดูรายละเอียดทุน
-                        </a>
-                    </div>
->>>>>>> 8eaf5c2 (แก้ไข student routes และหน้า dashboard/profile)
-                </div>
-            </div>
-            
-            <div class="p-8 flex flex-col flex-grow">
-                <h3 class="font-bold text-xl text-blue-900 mb-4 line-clamp-2 min-h-[3.5rem]">{{ item.name }}</h3>
-                <div class="space-y-3 text-sm text-gray-600 flex-grow">
-                    <div class="flex justify-between items-center p-3 bg-blue-50 rounded-xl">
-                        <span class="text-blue-800 font-semibold">ทุนละ :</span>
-                        <span class="font-black text-blue-700 text-lg">{{ "{:,.0f}".format(item.amount or 0) }} ฿</span>
-                    </div>
-                    <p class="flex justify-between px-1">
-                        <span>หน่วยงาน :</span> 
-                        <span class="font-medium text-gray-800">กองพัฒนานักศึกษา</span>
-                    </p>
-                </div>
-
-                <div class="mt-8">
-                    <a href="{{ url_for('student.apply_scholarship') }}" 
-                       class="block w-full bg-blue-900 text-white text-center font-bold py-3 px-6 rounded-2xl hover:bg-yellow-400 hover:text-blue-900 transition-all shadow-lg active:scale-95">
-                        สมัครทุนนี้
+                    <a href="{{ url_for('student.scholarship_detail', scholarship_id=item.id) }}" 
+                       class="w-full block text-center bg-blue-900 text-white py-4 rounded-2xl font-black hover:bg-yellow-400 hover:text-blue-900 transition-all transform active:scale-95 shadow-md">
+                        ดูรายละเอียดและสมัคร
                     </a>
                 </div>
             </div>
-        </div>
+            {% endfor %}
         {% else %}
-        <div class="col-span-full text-center py-24 bg-white rounded-3xl border-2 border-dashed border-gray-200">
-            <div class="text-6xl mb-4 text-gray-300">📁</div>
-            <p class="text-gray-400 text-xl font-medium">ขณะนี้ยังไม่มีทุนการศึกษาเปิดให้สมัครในระบบ</p>
-        </div>
-        {% endfor %}
+            <div class="col-span-full text-center py-24 bg-white rounded-[2.5rem] border-4 border-dashed border-gray-200">
+                <div class="text-7xl mb-4">📢</div>
+                <p class="text-gray-400 text-xl font-bold">ขณะนี้ยังไม่มีทุนการศึกษาเปิดให้สมัคร</p>
+            </div>
+        {% endif %}
     </div>
 </div>
 
 <style>
-    /* ปรับแต่งสี Pagination ให้เป็นสีเหลืองของ ม.อุบล */
+    body { font-family: 'Prompt', sans-serif; }
     .swiper-pagination-bullet-active { background: #fbbf24 !important; }
-    .swiper-button-next:after, .swiper-button-prev:after { font-size: 24px !important; font-weight: bold; }
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
     const swiper = new Swiper('.mySwiper', {
         loop: true,
-        spaceBetween: 30,
+        speed: 1000,
+        autoplay: { delay: 5000, disableOnInteraction: false },
         effect: 'fade',
         fadeEffect: { crossFade: true },
-        pagination: { el: '.swiper-pagination', clickable: true },
         navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
-        autoplay: { delay: 5000, disableOnInteraction: false }
+        pagination: { el: '.swiper-pagination', clickable: true },
     });
 </script>
-
 {% endblock %}

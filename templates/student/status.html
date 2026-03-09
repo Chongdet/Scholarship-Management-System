@@ -1,80 +1,116 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบทุนการศึกษา - Ubon Ratchathani University</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    
-    <style>
-    body {
-        font-family: 'Prompt', sans-serif;
-    }
-    .nav-capsule {
-        display: flex;
-        gap: 8px;
-    }
-</style>
-</head>
-<body class="bg-sky-50 min-h-screen flex flex-col m-0 p-0">
-    
-    <header class="bg-blue-900 text-white shadow-md w-full">
-        <div class="px-8 py-4 flex justify-between items-center w-full">
-            
-            <div class="flex items-center gap-4">
-                <div class="w-14 h-14 flex items-center justify-center">
-                    <img src="{{ url_for('static', filename='images/ubu_logo.png') }}" alt="UBU Logo" class="w-full h-full object-contain">
+{% extends "layouts/base.html" %}
+
+{% block content %}
+<div class="max-w-[90%] mx-auto py-10">
+    <div class="bg-gray-200 rounded-3xl shadow-xl p-8 min-h-[570px] flex flex-col">
+        <h2 class="text-3xl font-bold mb-8 text-blue-900">ทุนการศึกษาที่ยื่นสมัคร</h2>
+        
+        <div class="overflow-x-auto bg-white rounded-2xl shadow-sm p-4">
+            <table class="w-full text-left border-collapse table-auto">
+                <thead>
+                    <tr class="bg-gray-50 text-gray-600 text-sm">
+                        <th class="p-4 border-b text-center whitespace-nowrap">ลำดับ</th>
+                        <th class="p-4 border-b text-center whitespace-nowrap">ชื่อทุน</th>
+                        <th class="p-4 border-b text-center whitespace-nowrap">ประเภท</th>
+                        <th class="p-4 border-b text-center whitespace-nowrap">หน่วยงาน</th>
+                        <th class="p-4 border-b text-center whitespace-nowrap">ไฟล์ที่แนบ</th>
+                        <th class="p-4 border-b text-center whitespace-nowrap">วันที่สมัคร</th>
+                        <th class="p-4 border-b text-center whitespace-nowrap">สถานะ</th>
+                        <th class="p-4 border-b text-center whitespace-nowrap">ข้อมูลเพิ่มเติม</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in pagination.items %}
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="p-4 border-b text-center">{{ loop.index + (pagination.page - 1) * pagination.per_page }}</td>
+                        <td class="p-4 border-b font-medium">{{ app.scholarship.name }}</td>
+                        <td class="p-4 border-b text-center">{{ app.scholarship.category if app.scholarship.category else 'ทุนทั่วไป' }}</td>
+                        <td class="p-4 border-b text-center">{{ app.provider if app.provider else 'มหาวิทยาลัย'}}</td>
+                        <td class="p-4 border-b text-center">
+                            <div class="flex flex-wrap gap-2 justify-center max-w-[120px] mx-auto">
+                                {% if app.all_files %}
+                                    {% for file_name in app.all_files %}
+                                        <a href="{{ url_for('static', filename='uploads/' + app.student_id|string + '/' + file_name) }}" 
+                                        target="_blank" 
+                                        title="{{ file_name.split('_')[-1] }}"
+                                        class="flex items-center justify-center w-8 h-8 bg-gray-50 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all shadow-sm border border-gray-200 group relative">
+                                            
+                                            <span class="text-xl">📄</span>
+
+                                            <span class="absolute hidden group-hover:block bg-black text-white text-[10px] p-1 rounded -bottom-8 z-20 whitespace-nowrap">
+                                                {{ file_name.split('_')[-1] }}
+                                            </span>
+                                        </a>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-gray-400 text-xs italic">ไม่มีไฟล์</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        </td>
+
+                        <td class="p-4 border-b text-sm">{{ app.created_at.strftime('%d/%m/%Y') if app.created_at else '-' }}</td>
+
+                        <td class="p-4 border-b text-center">
+                            {% if app.status in ['interview', 'เรียกสัมภาษณ์'] %}
+                                <span class="px-3 py-1 rounded-full text-xs font-bold border bg-blue-100 text-blue-700 border-blue-200">เรียกสัมภาษณ์</span>
+                            {% elif app.status in ['approved', 'ได้รับทุน', 'Selected'] %}
+                                <span class="px-3 py-1 rounded-full text-xs font-bold border bg-green-100 text-green-700 border-green-200">ได้รับทุนการศึกษา</span>
+                            {% elif app.status in ['needs_edit', 'รอเเก้ไข'] %}
+                                <span class="px-3 py-1 rounded-full text-xs font-bold border bg-orange-100 text-yellow-700 border-orange-200">แก้ไขเอกสาร</span>
+                            {% elif app.status in ['Reserved'] %}
+                                <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-bold">ตัวสำรอง</span>
+                            {% elif app.status == 'pending' or app.status == 'รอตรวจสอบ' or app.status == 'รอการตรวจสอบ' %}
+                                <span class="px-3 py-1 rounded-full text-xs font-bold border bg-yellow-100 text-yellow-700 border-yellow-200">รอตรวจสอบ</span>
+                            {% endif %}
+                        </td>
+
+                       <td class="p-4 border-b text-center">
+                            <a href="{{ url_for('student.status_detail', app_id=app.id) }}" 
+                               class="inline-flex items-center px-4 py-2 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition-all font-bold text-sm border border-blue-100">
+                                รายละเอียด
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="p-20 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <span class="text-6xl mb-4">📄</span>
+                                <p class="text-gray-500 text-xl font-bold">ยังไม่เคยสมัครทุนใดๆ</p>
+                                <p class="text-gray-400 text-sm mt-2">สามารถเลือกดูทุนที่เปิดรับได้ที่หน้าแรก</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {# แสดงส่วนนี้เฉพาะเมื่อมีข้อมูลเท่านั้น #}
+            {% if pagination.pages > 0 %}
+            <div class="mt-6 flex justify-between items-center border-t pt-4">
+                <div class="text-gray-600 font-medium text-sm pl-2">
+                    Showing page {{ pagination.page }} of {{ pagination.pages }}
                 </div>
-                <div>
-                    <h1 class="text-2xl font-bold text-yellow-400 tracking-wide">ระบบทุนการศึกษา</h1>
-                    <p class="text-sm text-blue-200">Ubon Ratchathani University</p>
+
+                <div class="flex gap-2 pr-2">
+                    {% if pagination.page > 1 %}
+                        <a href="{{ url_for('student.track_status', page=pagination.prev_num) }}" 
+                           class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all shadow-sm text-sm">
+                           ก่อนหน้า
+                        </a>
+                    {% endif %}
+
+                    {% if pagination.page < pagination.pages %}
+                        <a href="{{ url_for('student.track_status', page=pagination.next_num) }}" 
+                           class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-sm text-sm font-medium">
+                           ถัดไป
+                        </a>
+                    {% endif %}
                 </div>
             </div>
-            
-            <nav class="flex items-center gap-6">
-                <div class="nav-capsule">
-                    {% block nav_links %}
-                    <a href="/student/dashboard" class="text-white hover:text-yellow-400 px-5 py-2 rounded-full text-sm font-medium transition-all">ทุนการศึกษา</a>
-                    <a href="/student/scholarships" class="text-white hover:text-yellow-400 px-5 py-2 rounded-full text-sm font-medium transition-all">ระเบียบ/ประกาศ</a>
-                    <a href="/student/status" class="text-white border-b-4 border-yellow-400 px-1 py-2 text-sm font-bold">ติดตามสถานะ</a>
-                    {% endblock %}
-                </div>
-                
-                <div class="bg-blue-800 px-4 py-2 rounded-full text-sm border border-blue-700 flex items-center gap-2 text-yellow-100">
-                    👤 {% block role_name %}นักศึกษา{% endblock %}
-                </div>
-                
-                <a href="/logout" class="bg-yellow-400 text-blue-900 px-5 py-2.5 rounded-full font-bold hover:bg-yellow-300 transition-all shadow-md hover:shadow-lg">
-                    ออกจากระบบ 🚪
-                </a>
-            </nav>
+            {% endif %}
         </div>
-    </header>
-
-    <main class="flex-grow w-full px-8 py-10">
-        {% block content %}{% endblock %}
-    </main>
-
-    <footer class="bg-blue-950 text-blue-200 py-8 px-8 w-full text-sm mt-auto">
-        <div class="flex justify-between items-start">
-            <div>
-                <strong class="text-yellow-400 text-base">สำนักงานพัฒนานักศึกษา</strong><br>
-                มหาวิทยาลัยอุบลราชธานี<br>
-                85 ถนนสถลมาร์ค ตำบลเมืองศรีไค อำเภอวารินชำราบ จังหวัดอุบลราชธานี 34190
-            </div>
-            <div class="text-right">
-                <strong class="text-yellow-400 text-base">ติดต่อเรา</strong><br>
-                Email: ubustudent.d@ubu.ac.th<br>
-                โทรศัพท์: 045-353000 ต่อ 1210
-            </div>
-        </div>
-    </footer>
-
-</body>
-</html>
+    </div>
+</div>
+{% endblock %}

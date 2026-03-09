@@ -21,15 +21,18 @@ def scoring():
     # สร้าง List ข้อมูลใหม่เพื่อคำนวณจำนวนผู้สมัคร
     scholarship_list = []
     for sch in scholarships:
-        # ใช้ scholarship_id เป็นกุญแจหลัก
-        # แก้เป็นแบบนี้ครับ
         total_applicants = Application.query.filter_by(scholarship_id=sch.id).count()
-        passed_docs = Application.query.filter_by(scholarship_id=sch.id, is_passed=True).count()
+        # ผ่านเอกสาร = เจ้าหน้าที่อนุมัติสัมภาษณ์แล้ว (status=interview) หรือกรรมการอนุมัติแล้ว (status=approved)
+        passed_docs = Application.query.filter(
+            Application.scholarship_id == sch.id,
+            Application.status.in_(['interview', 'approved'])
+        ).count()
 
         scholarship_list.append(
             {
+                "id": sch.id,
+                "name": sch.name,
                 "scholarship_id": sch.id,
-                "scholarship_name": sch.scholarship_name,
                 "total_applicants": total_applicants,
                 "passed_docs": passed_docs,
             }
@@ -45,13 +48,16 @@ def scoring():
 def scholarship_students(scholarship_id):
     # ดึงข้อมูลทุนเพื่อเอาชื่อทุนมาแสดง
     sch = Scholarship.query.get_or_404(scholarship_id)
-    # ดึงเฉพาะนักศึกษาที่สมัครทุนนี้เท่านั้น (รายชื่อจะไม่ปนกัน)
-    candidates = Application.query.filter_by(scholarship_id=scholarship_id).all()
+    # ดึงเฉพาะนักศึกษาที่เจ้าหน้าที่อนุมัติสัมภาษณ์แล้ว (status=interview) หรืออนุมัติแล้ว (status=approved)
+    candidates = Application.query.filter(
+        Application.scholarship_id == scholarship_id,
+        Application.status.in_(['interview', 'approved'])
+    ).all()
 
     return render_template(
         "director/scoring_students.html",
         scholarship_id=scholarship_id,
-        scholarship_name=sch.scholarship_name,
+        scholarship_name=sch.name,
         candidates=candidates,
     )
 
@@ -72,13 +78,17 @@ def give_score(app_id):
         total = 0
         # วนลูปรับคะแนนตามจำนวนเกณฑ์ที่มีใน Database
         for c in criteria:
-            # รับค่าจาก input ที่ชื่อ 'score_IDเกณฑ์' (จะสัมพันธ์กับหน้า HTML)
             score_val = request.form.get(f"score_{c.id}", 0)
-            total += int(score_val)
+            total += int(score_val or 0)
 
         # บันทึกคะแนนรวมลงใน Database
         application.total_score = total
         application.is_scored = True
+
+        # ถ้ากดอนุมัติได้รับทุน เปลี่ยน status เป็น approved (สถานะ "ผ่าน" ในฝั่งเจ้าหน้าที่)
+        if request.form.get("approve_scholarship") == "1":
+            application.status = "approved"
+
         db.session.commit()
 
         return redirect(
@@ -94,7 +104,21 @@ def give_score(app_id):
 
 
 # ==========================================
-# 4. หน้าดูรายละเอียดนักศึกษา
+# 4. อนุมัติได้รับทุน (ตั้ง status=approved)
+# ==========================================
+@director_bp.route("/approve/<int:app_id>", methods=["POST"])
+def approve_scholarship(app_id):
+    application = Application.query.get_or_404(app_id)
+    if application.is_scored and application.status == "interview":
+        application.status = "approved"
+        db.session.commit()
+    return redirect(
+        url_for("director.scholarship_students", scholarship_id=application.scholarship_id)
+    )
+
+
+# ==========================================
+# 5. หน้าดูรายละเอียดนักศึกษา
 # ==========================================
 @director_bp.route("/candidate/<int:app_id>")
 def candidate_detail(app_id):

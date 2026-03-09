@@ -134,6 +134,16 @@ class Application(db.Model):
     reviewing_at = db.Column(db.DateTime)
     status_description = db.Column(db.Text)
 
+    # ฝั่งกรรมการ (Director): คะแนนสัมภาษณ์
+    total_score = db.Column(db.Float, nullable=True)
+    is_scored = db.Column(db.Boolean, default=False)
+
+    @property
+    def gpa(self):
+        """GPA จาก Student (gpax)"""
+        s = Student.query.filter_by(student_id=self.student_id).first()
+        return s.gpax if s and s.gpax is not None else "-"
+
 
 # 2.3 บันทึกการทำงาน (Audit Log)
 class AuditLog(db.Model):

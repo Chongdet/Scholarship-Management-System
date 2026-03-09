@@ -1,0 +1,291 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+<style>
+  body { font-family: 'Prompt', sans-serif; }
+
+  .detail-hero { position: relative; height: 260px; overflow: hidden; }
+  .detail-hero img { width: 100%; height: 100%; object-fit: cover; }
+  .detail-hero .overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to right, rgba(15,30,80,0.92) 40%, rgba(15,30,80,0.4));
+    display: flex; align-items: flex-end; padding: 2rem 2.5rem;
+  }
+
+  .stat-card {
+    background: #f8faff; border-radius: 1.2rem; padding: 1.2rem 1rem;
+    text-align: center; border: 1.5px solid #e2eaf8;
+  }
+
+  /* ปุ่มสมัคร enabled */
+  .btn-apply {
+    background: #1e3a8a; color: #fff;
+    padding: 1rem 2rem; border-radius: 1rem;
+    font-weight: 900; font-size: 1.1rem;
+    transition: all .2s; cursor: pointer; border: none;
+    width: 100%; text-align: center; display: block;
+  }
+  .btn-apply:hover { background: #facc15; color: #1e3a8a; }
+
+  /* ปุ่มสมัคร disabled */
+  .btn-apply-disabled {
+    background: #e5e7eb; color: #9ca3af;
+    padding: 1rem 2rem; border-radius: 1rem;
+    font-weight: 900; font-size: 1.1rem;
+    cursor: not-allowed; border: none;
+    width: 100%; text-align: center; display: block;
+  }
+
+  /* Badge ผ่าน/ไม่ผ่านเกณฑ์ */
+  .badge-pass { background: #dcfce7; color: #15803d; border-radius: 999px; padding: .25rem 1rem; font-size: .8rem; font-weight: 700; }
+  .badge-fail { background: #fee2e2; color: #b91c1c; border-radius: 999px; padding: .25rem 1rem; font-size: .8rem; font-weight: 700; }
+  .badge-applied { background: #dbeafe; color: #1d4ed8; border-radius: 999px; padding: .25rem 1rem; font-size: .8rem; font-weight: 700; }
+
+  /* Alert ไม่ผ่านเกณฑ์ */
+  .alert-fail {
+    background: #fff1f2; border-left: 4px solid #e11d48;
+    border-radius: .75rem; padding: 1rem 1.25rem; margin-top: 1rem;
+  }
+  .alert-info {
+    background: #eff6ff; border-left: 4px solid #3b82f6;
+    border-radius: .75rem; padding: 1rem 1.25rem; margin-top: 1rem;
+  }
+
+  /* Pop-up modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.5);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9999; opacity: 0; pointer-events: none;
+    transition: opacity .3s;
+  }
+  .modal-overlay.show { opacity: 1; pointer-events: all; }
+  .modal-box {
+    background: #fff; border-radius: 1.5rem; padding: 2.5rem;
+    max-width: 420px; width: 90%; text-align: center;
+    transform: scale(.9); transition: transform .3s;
+    box-shadow: 0 25px 50px rgba(0,0,0,.25);
+  }
+  .modal-overlay.show .modal-box { transform: scale(1); }
+</style>
+
+<!-- Pop-up สำเร็จ -->
+<div class="modal-overlay" id="successModal">
+  <div class="modal-box">
+    <div class="text-6xl mb-4">🎉</div>
+    <h3 class="text-2xl font-black text-blue-900 mb-2">สมัครทุนเรียบร้อยแล้ว!</h3>
+    <p class="text-gray-500 mb-6">ระบบได้รับใบสมัครของคุณแล้ว กรุณารอการตรวจสอบจากเจ้าหน้าที่</p>
+    <div class="flex flex-col gap-3">
+      <a href="{{ url_for('student.track_status') }}"
+         class="block bg-blue-900 text-white py-3 rounded-xl font-bold hover:bg-yellow-400 hover:text-blue-900 transition-all">
+        ดูรายการทุนที่สมัครไว้
+      </a>
+      <button onclick="document.getElementById('successModal').classList.remove('show')"
+              class="block bg-gray-100 text-gray-600 py-3 rounded-xl font-bold hover:bg-gray-200 transition-all">
+        ปิด
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="max-w-4xl mx-auto px-4 py-8">
+
+  <!-- Breadcrumb -->
+  <nav class="flex items-center gap-2 text-sm text-gray-500 mb-6 font-medium">
+    <a href="{{ url_for('student.dashboard') }}" class="hover:text-blue-800 transition-colors">ทุนการศึกษา</a>
+    <span class="text-gray-300">›</span>
+    <span class="text-blue-900 font-bold">รายละเอียดทุน</span>
+  </nav>
+
+  <div class="bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-gray-100">
+
+    <!-- Hero -->
+    <div class="detail-hero">
+      <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1200" alt="Banner">
+      <div class="overlay">
+        <div>
+          <!-- Badge สถานะ -->
+          <div class="flex flex-wrap gap-2 mb-3">
+            <span class="bg-yellow-400 text-blue-900 px-3 py-1 rounded-full text-xs font-bold">
+              {{ scholarship.category if scholarship.category else 'ทุนทั่วไป' }}
+            </span>
+            {% if scholarship.status == 'open' or not scholarship.status %}
+              <span class="bg-green-400 text-white px-3 py-1 rounded-full text-xs font-bold">🟢 เปิดรับสมัคร</span>
+            {% else %}
+              <span class="bg-gray-400 text-white px-3 py-1 rounded-full text-xs font-bold">🔴 ปิดรับสมัคร</span>
+            {% endif %}
+
+            {% if already_applied %}
+              <span class="badge-applied">✅ ยื่นสมัครแล้ว</span>
+            {% elif is_eligible %}
+              <span class="badge-pass">✔ คุณมีสิทธิ์สมัคร</span>
+            {% else %}
+              <span class="badge-fail">✖ ไม่มีสิทธิ์สมัคร</span>
+            {% endif %}
+          </div>
+
+          <h1 class="text-2xl md:text-3xl font-black text-white leading-tight">{{ scholarship.name }}</h1>
+          <p class="text-blue-200 mt-1 text-sm">
+            หน่วยงาน: {{ scholarship.provider if scholarship.provider else 'มหาวิทยาลัยอุบลราชธานี' }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-8 md:p-10">
+
+      <!-- Stats Row -->
+      <div class="grid grid-cols-3 gap-4 mb-8">
+        <div class="stat-card">
+          <p class="text-xs text-blue-400 font-bold uppercase tracking-widest mb-1">มูลค่าทุนละ</p>
+          <p class="text-2xl font-black text-blue-900">{{ "{:,.0f}".format(scholarship.amount) }}</p>
+          <p class="text-xs text-gray-400">บาท</p>
+        </div>
+        <div class="stat-card">
+          <p class="text-xs text-yellow-500 font-bold uppercase tracking-widest mb-1">จำนวนทุน</p>
+          <p class="text-2xl font-black text-yellow-700">{{ scholarship.quota if scholarship.quota else '∞' }}</p>
+          <p class="text-xs text-gray-400">ทุน</p>
+        </div>
+        <div class="stat-card">
+          <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">ผู้สมัครแล้ว</p>
+          <p class="text-2xl font-black text-gray-700">{{ scholarship.applications.count() if scholarship.applications else 0 }}</p>
+          <p class="text-xs text-gray-400">ราย</p>
+        </div>
+      </div>
+
+      <!-- Detail Table -->
+      <div class="mb-8">
+        <h2 class="text-lg font-black text-blue-900 border-l-4 border-yellow-400 pl-4 mb-4">รายละเอียดทุน</h2>
+        <div class="space-y-0 divide-y divide-gray-50 bg-gray-50/50 rounded-xl overflow-hidden">
+
+          <div class="flex justify-between items-center px-4 py-3">
+            <span class="text-gray-500 text-sm">หน่วยงาน</span>
+            <span class="font-bold text-blue-900 text-sm">{{ scholarship.provider if scholarship.provider else 'มหาวิทยาลัยอุบลราชธานี' }}</span>
+          </div>
+          <div class="flex justify-between items-center px-4 py-3">
+            <span class="text-gray-500 text-sm">ประเภท</span>
+            <span class="font-bold text-blue-900 text-sm">{{ scholarship.category if scholarship.category else 'ทุนทั่วไป' }}</span>
+          </div>
+          <div class="flex justify-between items-center px-4 py-3">
+            <span class="text-gray-500 text-sm">ระยะเวลาเปิดรับ</span>
+            <span class="font-bold text-blue-900 text-sm">
+              {{ scholarship.start_date.strftime('%d/%m/%Y') if scholarship.start_date else 'ไม่ระบุ' }}
+              — {{ scholarship.end_date.strftime('%d/%m/%Y') if scholarship.end_date else 'ไม่ระบุ' }}
+            </span>
+          </div>
+          {% if scholarship.min_gpax %}
+          <div class="flex justify-between items-center px-4 py-3">
+            <span class="text-gray-500 text-sm">GPAX ขั้นต่ำ</span>
+            <span class="font-bold text-blue-900 text-sm">
+              {{ scholarship.min_gpax }}
+              {% if student and student.gpax %}
+                <span class="text-xs ml-2 {% if student.gpax >= scholarship.min_gpax %}text-green-600{% else %}text-red-500{% endif %}">
+                  (ของคุณ: {{ "%.2f"|format(student.gpax) }})
+                </span>
+              {% endif %}
+            </span>
+          </div>
+          {% endif %}
+          {% if scholarship.faculty %}
+          <div class="flex justify-between items-center px-4 py-3">
+            <span class="text-gray-500 text-sm">เฉพาะคณะ</span>
+            <span class="font-bold text-blue-900 text-sm">{{ scholarship.faculty }}</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Description -->
+      {% if scholarship.description %}
+      <div class="mb-8">
+        <h2 class="text-lg font-black text-blue-900 border-l-4 border-yellow-400 pl-4 mb-4">คุณสมบัติผู้สมัคร</h2>
+        <div class="bg-blue-50/50 rounded-xl p-5 text-gray-700 leading-relaxed text-sm whitespace-pre-line">
+          {{ scholarship.description }}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- ── Action Zone ─────────────────────────────── -->
+      <div class="border-t border-gray-100 pt-6">
+
+        {% if already_applied %}
+          <!-- กรณี: สมัครแล้ว -->
+          <div class="alert-info flex items-start gap-3">
+            <span class="text-2xl">📋</span>
+            <div>
+              <p class="font-bold text-blue-900">ยื่นสมัครขอรับทุนนี้แล้ว</p>
+              <p class="text-sm text-blue-600 mt-1">
+                สถานะ: 
+                <span class="font-bold">
+                  {% if existing_app.status == 'pending' %}⏳ รอตรวจสอบ
+                  {% elif existing_app.status == 'approved' %}✅ อนุมัติแล้ว
+                  {% elif existing_app.status == 'rejected' %}❌ ไม่ผ่านการคัดเลือก
+                  {% else %}{{ existing_app.status }}{% endif %}
+                </span>
+              </p>
+            </div>
+          </div>
+          <a href="{{ url_for('student.track_status') }}"
+             class="btn-apply mt-4 inline-block">
+            ดูรายการทุนที่สมัครไว้ →
+          </a>
+
+        {% elif not profile_complete %}
+          <!-- กรณี: โปรไฟล์ยังไม่ครบ -->
+          <div class="alert-info flex items-start gap-3 mb-4">
+            <span class="text-2xl">⚠️</span>
+            <div>
+              <p class="font-bold text-blue-900">ข้อมูลส่วนตัวยังไม่ครบถ้วน</p>
+              <p class="text-sm text-blue-600 mt-1">กรุณากรอกข้อมูลส่วนตัวให้ครบก่อนทำการสมัครทุน</p>
+            </div>
+          </div>
+          <a href="{{ url_for('student.profile') }}"
+             class="btn-apply inline-block text-center" style="background:#2563eb;">
+            คลิกเพื่อปรับปรุงข้อมูลส่วนตัวให้เป็นปัจจุบันก่อนการสมัคร →
+          </a>
+
+        {% elif not is_eligible %}
+          <!-- กรณี: ไม่ผ่านเกณฑ์ -->
+          <div class="alert-fail flex items-start gap-3 mb-4">
+            <span class="text-2xl">🚫</span>
+            <div>
+              <p class="font-bold text-red-800">ไม่สามารถสมัครทุนนี้ได้ เนื่องจาก:</p>
+              <ul class="mt-2 space-y-1">
+                {% for reason in eligibility_reasons %}
+                  <li class="text-sm text-red-700">• {{ reason }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+          <button class="btn-apply-disabled" disabled>สมัครทุนนี้ (ไม่มีสิทธิ์)</button>
+
+        {% else %}
+          <!-- กรณี: ผ่านเกณฑ์ สมัครได้ -->
+          <div class="alert-info flex items-start gap-3 mb-4" style="background:#f0fdf4; border-color:#22c55e;">
+            <span class="text-2xl">✅</span>
+            <div>
+              <p class="font-bold text-green-800">คุณมีสิทธิ์สมัครทุนนี้</p>
+              <p class="text-sm text-green-600 mt-1">คุณสมบัติครบถ้วนตามเกณฑ์ที่กำหนด</p>
+            </div>
+          </div>
+          <a href="{{ url_for('student.apply_scholarship', scholarship_id=scholarship.id) }}"
+             class="btn-apply inline-block text-center">
+            สมัครทุนนี้ →
+          </a>
+
+        {% endif %}
+
+      </div>
+      <!-- ──────────────────────────────────────────── -->
+
+    </div>
+  </div>
+</div>
+
+{% if request.args.get('applied') == 'success' %}
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('successModal').classList.add('show');
+  });
+</script>
+{% endif %}
+
+{% endblock %}

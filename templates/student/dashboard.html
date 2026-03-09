@@ -55,7 +55,56 @@
                 <div class="absolute bottom-4 left-4 z-20">
                     <span class="bg-white/90 backdrop-blur text-blue-900 px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
                         UBU Scholarship
+<<<<<<< HEAD
                     </span>
+=======
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+                    
+                </div>
+
+                <div class="p-8 pb-0 flex flex-col h-full">
+                    <h2 class="text-2xl font-bold text-blue-900 mb-8 border-l-8 border-yellow-600 pl-4">
+                        {{ item.name }}
+                    </h3>
+
+                    <div class="space-y-3 text-gray-800 font-medium mb-8">
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                            <span class="font-bold text-black text-l">จำนวนทุน :</span>
+                            <span class="font-bold text-blue-800">{{ item.quota if item.quota else 'ไม่จำกัดจำนวน' }} ทุน</span>
+                        </div>
+
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                            <span class="font-bold text-black text-l">ทุนละ :</span>
+                            <span class="font-bold text-blue-800">{{ "{:,.0f}".format(item.amount) }} บาท</span>
+                        </div>
+
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                            <span class="font-bold text-black text-l">ประเภททุน :</span>
+                            <span class="font-bold text-blue-800">{{ item.category if item.category else 'ทุนทั่วไป' }}</span>
+                        </div>
+
+                        <div class="flex justify-between items-start border-b border-gray-100 pb-2">
+                            <span class="font-bold text-black text-sm whitespace-nowrap">วันที่เปิดรับสมัคร :</span>
+                            <span class="font-bold text-blue-800 text-[13px] text-right ml-4">
+                                {{ item.start_date.strftime('%d/%m/%Y') if item.start_date else 'ไม่ระบุ' }} 
+                                <br class="md:hidden"> - {{ item.end_date.strftime('%d/%m/%Y') if item.end_date else 'ไม่ระบุ' }}
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-black text-l">หน่วยงาน :</span>
+                            <span class="font-bold text-blue-800">{{ item.provider if item.provider else 'มหาวิทยาลัย' }}</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-2">
+                        <a href="{{ url_for('student.scholarship_detail', scholarship_id=item.id) }}" 
+                           class="w-full block text-center bg-blue-900 text-white py-4 rounded-2xl font-black text-l hover:bg-yellow-400 hover:text-blue-900 transition-all transform active:scale-95 shadow-md">
+                            ดูรายละเอียดทุน
+                        </a>
+                    </div>
+>>>>>>> 8eaf5c2 (แก้ไข student routes และหน้า dashboard/profile)
                 </div>
             </div>
             

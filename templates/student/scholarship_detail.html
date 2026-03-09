@@ -151,57 +151,95 @@
         </div>
       </div>
 
-      <!-- Detail Table -->
-      <div class="mb-8">
-        <h2 class="text-lg font-black text-blue-900 border-l-4 border-yellow-400 pl-4 mb-4">รายละเอียดทุน</h2>
-        <div class="space-y-0 divide-y divide-gray-50 bg-gray-50/50 rounded-xl overflow-hidden">
+      <!-- Details Table — ใช้ field จริงจาก model -->
 
-          <div class="flex justify-between items-center px-4 py-3">
-            <span class="text-gray-500 text-sm">หน่วยงาน</span>
-            <span class="font-bold text-blue-900 text-sm">{{ scholarship.provider if scholarship.provider else 'มหาวิทยาลัยอุบลราชธานี' }}</span>
-          </div>
-          <div class="flex justify-between items-center px-4 py-3">
-            <span class="text-gray-500 text-sm">ประเภท</span>
-            <span class="font-bold text-blue-900 text-sm">{{ scholarship.category if scholarship.category else 'ทุนทั่วไป' }}</span>
-          </div>
-          <div class="flex justify-between items-center px-4 py-3">
-            <span class="text-gray-500 text-sm">ระยะเวลาเปิดรับ</span>
-            <span class="font-bold text-blue-900 text-sm">
-              {{ scholarship.start_date.strftime('%d/%m/%Y') if scholarship.start_date else 'ไม่ระบุ' }}
-              — {{ scholarship.end_date.strftime('%d/%m/%Y') if scholarship.end_date else 'ไม่ระบุ' }}
-            </span>
-          </div>
-          {% if scholarship.min_gpax %}
-          <div class="flex justify-between items-center px-4 py-3">
-            <span class="text-gray-500 text-sm">GPAX ขั้นต่ำ</span>
-            <span class="font-bold text-blue-900 text-sm">
-              {{ scholarship.min_gpax }}
-              {% if student and student.gpax %}
-                <span class="text-xs ml-2 {% if student.gpax >= scholarship.min_gpax %}text-green-600{% else %}text-red-500{% endif %}">
-                  (ของคุณ: {{ "%.2f"|format(student.gpax) }})
-                </span>
-              {% endif %}
-            </span>
-          </div>
-          {% endif %}
-          {% if scholarship.faculty %}
-          <div class="flex justify-between items-center px-4 py-3">
-            <span class="text-gray-500 text-sm">เฉพาะคณะ</span>
-            <span class="font-bold text-blue-900 text-sm">{{ scholarship.faculty }}</span>
-          </div>
-          {% endif %}
-        </div>
-      </div>
+<div class="flex justify-between items-center px-4 py-3">
+    <span class="text-gray-500 text-sm">หน่วยงาน</span>
+    <span class="font-bold text-blue-900 text-sm">
+        {{ scholarship.provider if scholarship.provider else 'มหาวิทยาลัยอุบลราชธานี' }}
+    </span>
+</div>
 
-      <!-- Description -->
-      {% if scholarship.description %}
-      <div class="mb-8">
-        <h2 class="text-lg font-black text-blue-900 border-l-4 border-yellow-400 pl-4 mb-4">คุณสมบัติผู้สมัคร</h2>
-        <div class="bg-blue-50/50 rounded-xl p-5 text-gray-700 leading-relaxed text-sm whitespace-pre-line">
-          {{ scholarship.description }}
-        </div>
-      </div>
-      {% endif %}
+<div class="flex justify-between items-center px-4 py-3">
+    <span class="text-gray-500 text-sm">ประเภททุน</span>
+    <span class="font-bold text-blue-900 text-sm">
+        {{ scholarship.scholarship_type if scholarship.scholarship_type else (scholarship.category if scholarship.category else 'ทุนทั่วไป') }}
+    </span>
+</div>
+
+<div class="flex justify-between items-center px-4 py-3">
+    <span class="text-gray-500 text-sm">ลักษณะทุน</span>
+    <span class="font-bold text-blue-900 text-sm">
+        {{ scholarship.scholarship_nature if scholarship.scholarship_nature else 'ไม่ระบุ' }}
+    </span>
+</div>
+
+<div class="flex justify-between items-start px-4 py-3">
+    <span class="text-gray-500 text-sm">ระยะเวลาเปิดรับ</span>
+    <span class="font-bold text-blue-900 text-sm text-right">
+        {{ scholarship.start_date.strftime('%d/%m/%Y') if scholarship.start_date else 'ไม่ระบุ' }}
+        — {{ scholarship.end_date.strftime('%d/%m/%Y') if scholarship.end_date else 'ไม่ระบุ' }}
+    </span>
+</div>
+
+{% if scholarship.min_gpax %}
+<div class="flex justify-between items-center px-4 py-3">
+    <span class="text-gray-500 text-sm">GPAX ขั้นต่ำ</span>
+    <span class="font-bold text-blue-900 text-sm">
+        {{ scholarship.min_gpax }}
+        {% if student and student.gpax %}
+            <span class="text-xs ml-2 {% if student.gpax >= scholarship.min_gpax %}text-green-600{% else %}text-red-500{% endif %}">
+                (ของคุณ: {{ "%.2f"|format(student.gpax) }})
+            </span>
+        {% endif %}
+    </span>
+</div>
+{% endif %}
+
+{% if scholarship.income_cap %}
+<div class="flex justify-between items-center px-4 py-3">
+    <span class="text-gray-500 text-sm">เพดานรายได้ครอบครัว</span>
+    <span class="font-bold text-blue-900 text-sm">
+        ไม่เกิน {{ "{:,.0f}".format(scholarship.income_cap) }} บาท/ปี
+    </span>
+</div>
+{% endif %}
+
+{% if scholarship.faculty_condition %}
+<div class="flex justify-between items-center px-4 py-3">
+    <span class="text-gray-500 text-sm">เงื่อนไขคณะ</span>
+    <span class="font-bold text-blue-900 text-sm">{{ scholarship.faculty_condition }}</span>
+</div>
+{% endif %}
+<!-- คุณสมบัติผู้สมัคร -->
+{% if scholarship.qualifications %}
+<div class="mb-8">
+    <h2 class="text-lg font-black text-blue-900 border-l-4 border-yellow-400 pl-4 mb-4">คุณสมบัติผู้สมัคร</h2>
+    <div class="bg-blue-50/50 rounded-xl p-5 text-gray-700 leading-relaxed text-sm whitespace-pre-line">
+        {{ scholarship.qualifications }}
+    </div>
+</div>
+{% endif %}
+
+<!-- เงื่อนไขทุน -->
+{% if scholarship.conditions %}
+<div class="mb-8">
+    <h2 class="text-lg font-black text-blue-900 border-l-4 border-yellow-400 pl-4 mb-4">เงื่อนไขทุน</h2>
+    <div class="bg-yellow-50/50 rounded-xl p-5 text-gray-700 leading-relaxed text-sm whitespace-pre-line">
+        {{ scholarship.conditions }}
+    </div>
+</div>
+{% endif %}
+
+<!-- เอกสารที่ต้องส่ง -->
+{% if scholarship.required_documents %}
+<div class="mb-8">
+    <h2 class="text-lg font-black text-blue-900 border-l-4 border-yellow-400 pl-4 mb-4">เอกสารที่ต้องส่ง</h2>
+    <div class="bg-gray-50 rounded-xl p-5 text-gray-700 leading-relaxed text-sm whitespace-pre-line">
+        {{ scholarship.required_documents }}
+    </div>
+</div>
+{% endif %}
 
       <!-- ── Action Zone ─────────────────────────────── -->
       <div class="border-t border-gray-100 pt-6">

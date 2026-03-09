@@ -131,10 +131,7 @@
   .hist-table thead th { background:#f1f5f9; color:var(--navy2); font-weight:700; padding:10px 14px; font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; text-align:left; }
   .hist-table tbody td { padding:18px 14px; color:#94a3b8; text-align:center; }
 
-<<<<<<< HEAD
-=======
   
->>>>>>> 8eaf5c2 (แก้ไข student routes และหน้า dashboard/profile)
   /* Income summary box */
   .income-summary {
     background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
@@ -165,12 +162,6 @@
   .expense-summary .label { font-size:.78rem; font-weight:600; color:#9a3412; }
   .expense-summary .amount { font-size:1rem; font-weight:700; color:#c2410c; font-family:'Prompt',sans-serif; }
 
-<<<<<<< HEAD
-  /* Hidden utility */
-  .hidden { display:none !important; }
-=======
-
->>>>>>> 8eaf5c2 (แก้ไข student routes และหน้า dashboard/profile)
 
   /* Buttons */
   .btn-edit { display:flex; align-items:center; gap:8px; background:linear-gradient(135deg,#f5a623,#f59e0b); color:var(--navy); font-weight:700; font-size:.875rem; padding:10px 26px; border-radius:99px; border:none; cursor:pointer; box-shadow:0 2px 8px rgba(245,166,35,.4); transition:all .2s; font-family:'Prompt',sans-serif; }
@@ -348,39 +339,35 @@
           </div>
         </div>
 
-        {# ── ลักษณะการกู้ยืม (แสดง/ซ่อนตามการเลือก) ── #}
-        <div class="field-group" id="loanTypeWrap"
-          style="
-            transition: opacity .25s, transform .25s;
-            {% if not student.loan_student_fund %}opacity:.4; pointer-events:none;{% endif %}
-          ">
-          <span class="field-label">
-            ลักษณะการกู้ยืม
-            <span id="loanTypeRequired" class="field-note"
-              style="color:#ef4444;font-weight:700;{% if not student.loan_student_fund %}display:none;{% endif %}">
-              * จำเป็นต้องระบุ
-            </span>
-          </span>
-          <div class="radio-group" style="flex-direction:column;" id="loanTypeGroup">
-            <label class="rpill" id="loanTypePill1">
-              <input type="radio" name="loan_type" value="ค่าเล่าเรียน"
-                {% if student.loan_type == 'ค่าเล่าเรียน' %}checked{% endif %}
-                class="editable-radio loan-type-radio" disabled> กู้เฉพาะค่าเล่าเรียน
-            </label>
-            <label class="rpill" id="loanTypePill2">
-              <input type="radio" name="loan_type" value="ทั้งสองอย่าง"
-                {% if student.loan_type == 'ทั้งสองอย่าง' %}checked{% endif %}
-                class="editable-radio loan-type-radio" disabled> กู้ทั้งค่าเล่าเรียนและค่าครองชีพ
-            </label>
-          </div>
-          <div id="loanTypeHint" style="
-            margin-top:6px; font-size:.72rem; display:flex; align-items:center; gap:5px;
-            {% if not student.loan_student_fund or student.loan_type %}display:none!important;{% endif %}
-          ">
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="#f59e0b" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <span style="color:#b45309;">กรุณาเลือกลักษณะการกู้ยืมด้วย</span>
-          </div>
-        </div>
+      {# ── ลักษณะการกู้ยืม ── #}
+<div class="field-group" id="loanTypeWrap">
+  <span class="field-label">
+    ลักษณะการกู้ยืม
+    <span id="loanTypeRequired" class="field-note" style="color:#ef4444;font-weight:700;">
+      * จำเป็นต้องระบุ
+    </span>
+  </span>
+  <div class="radio-group" style="flex-direction:column;" id="loanTypeGroup">
+    <label class="rpill">
+      <input type="radio" name="loan_type" value="ค่าเล่าเรียน"
+        {% if student.loan_type == 'ค่าเล่าเรียน' %}checked{% endif %}
+        class="editable-radio loan-type-radio" disabled>
+      กู้เฉพาะค่าเล่าเรียน
+    </label>
+    <label class="rpill">
+      <input type="radio" name="loan_type" value="ทั้งสองอย่าง"
+        {% if student.loan_type == 'ทั้งสองอย่าง' %}checked{% endif %}
+        class="editable-radio loan-type-radio" disabled>
+      กู้ทั้งค่าเล่าเรียนและค่าครองชีพ
+    </label>
+  </div>
+  <div id="loanTypeHint" class="hidden" style="margin-top:6px;font-size:.72rem;display:flex;align-items:center;gap:5px;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="#f59e0b" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    <span style="color:#b45309;">กรุณาเลือกลักษณะการกู้ยืมด้วย</span>
+  </div>
+</div>
 
       </div>
     </div>
@@ -466,7 +453,6 @@
             <div class="field-group"><span class="field-label">อาชีพ</span><input type="text" name="father_job" value="{{ v(student.father_job) }}" placeholder="อาชีพ" class="editable-input" readonly></div>
             <div class="g2">
               <div class="field-group"><span class="field-label">รายได้ / เดือน (฿)</span><input type="number" name="father_income" value="{{ v(student.father_income) }}" placeholder="0" class="editable-input" readonly></div>
-              <div class="field-group"><span class="field-label">ส่งให้ผู้สมัคร / เดือน (฿) <span class="field-note">(แก้ไขได้ที่ข้อ 4)</span></span><input type="number" value="{{ v(student.inc_father) }}" placeholder="0" class="locked" readonly tabindex="-1"></div>
             </div>
             <div class="field-group"><span class="field-label">ปัญหาสุขภาพ</span><input type="text" name="father_health" value="{{ v(student.father_health) }}" placeholder="ปัญหาสุขภาพ (ถ้ามี)" class="editable-input" readonly></div>
           </div>
@@ -660,9 +646,9 @@ document.getElementById('profileForm').addEventListener('submit', (e) => {
   const loanType = document.querySelector('input[name="loan_type"]:checked');
   if (isLoan && !loanType) {
     e.preventDefault();
-    const hint = document.getElementById('loanTypeHint');
-    const wrap = document.getElementById('loanTypeWrap');
-    if (hint) hint.style.display = 'flex';
+          const hint = document.getElementById('loanTypeHint');
+          const wrap = document.getElementById('loanTypeWrap');
+          if (hint) hint.style.display = 'flex';
     // Highlight the loan type section
     wrap.style.outline = '2px solid #ef4444';
     wrap.style.borderRadius = '8px';

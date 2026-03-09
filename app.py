@@ -176,31 +176,6 @@ def seed_basic_data():
         director.set_password("ubu123456")
         db.session.add(director)
 
-    if not Scholarship.query.first():
-        now = datetime.now()
-
-        scholarships = [
-            Scholarship(
-                id="SCH001",
-                name="ทุนเรียนดี",
-                amount=15000,
-                min_gpax=3.5,
-                start_date=now - timedelta(days=5),
-                end_date=now + timedelta(days=10),
-            ),
-            Scholarship(
-                id="SCH002",
-                name="ทุนรายได้น้อย",
-                amount=10000,
-                min_gpax=2.5,
-                income_cap=30000,
-                start_date=now - timedelta(days=2),
-                end_date=now + timedelta(days=30),
-            ),
-        ]
-
-        db.session.add_all(scholarships)
-
     db.session.commit()
 
 

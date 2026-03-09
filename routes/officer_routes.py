@@ -2,8 +2,7 @@ from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from werkzeug.utils import secure_filename
 from models import db, Application, Scholarship, AuditLog, Officer
-import os
-import secrets
+from sqlalchemy import or_
 
 # สร้าง Blueprint สำหรับ Officer
 officer_bp = Blueprint('officer', __name__)
@@ -248,7 +247,13 @@ def applications():
     
     scholarships = Scholarship.query.all()
     pending_count = Application.query.filter_by(status='pending').count()
-    approved_count = Application.query.filter_by(status='approved').count()
+    approved_count = Application.query.filter(
+        or_(
+            Application.status == 'approved', 
+            Application.status == 'Selected',
+            Application.status == 'ได้รับทุนการศึกษา'
+        )
+    ).count()
     interview_count = Application.query.filter_by(status='interview').count()
     needs_edit_count = Application.query.filter_by(status='needs_edit').count()
     total_count = Application.query.count()
@@ -297,17 +302,23 @@ def view_application(application_id):
 def decide_application(application_id):
     application = Application.query.get_or_404(application_id)
     decision = request.form.get('decision')
+    date_str = request.form.get('interview_date')
     
     if decision == 'interview':
         application.status = 'interview'
         application.reviewing_by = None
         application.reviewing_at = None
+        application.interview_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        application.interview_time = request.form.get('interview_time')
+        application.interview_location = request.form.get('interview_location')
         db.session.commit()
         flash('ทำการยืนยันนัดสัมภาษณ์เรียบร้อยแล้ว', 'success')
+
     elif decision == 'needs_edit':
         application.status = 'needs_edit'
         application.reviewing_by = None
         application.reviewing_at = None
+        application.reject_reason = request.form.get('reject_reason') # บันทึกเหตุผลที่ให้แก้
         db.session.commit()
         flash('ส่งกลับให้แก้ไขเอกสารเรียบร้อยแล้ว', 'success')
         

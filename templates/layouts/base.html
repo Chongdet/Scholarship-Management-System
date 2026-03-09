@@ -35,9 +35,9 @@
            <nav class="hidden md:flex items-center gap-8">
                 <div class="flex gap-6">
                     {% block nav_links %}
-                    <a href="{{ url_for('student.dashboard') }}" class="text-white hover:text-yellow-400 py-2 text-sm font-medium transition-all">หน้าแรก</a>
-                    <a href="#" class="text-white hover:text-yellow-400 py-2 text-sm font-medium transition-all">ระเบียบ/ประกาศ</a>
-                    <a href="#" class="text-white hover:text-yellow-400 py-2 text-sm font-medium transition-all">ติดตามสถานะ</a>
+                    <a href="{{ url_for('student.dashboard') }}" class="text-white px-1 py-2 text-sm font-medium transition-all {{ 'nav-link-active' if request.endpoint == 'student.dashboard' else 'hover:text-yellow-400' }}">หน้าแรก</a>
+                    <a href="{{ url_for('student.announce_scholarships') }}" class="text-white px-1 py-2 text-sm font-medium transition-all {{ 'nav-link-active' if request.endpoint == 'student.announce_scholarships' else 'hover:text-yellow-400' }}">ระเบียบ/ประกาศ</a>
+                    <a href="{{ url_for('student.track_status') }}" class="text-white px-1 py-2 text-sm font-medium transition-all {{ 'nav-link-active' if request.endpoint == 'student.track_status' else 'hover:text-yellow-400' }}">ติดตามสถานะ</a>
                     {% endblock %}
                 </div>
                 

@@ -1,10 +1,35 @@
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from werkzeug.utils import secure_filename
 from models import db, Application, Scholarship, AuditLog, Officer
 from sqlalchemy import or_
 
 # สร้าง Blueprint สำหรับ Officer
 officer_bp = Blueprint('officer', __name__)
+
+# ตั้งค่าการอัปโหลดไฟล์
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'static', 'uploads')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def save_uploaded_file(file):
+    """บันทึกไฟล์ที่อัปโหลดและคืนชื่อไฟล์ที่บันทึก"""
+    if file and allowed_file(file.filename):
+        # สร้างชื่อไฟล์ที่ปลอดภัย
+        filename = secure_filename(file.filename)
+        # เพิ่ม timestamp เพื่อหลีกเลี่ยงการทับซ้อน
+        random_string = secrets.token_hex(4)
+        filename = f"{random_string}_{filename}"
+        
+        # สร้างโฟลเดอร์ถ้ายังไม่มี
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+        
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(filepath)
+        return filename
+    return None
 
 # ==========================================
 # ผู้รับผิดชอบ: นาย ยศสรัล ถิระบุตร (Officer ส่วนเดิม)
@@ -66,6 +91,18 @@ def add_scholarship():
             # Normalize status to lowercase to match model conventions
             status_val = (request.form.get('status') or 'open').lower()
             print(f"status: '{status_val}'")
+            
+            # จัดการการอัปโหลดไฟล์รูปภาพ
+            image_filename = None
+            if 'scholarship_image' in request.files:
+                file = request.files['scholarship_image']
+                if file and file.filename:
+                    image_filename = save_uploaded_file(file)
+            
+            # อ่านค่าฟิลด์ใหม่
+            num_scholarships = request.form.get('number_of_scholarships')
+            num_scholarships = int(num_scholarships) if num_scholarships else 1
+            
             new_scholarship = Scholarship(
                 id=s_id,             # ใน Model คือ id
                 name=s_name,         # ใน Model คือ name
@@ -74,7 +111,15 @@ def add_scholarship():
                 faculty_condition=request.form.get('faculty_condition'),
                 start_date=sd,
                 end_date=ed,
-                status=status_val
+                status=status_val,
+                # ฟิลด์ใหม่
+                image=image_filename,
+                qualifications=request.form.get('qualifications'),
+                conditions=request.form.get('conditions'),
+                scholarship_type=request.form.get('scholarship_type'),
+                scholarship_nature=request.form.get('scholarship_nature'),
+                number_of_scholarships=num_scholarships,
+                required_documents=request.form.get('required_documents')
             )
 
             print(f"Creating scholarship: {new_scholarship}")
@@ -133,6 +178,26 @@ def edit_scholarship(scholarship_id):
             status_val = request.form.get('status')
             if status_val:
                 scholarship.status = status_val.lower()
+            
+            # จัดการไฟล์รูปภาพใหม่
+            if 'scholarship_image' in request.files:
+                file = request.files['scholarship_image']
+                if file and file.filename:
+                    image_filename = save_uploaded_file(file)
+                    if image_filename:
+                        scholarship.image = image_filename
+            
+            # อัปเดตฟิลด์ใหม่
+            scholarship.qualifications = request.form.get('qualifications')
+            scholarship.conditions = request.form.get('conditions')
+            scholarship.scholarship_type = request.form.get('scholarship_type')
+            scholarship.scholarship_nature = request.form.get('scholarship_nature')
+            
+            num_scholarships = request.form.get('number_of_scholarships')
+            if num_scholarships:
+                scholarship.number_of_scholarships = int(num_scholarships)
+            
+            scholarship.required_documents = request.form.get('required_documents')
             
             db.session.commit()
             flash('แก้ไขข้อมูลทุนเรียบร้อยแล้ว', 'success')

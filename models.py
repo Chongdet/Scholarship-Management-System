@@ -104,6 +104,16 @@ class Scholarship(db.Model):
     interview_file_url = db.Column(db.String(500))    # ลิงก์ไฟล์ประกาศสัมภาษณ์
     announce_file_url = db.Column(db.String(500))     # ลิงก์ไฟล์ประกาศคนได้ทุน
     faculty_condition = db.Column(db.String(100), nullable=True) # หรือเป็น Text ก็ได้
+    
+    # ฟิลด์ใหม่สำหรับรายละเอียดทุนการศึกษา
+    image = db.Column(db.String(200), nullable=True) # ชื่อไฟล์ภาพ
+    qualifications = db.Column(db.Text, nullable=True) # คุณสมบัติ
+    conditions = db.Column(db.Text, nullable=True) # เงื่อนไข
+    scholarship_type = db.Column(db.String(50), nullable=True) # ประเภททุน (ทุนบริจาค, ฯลฯ)
+    scholarship_nature = db.Column(db.String(50), nullable=True) # ลักษณะทุน (ทุนรายปี, ฯลฯ)
+    number_of_scholarships = db.Column(db.Integer, default=1) # จำนวนทุน
+    required_documents = db.Column(db.Text, nullable=True) # เอกสารที่ต้องส่ง
+    
     criteria = db.relationship('Criterion', backref='scholarship', lazy=True)
     applications = db.relationship('Application', backref='scholarship', lazy=True)
 

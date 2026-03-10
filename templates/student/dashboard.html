@@ -8,8 +8,8 @@
         <div class="swiper-wrapper">
             {% for item in scholarships[:3] %} 
             <div class="swiper-slide relative">
-                <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1200" 
-                     class="absolute inset-0 w-full h-full object-cover" alt="Banner">
+                <img src="{{ url_for('static', filename='uploads/' + item.image) if item.image else url_for('static', filename='img/default-scholarship.png') }}" 
+                    class="absolute inset-0 w-full h-full object-cover" alt="Banner">
                 
                 <div class="absolute inset-0 bg-gradient-to-r from-blue-900 via-blue-900/60 to-transparent flex flex-col justify-center px-12 md:px-20 text-white">
                     <span class="bg-yellow-400 text-blue-900 px-3 py-1 rounded-full text-xs font-bold w-fit mb-4">กำลังเปิดรับสมัคร 🔥</span>
@@ -27,7 +27,7 @@
                         
                         <div>
                             <p class="text-blue-200 text-xs uppercase font-bold tracking-widest mb-1">จำนวนทุน</p>
-                            <p class="text-white text-3xl font-black">{{ item.quota if item.quota else '-' }} <span class="text-lg">ทุน</span></p>
+                            <p class="text-white text-3xl font-black">{{ item.number_of_scholarships if item.number_of_scholarships else 'ไม่จำกัด' }} <span class="text-lg">ทุน</span></p>
                         </div>
                     </div>
 
@@ -59,9 +59,9 @@
             {% for item in scholarships %}
             <div class="bg-white rounded-[2.5rem] overflow-hidden shadow-lg hover:shadow-2xl transition-all border border-gray-100 group flex flex-col">
                 <div class="relative h-56 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=600" 
-                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
-                         alt="Cover">
+                    <img src="{{ url_for('static', filename='uploads/' + item.image) if item.image else url_for('static', filename='img/default-scholarship.png') }}" 
+                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                        alt="Cover">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     <div class="absolute top-4 right-4 bg-yellow-400 px-3 py-1 rounded-full text-[10px] font-bold text-blue-900 shadow-sm uppercase">
                         UBU Scholarship
@@ -76,7 +76,7 @@
                     <div class="space-y-4 mb-8 flex-grow">
                         <div class="flex justify-between items-center border-b border-gray-50 pb-2">
                             <span class="text-gray-500 text-sm font-bold">จำนวนทุน</span>
-                            <span class="text-blue-800 font-bold">{{ item.quota if item.quota else 'ไม่จำกัด' }} ทุน</span>
+                            <span class="text-blue-800 font-bold">{{ item.number_of_scholarships if item.number_of_scholarships else 'ไม่จำกัด' }} ทุน</span>
                         </div>
                         <div class="flex justify-between items-center border-b border-gray-50 pb-2">
                             <span class="text-gray-500 text-sm font-bold">ทุนละ</span>
@@ -84,7 +84,7 @@
                         </div>
                         <div class="flex justify-between items-center border-b border-gray-50 pb-2">
                             <span class="text-gray-500 text-sm font-bold">ประเภท</span>
-                            <span class="text-blue-800 font-bold">{{ item.category if item.category else 'ทุนทั่วไป' }}</span>
+                            <span class="text-blue-800 font-bold">{{ item.scholarship_type if item.scholarship_type else 'ทุนทั่วไป' }}</span>
                         </div>
                         <div class="flex justify-between items-start border-b border-gray-50 pb-2">
                             <span class="text-gray-500 text-sm font-bold">สิ้นสุดรับสมัคร</span>

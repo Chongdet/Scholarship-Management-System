@@ -24,7 +24,7 @@
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="p-4 border-b text-center">{{ loop.index + (pagination.page - 1) * pagination.per_page }}</td>
                         <td class="p-4 border-b font-medium">{{ app.scholarship.name }}</td>
-                        <td class="p-4 border-b text-center">{{ app.scholarship.category if app.scholarship.category else 'ทุนทั่วไป' }}</td>
+                        <td class="p-4 border-b text-center">{{ app.scholarship_type if app.sscholarship_type else 'ทุนทั่วไป' }}</td>
                         <td class="p-4 border-b text-center">{{ app.provider if app.provider else 'มหาวิทยาลัย'}}</td>
                         <td class="p-4 border-b text-center">
                             <div class="flex flex-wrap gap-2 justify-center max-w-[120px] mx-auto">

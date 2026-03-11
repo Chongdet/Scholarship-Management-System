@@ -61,7 +61,6 @@ class Student(db.Model):
     disciplinary_status  = db.Column(db.String(50))
 
     # --- 3. ข้อมูลครอบครัว ---
-<<<<<<< feature/kittiphong-login-automatch
     father_name   = db.Column(db.String(100))  # [REG]
     mother_name   = db.Column(db.String(100))  # [REG]
 
@@ -162,22 +161,6 @@ class Student(db.Model):
         filled = sum(1 for field in required_fields if getattr(self, field))
         self.profile_completeness = int((filled / len(required_fields)) * 100)
         return self.profile_completeness
-=======
-    father_name = db.Column(db.String(100))     # [REG]
-    mother_name = db.Column(db.String(100))     # [REG]
-    
-    father_job = db.Column(db.String(100))      # [Self]
-    father_income = db.Column(db.Float)         # [Self]
-    inc_father = db.Column(db.Float)            # [Self] เงินที่บิดาส่งให้ [NEW]
-    father_health = db.Column(db.Text)          # [Self]
-    
-    mother_job = db.Column(db.String(100))      # [Self]
-    mother_income = db.Column(db.Float)         # [Self]
-    inc_mother = db.Column(db.Float)            # [Self] เงินที่มารดาส่งให้ [NEW]
-    mother_health = db.Column(db.Text)          # [Self] ปัญหาสุขภาพมารดา [NEW]
-    
-    parents_status = db.Column(db.String(50))   # [Self]
->>>>>>> main
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -193,10 +176,9 @@ class Student(db.Model):
 # 2.1 ข้อมูลทุนการศึกษา
 class Scholarship(db.Model):
     __tablename__ = 'scholarship'
-<<<<<<< feature/kittiphong-login-automatch
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    amount = db.Column(db.Float, nullable=True)
+    id = db.Column(db.String(20), primary_key=True)
+    name = db.Column(db.String(100), nullable=False) # ชื่อทุน
+    amount = db.Column(db.Float, nullable=True) # ทุนละเท่าไหร่
 
     # --- เงื่อนไขการรับสมัคร ---
     start_date        = db.Column(db.DateTime)          # วันที่เริ่มเปิดรับ
@@ -204,36 +186,25 @@ class Scholarship(db.Model):
     faculty_condition = db.Column(db.String(255))       # คณะที่ระบุ หรือ "ทุกคณะ"
     min_gpax          = db.Column(db.Float, default=0.0) # เกรดเฉลี่ยขั้นต่ำ
     income_cap        = db.Column(db.Float)             # รายได้ครอบครัวไม่เกิน
-    quota             = db.Column(db.Integer)           # จำนวนที่เปิดรับ
-
-    criteria     = db.relationship('Criterion',   backref='scholarship', lazy=True)
-=======
-    id = db.Column(db.String(20), primary_key=True)
-    name = db.Column(db.String(100), nullable=False) # ชื่อทุน
-    quota = db.Column(db.Integer, default=0) # จำนวนกี่ทุน
-    amount = db.Column(db.Float, nullable=True) # ทุนละเท่าไหร่
-    category = db.Column(db.String(50)) # ประเภทของทุน (เช่น ทุนภายใน/ภายนอก)
-    start_date = db.Column(db.Date) # วันที่เปิดรับสมัคร                    
-    end_date = db.Column(db.Date) # วันที่ปิดรับสมัคร
-    provider = db.Column(db.String(100)) # หน่วยงานของทุนนั้นๆ
-    min_gpax = db.Column(db.Float, nullable=True)   
-    income_cap = db.Column(db.Float, nullable=True) # กำหนดเพดานรายได้ (ถ้ามี)  
-    status = db.Column(db.String(20), default='open')  # สถานะของทุน open(เปิดรับ),checking=close(กำลังตรวจสอบ,ปิดทุน), interview(รายชื่อสัมภาษณ์), announce(รายชื่อได้รับทุน) 
+    number_of_scholarships = db.Column(db.Integer)           # จำนวนทุนที่เปิดรับ
+    scholarship_type  = db.Column(db.String(50)) # ประเภทของทุน (เช่น ทุน ภายใน/ภายนอก/บริจาค) 
+    provider          = db.Column(db.String(100)) # หน่วยงานของทุนนั้นๆ
+    status            = db.Column(db.String(20), default='open')  # สถานะของทุน open(เปิดรับ),checking=close(กำลังตรวจสอบ,ปิดทุน), interview(รายชื่อสัมภาษณ์), announce(รายชื่อได้รับทุน) 
     interview_file_url = db.Column(db.String(500))    # ลิงก์ไฟล์ประกาศสัมภาษณ์
     announce_file_url = db.Column(db.String(500))     # ลิงก์ไฟล์ประกาศคนได้ทุน
-    faculty_condition = db.Column(db.String(100), nullable=True) # หรือเป็น Text ก็ได้
     
     # ฟิลด์ใหม่สำหรับรายละเอียดทุนการศึกษา
     image = db.Column(db.String(200), nullable=True) # ชื่อไฟล์ภาพ
     qualifications = db.Column(db.Text, nullable=True) # คุณสมบัติ
     conditions = db.Column(db.Text, nullable=True) # เงื่อนไข
-    scholarship_type = db.Column(db.String(50), nullable=True) # ประเภททุน (ทุนบริจาค, ฯลฯ)
     scholarship_nature = db.Column(db.String(50), nullable=True) # ลักษณะทุน (ทุนรายปี, ฯลฯ)
     number_of_scholarships = db.Column(db.Integer, default=1) # จำนวนทุน
     required_documents = db.Column(db.Text, nullable=True) # เอกสารที่ต้องส่ง
     
-    criteria = db.relationship('Criterion', backref='scholarship', lazy=True)
->>>>>>> main
+    criteria     = db.relationship('Criterion',   backref='scholarship', lazy=True)
+
+
+
     applications = db.relationship('Application', backref='scholarship', lazy=True)
 
     def is_open(self):
@@ -255,14 +226,8 @@ class Application(db.Model):
     id = db.Column(db.String, primary_key=True)
     student_id = db.Column(db.String(20), nullable=False)
     student_name = db.Column(db.String(100))
-<<<<<<< feature/kittiphong-login-automatch
     faculty = db.Column(db.String(100)) # <--- คงไว้ตามที่คุณเพิ่มมา
     scholarship_id = db.Column(db.Integer, db.ForeignKey('scholarship.id'))
-=======
-    faculty = db.Column(db.String(100))
-    
-    scholarship_id = db.Column(db.String(20), db.ForeignKey('scholarship.id'), nullable=False)
->>>>>>> main
     status = db.Column(db.String(20), default='pending')
     reviewing_by = db.Column(db.String(50))
     reviewing_at = db.Column(db.DateTime)
@@ -301,17 +266,9 @@ class AuditLog(db.Model):
 class Criterion(db.Model):
     __tablename__ = 'criterion'
     id = db.Column(db.Integer, primary_key=True)
-<<<<<<< feature/kittiphong-login-automatch
     scholarship_id = db.Column(db.Integer, db.ForeignKey('scholarship.id'))
     name = db.Column(db.String(100))
     max_score = db.Column(db.Integer)
-=======
-    
-    # ✅ แก้ไขตรงนี้: เปลี่ยนเป็น db.Integer และอ้างอิงไปที่ scholarship.id
-    scholarship_id = db.Column(db.String(20), db.ForeignKey('scholarship.id'))
-    
-    name = db.Column(db.String(100))  # เช่น 'คะแนนสัมภาษณ์', 'จิตอาสา'
-    max_score = db.Column(db.Integer) # คะแนนเต็มของหัวข้อนั้น
 
 
 # บันทึกการทำงานฝั่งกรรมการ (Director) - ตาราง audit_logs
@@ -323,4 +280,3 @@ class DirectorAuditLog(db.Model):
     action = db.Column(db.String(100), nullable=False)
     details = db.Column(db.Text, nullable=True)
     ip_address = db.Column(db.String(45), nullable=True)
->>>>>>> main

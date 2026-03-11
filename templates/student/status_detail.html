@@ -65,9 +65,9 @@
                     <h3 class="mt-8 text-2xl font-bold text-gray-800 border-l-4 border-blue-500 pl-3">ข้อมูลทุน</h3>
                     <div class="bg-gray-50 p-6 rounded-2xl space-y-3 shadow-sm">
                         <p><strong class="text-xl text-gray-600">ชื่อทุน:</strong> <span class="text-xl text-gray-800 font-medium">{{ app.scholarship.name }}</span></p>
-                        <p><strong class="text-xl text-gray-600">จำนวนทุน:</strong> <span class="text-xl text-gray-800">{{ app.scholarship.quota if app.scholarship.category else 'ไม่จำกัดจำนวน' }} ทุน</span></p>
+                        <p><strong class="text-xl text-gray-600">จำนวนทุน:</strong> <span class="text-xl text-gray-800">{{ app.number_of_scholarships if number_of_scholarships else 'ไม่จำกัดจำนวน' }} ทุน</span></p>
                         <p><strong class="text-xl text-gray-600">ทุนละ:</strong> <span class="text-xl text-gray-800">{{ app.scholarship.amount }} บาท</span></p>
-                        <p><strong class="text-xl text-gray-600">ประเภททุน:</strong> <span class="text-xl text-gray-800">{{ app.scholarship.category if app.scholarship.category else 'ทุนทั่วไป' }}</span></p>
+                        <p><strong class="text-xl text-gray-600">ประเภททุน:</strong> <span class="text-xl text-gray-800">{{ app.scholarship_type if app.scholarship_type else 'ทุนทั่วไป' }}</span></p>
                         <p><strong class="text-xl text-gray-600">คณะ/หน่วยงาน:</strong> <span class="text-xl text-gray-800">{{ app.scholarship.provider if app.scholarship.provider else 'มหาวิทยาลัย' }}</span></p>
                         <p><strong class="text-xl text-gray-600">ระยะเวลาเปิดรับสมัคร:</strong> 
                             <span class="text-xl text-gray-800">

@@ -1,0 +1,106 @@
+{% extends "layouts/base_director.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto font-prompt p-6">
+    
+    <nav class="flex items-center text-sm font-medium mb-6 space-x-2 no-print">
+        <a href="{{ url_for('director.home') }}" class="text-blue-600 hover:text-blue-800 transition flex items-center gap-1">
+            <span>🏠</span> หน้าหลัก
+        </a>
+        <span class="text-gray-400">/</span>
+        <span class="text-gray-800 font-bold">บันทึกการทำงาน</span>
+    </nav>
+
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        <div>
+            <h2 class="text-2xl font-extrabold text-gray-800 flex items-center gap-2">
+                <span class="text-blue-600">📋</span> บันทึกการทำงาน (Audit Logs)
+            </h2>
+            <p class="text-gray-500 text-sm">ประวัติการบันทึกคะแนน การแก้ไข และการยืนยันผลทุนการศึกษา</p>
+        </div>
+        
+        <div class="flex gap-2 w-full md:w-auto">
+            <input type="text" id="logSearch" placeholder="ค้นหาชื่อกรรมการ หรือ กิจกรรม..." 
+                   class="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm transition">
+            <button class="bg-gray-100 text-gray-600 px-4 py-2 rounded-xl hover:bg-gray-200 transition">
+                <span>🔍</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-white shadow-xl rounded-3xl border border-gray-100 overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-widest">วัน-เวลา</th>
+                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-widest">ผู้ใช้งาน</th>
+                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-widest">กิจกรรม</th>
+                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-widest">รายละเอียด</th>
+                    <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-widest">IP Address</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 bg-white" id="logTableBody">
+                {% for log in logs %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+                        {{ log.timestamp.strftime('%d/%m/%Y %H:%M') }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">
+                                {{ log.user_name[0] }}
+                            </div>
+                            <span class="text-sm font-bold text-gray-800">{{ log.user_name }}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if 'ให้คะแนน' in log.action %}
+                            <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase">SCORING</span>
+                        {% elif 'ยืนยัน' in log.action %}
+                            <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase">CONFIRM</span>
+                        {% else %}
+                            <span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase">ACTION</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-600">
+                        {{ log.details }}
+                    </td>
+                    <td class="px-6 py-4 text-center text-xs text-gray-400 font-mono">
+                        {{ log.ip_address }}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="px-6 py-20 text-center text-gray-400">
+                        <div class="flex flex-col items-center">
+                            <span class="text-4xl mb-2">📁</span>
+                            <p>ไม่พบประวัติบันทึกการทำงาน</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-6 flex justify-between items-center no-print">
+        <p class="text-sm text-gray-500">แสดงรายการล่าสุด 20 รายการ</p>
+        <div class="flex gap-2">
+            <button class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50" disabled>ก่อนหน้า</button>
+            <button class="px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">ถัดไป</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ระบบค้นหาเบื้องต้นในตาราง
+    document.getElementById('logSearch').addEventListener('keyup', function() {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#logTableBody tr');
+        rows.forEach(row => {
+            let text = row.innerText.toLowerCase();
+            row.style.display = text.includes(filter) ? '' : 'none';
+        });
+    });
+</script>
+{% endblock %}

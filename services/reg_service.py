@@ -99,13 +99,22 @@ class RegService:
         # ❌ ไม่ sync student_id (Primary Key ห้ามทับ)
 
         # --------------------------------
-        # 🔓 DEFAULT FROM REG (แก้ไขได้)
+        # 🔓 DEFAULT FROM REG (ดึงมาตั้งต้น แต่แก้ไขได้)
         # --------------------------------
         if not student_model.email:
             student_model.email = reg_data.get('email')
 
         if not student_model.address_current:
             student_model.address_current = reg_data.get('address_current')
+
+        # 🌟 จุดที่เพิ่ม: ดึงชื่อบิดาและมารดามาด้วย ถ้ายังไม่มีข้อมูล
+        if not student_model.father_name:
+            student_model.father_name = reg_data.get('father_name')
+
+        if not student_model.mother_name:
+            student_model.mother_name = reg_data.get('mother_name')
+
+        return student_model
 
         # --------------------------------
         # 🔓 FULLY EDITABLE (ไม่ผูก REG)

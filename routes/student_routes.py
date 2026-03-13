@@ -43,20 +43,20 @@ def login():
         input_student_id = request.form.get('student_id')
         input_password   = request.form.get('password')
 
-        is_valid, message = RegService.authenticate(input_student_id, input_password)
+        # หมายเหตุ: ในไฟล์ reg_service.py คุณตั้งชื่อว่า validate_credentials
+        # ดังนั้นผมขอปรับให้ตรงกับชื่อฟังก์ชันที่คุณมีนะครับ
+        is_valid, reg_data_or_msg = RegService.validate_credentials(input_student_id, input_password)
 
         if is_valid:
-            reg_data = RegService.fetch_profile(input_student_id)
+            reg_data = reg_data_or_msg # ถ้ารหัสถูก validate_credentials จะคืนค่า reg_data กลับมาให้
 
             student = Student.query.filter_by(student_id=input_student_id).first()
             if not student:
                 student = Student(student_id=input_student_id)
                 db.session.add(student)
 
-            student.gpax                = reg_data['gpax']
-            student.faculty             = reg_data['faculty']
-            student.year                = reg_data['year']
-            student.disciplinary_status = reg_data['disciplinary_status']
+            # 🌟 จุดที่แก้ไข: เรียกใช้ sync_student_data แทนการกำหนดค่าทีละตัว
+            student = RegService.sync_student_data(student, reg_data)
             student.set_password(input_password)
 
             db.session.commit()
@@ -65,10 +65,10 @@ def login():
             session['user_id'] = student.student_id
             session['role']    = 'student'
 
-            flash(f"เข้าสู่ระบบสำเร็จ! อัปเดต GPAX: {student.gpax} จาก REG แล้ว", "success")
+            flash(f"เข้าสู่ระบบสำเร็จ! อัปเดตข้อมูลจาก REG เรียบร้อยแล้ว", "success")
             return redirect(url_for('student.dashboard'))
         else:
-            flash(f"การเข้าสู่ระบบล้มเหลว: {message}", "error")
+            flash(f"การเข้าสู่ระบบล้มเหลว รหัสผ่านไม่ถูกต้อง", "error")
             return render_template('login.html')
 
     return render_template('login.html')

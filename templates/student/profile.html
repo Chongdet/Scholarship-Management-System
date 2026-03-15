@@ -26,14 +26,12 @@
   }
   .container { max-width: 900px; margin: 0 auto; padding: 0 1rem; }
 
-  /* Breadcrumb */
   .breadcrumb { display:flex; align-items:center; gap:8px; margin-bottom:1.5rem; font-size:.875rem; }
   .breadcrumb a { color:var(--navy2); font-weight:600; display:flex; align-items:center; gap:4px; text-decoration:none; transition:color .2s; }
   .breadcrumb a:hover { color:var(--gold); }
   .breadcrumb .sep { color:var(--muted); }
   .breadcrumb .cur { color:var(--slate); }
 
-  /* Hero */
   .hero-card {
     background: linear-gradient(135deg, #0f2d5e 0%, #1a3f7a 60%, #1e4d96 100%);
     border-radius: var(--radius);
@@ -51,9 +49,7 @@
   .hero-val { color:#fff; font-size:.9rem; font-weight:500; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.15); border-radius:var(--radius-sm); padding:8px 12px; }
   .hero-lock-note { margin-top:1rem; font-size:.7rem; color:rgba(255,255,255,.4); display:flex; align-items:center; gap:5px; position:relative; z-index:1; }
 
-  /* Section cards */
   .section-card { background:#fff; border-radius:var(--radius); box-shadow:0 1px 3px rgba(15,45,94,.07),0 4px 16px rgba(15,45,94,.06); margin-bottom:1.25rem; overflow:hidden; }
-
   .section-header { display:flex; align-items:center; gap:12px; padding:1rem 1.5rem; border-bottom:1px solid #e8f0fe; background:linear-gradient(90deg,#f8faff,#fff); }
   .s-icon { width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:.95rem; flex-shrink:0; }
   .s-icon.gold   { background:linear-gradient(135deg,#fef3c7,#fde68a); }
@@ -64,13 +60,12 @@
   .s-icon.green  { background:linear-gradient(135deg,#d1fae5,#a7f3d0); }
   .s-title { font-family:'Prompt',sans-serif; font-size:.95rem; font-weight:600; color:var(--navy); }
   .s-badge { font-size:.68rem; background:#f1f5f9; color:var(--slate); border-radius:99px; padding:2px 10px; font-weight:600; margin-left:auto; letter-spacing:.03em; }
-
   .s-body { padding:1.25rem 1.5rem; }
 
-  /* Fields */
   .field-group { display:flex; flex-direction:column; gap:4px; }
   .field-label { font-size:.78rem; font-weight:600; color:var(--slate); }
   .field-note  { font-size:.72rem; font-weight:400; color:var(--muted); margin-left:4px; }
+  .field-req   { font-size:.72rem; font-weight:700; color:#ef4444; margin-left:3px; }
 
   input.locked, textarea.locked {
     width:100%; padding:8px 12px; border-radius:var(--radius-sm);
@@ -87,35 +82,39 @@
   textarea.editable-input:not([readonly]):focus {
     outline:none; border-color:var(--navy2); box-shadow:0 0 0 3px rgba(26,63,122,.12);
   }
+  /* error highlight */
+  input.input-error, textarea.input-error {
+    border-color:#ef4444 !important;
+    background:#fff5f5 !important;
+    box-shadow:0 0 0 3px rgba(239,68,68,.15) !important;
+  }
+  .radio-error .rpill {
+    border-color:#fca5a5 !important;
+    background:#fff5f5 !important;
+  }
 
-  /* Grid helpers */
   .g2 { display:grid; grid-template-columns:1fr 1fr; gap:.875rem; }
   .g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:.875rem; }
   .g4 { display:grid; grid-template-columns:repeat(4,1fr); gap:.875rem; }
   @media(max-width:860px){ .g4{grid-template-columns:1fr 1fr;} .g3{grid-template-columns:1fr 1fr;} }
   @media(max-width:580px){ .g2,.g3,.g4{grid-template-columns:1fr;} }
 
-  /* Parent cards */
   .parent-card { border-radius:var(--radius-sm); border:1.5px solid #e8f0fe; overflow:hidden; }
   .parent-header { padding:10px 14px; font-weight:700; font-size:.85rem; display:flex; align-items:center; gap:8px; }
   .parent-header.father { background:linear-gradient(90deg,#eff6ff,#f0f9ff); color:#1e40af; }
   .parent-header.mother { background:linear-gradient(90deg,#fdf2f8,#fff0fb); color:#9d174d; }
   .parent-body { padding:12px 14px; display:flex; flex-direction:column; gap:8px; background:#fafcff; }
 
-  /* Radio pills */
   .radio-group { display:flex; flex-wrap:wrap; gap:7px; margin-top:5px; }
   .rpill { display:flex; align-items:center; gap:6px; padding:6px 13px; border-radius:99px; border:1.5px solid #e2e8f0; background:#f8faff; font-size:.82rem; color:var(--slate); cursor:not-allowed; transition:all .15s; user-select:none; }
   .rpill input { accent-color:var(--navy2); }
   .rpill:has(input:checked) { border-color:var(--navy2); background:#eff6ff; color:var(--navy); font-weight:600; }
 
-  /* Divider labels */
   .div-label { display:flex; align-items:center; gap:10px; margin:1.4rem 0 .875rem; color:var(--navy); font-weight:700; font-size:.82rem; text-transform:uppercase; letter-spacing:.04em; }
   .div-label::before,.div-label::after { content:''; flex:1; height:1px; background:#e8f0fe; }
 
-  /* Sub-inputs */
   .sub-wrap { padding-left:1.5rem; margin-top:6px; }
 
-  /* Siblings */
   .sib-table-wrap { border:1.5px solid #e2e8f0; border-radius:var(--radius-sm); overflow:hidden; }
   .sib-table { width:100%; border-collapse:collapse; font-size:.8rem; }
   .sib-table thead th { background:#f1f5f9; color:var(--navy2); font-weight:700; padding:10px 12px; font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; text-align:left; }
@@ -126,45 +125,71 @@
   .sib-table tbody td input:focus { outline:none; border-color:#93c5fd; }
   .sib-footer { padding:.75rem 1rem; display:flex; justify-content:flex-end; align-items:center; gap:8px; border-top:1px solid #f1f5f9; }
 
-  /* History table */
   .hist-table { width:100%; border-collapse:collapse; font-size:.85rem; }
   .hist-table thead th { background:#f1f5f9; color:var(--navy2); font-weight:700; padding:10px 14px; font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; text-align:left; }
   .hist-table tbody td { padding:18px 14px; color:#94a3b8; text-align:center; }
 
+<<<<<<< HEAD
   /* Income summary box */
+=======
+>>>>>>> 74c5a695f247e7393e84e2e99af503361cf2829c
   .income-summary {
     background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-    border: 1.5px solid #bbf7d0;
-    border-radius: var(--radius-sm);
-    padding: 12px 16px;
-    margin-top: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 8px;
+    border: 1.5px solid #bbf7d0; border-radius: var(--radius-sm);
+    padding: 12px 16px; margin-top: 1rem;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
   }
   .income-summary .label { font-size:.78rem; font-weight:600; color:#166534; }
   .income-summary .amount { font-size:1rem; font-weight:700; color:#15803d; font-family:'Prompt',sans-serif; }
   .expense-summary {
     background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
-    border: 1.5px solid #fed7aa;
-    border-radius: var(--radius-sm);
-    padding: 12px 16px;
-    margin-top: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 8px;
+    border: 1.5px solid #fed7aa; border-radius: var(--radius-sm);
+    padding: 12px 16px; margin-top: 1rem;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
   }
   .expense-summary .label { font-size:.78rem; font-weight:600; color:#9a3412; }
   .expense-summary .amount { font-size:1rem; font-weight:700; color:#c2410c; font-family:'Prompt',sans-serif; }
 
+<<<<<<< HEAD
   /* Hidden utility */
   .hidden { display:none !important; }
+=======
+  /* ── Validation progress bar ── */
+  .vbar-wrap {
+    display:none; flex:1; flex-direction:column; gap:5px; min-width:0;
+  }
+  .vbar-track {
+    height:7px; background:#e2e8f0; border-radius:99px; overflow:hidden;
+  }
+  .vbar-fill {
+    height:100%; border-radius:99px;
+    transition:width .35s ease, background .35s ease;
+    background:#f87171;
+  }
+  .vbar-label {
+    font-size:.72rem; font-weight:600; color:var(--slate);
+    display:flex; align-items:center; gap:6px;
+  }
 
-  /* Buttons */
+  /* ── Tooltip on disabled save ── */
+  .save-wrap { position:relative; }
+  .save-tooltip {
+    display:none; position:absolute; bottom:calc(100% + 10px); right:0;
+    background:#1e293b; color:#fff; font-size:.75rem; line-height:1.7;
+    border-radius:10px; padding:10px 14px; width:280px;
+    box-shadow:0 4px 20px rgba(0,0,0,.25); z-index:50; pointer-events:none;
+  }
+  .save-tooltip::after {
+    content:''; position:absolute; bottom:-5px; right:22px;
+    width:10px; height:10px; background:#1e293b;
+    transform:rotate(45deg); border-radius:2px;
+  }
+  .save-tooltip .tt-title { font-weight:700; color:#fbbf24; margin-bottom:6px; display:block; }
+  .save-tooltip ul { margin:0; padding-left:15px; color:#94a3b8; }
+  .save-tooltip li { margin-bottom:2px; }
+  .save-wrap:hover .save-tooltip { display:block; }
+>>>>>>> 74c5a695f247e7393e84e2e99af503361cf2829c
+
   .btn-edit { display:flex; align-items:center; gap:8px; background:linear-gradient(135deg,#f5a623,#f59e0b); color:var(--navy); font-weight:700; font-size:.875rem; padding:10px 26px; border-radius:99px; border:none; cursor:pointer; box-shadow:0 2px 8px rgba(245,166,35,.4); transition:all .2s; font-family:'Prompt',sans-serif; }
   .btn-edit:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(245,166,35,.5); }
   .btn-save { display:flex; align-items:center; gap:8px; background:linear-gradient(135deg,#0f2d5e,#1a3f7a); color:#fff; font-weight:700; font-size:.9rem; padding:10px 32px; border-radius:99px; border:none; box-shadow:0 2px 8px rgba(15,45,94,.3); transition:all .2s; font-family:'Prompt',sans-serif; }
@@ -180,17 +205,40 @@
   .btn-pg.next { background:#dbeafe; color:var(--navy2); }
   .btn-pg.next:hover { background:#bfdbfe; }
 
-  /* Sticky action bar */
   .action-bar { position:sticky; bottom:0; z-index:40; background:rgba(255,255,255,.93); backdrop-filter:blur(14px); border-top:1px solid #e8f0fe; padding:.875rem 1.5rem; display:flex; align-items:center; justify-content:space-between; gap:12px; box-shadow:0 -4px 20px rgba(15,45,94,.08); }
-  .action-hint { font-size:.78rem; color:var(--slate); font-style:italic; display:flex; align-items:center; gap:6px; }
-  .action-btns { display:flex; gap:10px; align-items:center; }
+  .action-left { display:flex; flex:1; align-items:center; gap:12px; min-width:0; flex-wrap:wrap; }
+  .action-hint { font-size:.78rem; color:var(--slate); font-style:italic; display:flex; align-items:center; gap:6px; white-space:nowrap; }
+  .action-btns { display:flex; gap:10px; align-items:center; flex-shrink:0; }
   @media(max-width:580px){ .action-bar{flex-direction:column;padding:.75rem 1rem;} .action-btns{width:100%;justify-content:flex-end;} }
+
+  /* ── Validation Modal ── */
+  .vmodal-bg {
+    display:none; position:fixed; inset:0; z-index:9999;
+    background:rgba(15,45,94,.5); backdrop-filter:blur(4px);
+    align-items:center; justify-content:center;
+  }
+  .vmodal-bg.open { display:flex; }
+  .vmodal {
+    background:#fff; border-radius:18px; padding:2rem;
+    max-width:460px; width:90%;
+    box-shadow:0 20px 60px rgba(15,45,94,.3);
+    animation:popIn .2s ease;
+  }
+  .vmodal-head { display:flex; align-items:center; gap:12px; margin-bottom:1.25rem; }
+  .vmodal-icon { width:46px; height:46px; background:#fef3c7; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0; }
+  .vmodal-title { font-family:'Prompt',sans-serif; font-weight:700; color:#0f2d5e; font-size:1rem; }
+  .vmodal-sub { font-size:.8rem; color:#64748b; margin-top:3px; }
+  .vmodal-list { margin:0 0 1.25rem; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px; max-height:260px; overflow-y:auto; }
+  .vmodal-list li { display:flex; align-items:flex-start; gap:8px; background:#fef9ec; border:1px solid #fde68a; border-radius:8px; padding:8px 12px; font-size:.83rem; color:#78350f; }
+  .vmodal-list li .dot { color:#f59e0b; font-size:.9rem; flex-shrink:0; }
+  .vmodal-footer { display:flex; justify-content:flex-end; }
+  .vmodal-close { background:linear-gradient(135deg,#0f2d5e,#1a3f7a); color:#fff; font-weight:700; font-size:.875rem; padding:9px 24px; border-radius:99px; border:none; cursor:pointer; font-family:'Prompt',sans-serif; }
+  @keyframes popIn { from{transform:scale(.92);opacity:0} to{transform:scale(1);opacity:1} }
 </style>
 
 <div class="page-bg">
 <div class="container">
 
-  {# Breadcrumb #}
   <div class="breadcrumb">
     <a href="/student/dashboard">
       <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
@@ -252,11 +300,11 @@
       <div class="g4" style="margin-bottom:.875rem;">
         <div class="field-group">
           <span class="field-label">เลขประจำตัวประชาชน <span class="field-note">(ล็อก)</span></span>
-          <input type="text" name="citizen_id" value="{{ v(student.citizen_id) }}" placeholder="เลขประจำตัวประชาชน 13 หลัก" class="locked" readonly>
+          <input type="text" name="citizen_id" value="{{ v(student.citizen_id) }}" class="locked" readonly>
         </div>
         <div class="field-group">
-          <span class="field-label">เบอร์โทรศัพท์</span>
-          <input type="text" name="mobile" value="{{ v(student.mobile) }}" placeholder="0xx-xxx-xxxx" class="editable-input" readonly>
+          <span class="field-label">เบอร์โทรศัพท์ <span class="field-req">*</span></span>
+          <input type="text" id="f_mobile" name="mobile" value="{{ v(student.mobile) }}" placeholder="0xx-xxx-xxxx" class="editable-input" readonly>
         </div>
         <div class="field-group">
           <span class="field-label">Facebook</span>
@@ -270,11 +318,11 @@
       <div style="display:flex;flex-direction:column;gap:.75rem;">
         <div class="field-group">
           <span class="field-label">ที่อยู่ตามทะเบียนบ้าน <span class="field-note">(ล็อก)</span></span>
-          <textarea name="address_domicile" rows="2" placeholder="ที่อยู่ตามทะเบียนบ้าน" class="locked" readonly>{{ v(student.address_domicile) }}</textarea>
+          <textarea name="address_domicile" rows="2" class="locked" readonly>{{ v(student.address_domicile) }}</textarea>
         </div>
         <div class="field-group">
-          <span class="field-label">ที่อยู่ปัจจุบัน (หอพัก / บ้านเช่า)</span>
-          <textarea name="address_current" rows="2" placeholder="บ้านเลขที่ / หมู่ / ตำบล / อำเภอ / จังหวัด" class="editable-input" readonly>{{ v(student.address_current) }}</textarea>
+          <span class="field-label">ที่อยู่ปัจจุบัน (หอพัก / บ้านเช่า) <span class="field-req">*</span></span>
+          <textarea id="f_address_current" name="address_current" rows="2" placeholder="บ้านเลขที่ / หมู่ / ตำบล / อำเภอ / จังหวัด" class="editable-input" readonly>{{ v(student.address_current) }}</textarea>
         </div>
       </div>
     </div>
@@ -291,15 +339,15 @@
       <div class="g3" style="margin-bottom:1rem;">
         <div class="field-group">
           <span class="field-label">ชั้นปีที่</span>
-          <input type="text" name="year" value="{{ v(student.year) }}" placeholder="ชั้นปีที่" class="locked" readonly>
+          <input type="text" name="year" value="{{ v(student.year) }}" class="locked" readonly>
         </div>
         <div class="field-group">
           <span class="field-label">เกรดเฉลี่ยสะสม (GPAX)</span>
-          <input type="number" step="0.01" name="gpax" value="{{ v(student.gpax) }}" placeholder="0.00" class="locked" readonly>
+          <input type="number" step="0.01" name="gpax" value="{{ v(student.gpax) }}" class="locked" readonly>
         </div>
         <div class="field-group">
           <span class="field-label">อาจารย์ที่ปรึกษา</span>
-          <input type="text" name="advisor_name" value="{{ v(student.advisor_name) }}" placeholder="ชื่อ-นามสกุลอาจารย์ที่ปรึกษา" class="locked" readonly>
+          <input type="text" name="advisor_name" value="{{ v(student.advisor_name) }}" class="locked" readonly>
         </div>
       </div>
       <div class="field-group">
@@ -320,60 +368,47 @@
     </div>
     <div class="s-body">
       <div style="display:flex;flex-direction:column;gap:1.25rem;">
-
-        {# ── ฝั่งซ้าย: กู้ยืมหรือไม่ ── #}
         <div class="field-group">
-          <span class="field-label">กู้ยืมเงินกองทุน กยศ. หรือไม่?</span>
-          <div class="radio-group">
+          <span class="field-label">กู้ยืมเงินกองทุน กยศ. หรือไม่? <span class="field-req">*</span></span>
+          <div class="radio-group" id="rg_loan_fund">
             <label class="rpill">
               <input type="radio" name="loan_student_fund" value="TRUE"
                 {% if student.loan_student_fund %}checked{% endif %}
-                class="editable-radio" disabled
-                onchange="toggleLoanType()"> กู้ยืม
+                class="editable-radio" disabled onchange="toggleLoanType(); runValidation();">
+              กู้ยืม
             </label>
             <label class="rpill">
               <input type="radio" name="loan_student_fund" value="FALSE"
                 {% if not student.loan_student_fund %}checked{% endif %}
-                class="editable-radio" disabled
-                onchange="toggleLoanType()"> ไม่กู้ยืม
+                class="editable-radio" disabled onchange="toggleLoanType(); runValidation();">
+              ไม่กู้ยืม
             </label>
           </div>
         </div>
-
-        {# ── ลักษณะการกู้ยืม (แสดง/ซ่อนตามการเลือก) ── #}
-        <div class="field-group" id="loanTypeWrap"
-          style="
-            transition: opacity .25s, transform .25s;
-            {% if not student.loan_student_fund %}opacity:.4; pointer-events:none;{% endif %}
-          ">
+        <div class="field-group" id="loanTypeWrap">
           <span class="field-label">
             ลักษณะการกู้ยืม
-            <span id="loanTypeRequired" class="field-note"
-              style="color:#ef4444;font-weight:700;{% if not student.loan_student_fund %}display:none;{% endif %}">
-              * จำเป็นต้องระบุ
-            </span>
+            <span id="loanTypeRequired" class="field-note" style="color:#ef4444;font-weight:700;">* จำเป็นต้องระบุ</span>
           </span>
-          <div class="radio-group" style="flex-direction:column;" id="loanTypeGroup">
-            <label class="rpill" id="loanTypePill1">
+          <div class="radio-group" style="flex-direction:column;" id="loanTypeGroup" id="rg_loan_type">
+            <label class="rpill">
               <input type="radio" name="loan_type" value="ค่าเล่าเรียน"
                 {% if student.loan_type == 'ค่าเล่าเรียน' %}checked{% endif %}
-                class="editable-radio loan-type-radio" disabled> กู้เฉพาะค่าเล่าเรียน
+                class="editable-radio loan-type-radio" disabled onchange="runValidation();">
+              กู้เฉพาะค่าเล่าเรียน
             </label>
-            <label class="rpill" id="loanTypePill2">
+            <label class="rpill">
               <input type="radio" name="loan_type" value="ทั้งสองอย่าง"
                 {% if student.loan_type == 'ทั้งสองอย่าง' %}checked{% endif %}
-                class="editable-radio loan-type-radio" disabled> กู้ทั้งค่าเล่าเรียนและค่าครองชีพ
+                class="editable-radio loan-type-radio" disabled onchange="runValidation();">
+              กู้ทั้งค่าเล่าเรียนและค่าครองชีพ
             </label>
           </div>
-          <div id="loanTypeHint" style="
-            margin-top:6px; font-size:.72rem; display:flex; align-items:center; gap:5px;
-            {% if not student.loan_student_fund or student.loan_type %}display:none!important;{% endif %}
-          ">
+          <div id="loanTypeHint" class="hidden" style="margin-top:6px;font-size:.72rem;display:flex;align-items:center;gap:5px;">
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="#f59e0b" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             <span style="color:#b45309;">กรุณาเลือกลักษณะการกู้ยืมด้วย</span>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -385,59 +420,24 @@
       <span class="s-title">4. รายได้และค่าใช้จ่ายนักศึกษาต่อเดือน</span>
     </div>
     <div class="s-body">
-
       <div class="div-label">รายได้ที่นักศึกษาได้รับต่อเดือน</div>
       <div class="g2" style="margin-bottom:.5rem;">
-        <div class="field-group">
-          <span class="field-label">ได้รับจากบิดา (บาท)</span>
-          <input type="number" name="inc_father" value="{{ v(student.inc_father) }}" placeholder="0" class="editable-input" readonly>
-        </div>
-        <div class="field-group">
-          <span class="field-label">ได้รับจากมารดา (บาท)</span>
-          <input type="number" name="inc_mother" value="{{ v(student.inc_mother) }}" placeholder="0" class="editable-input" readonly>
-        </div>
-        <div class="field-group">
-          <span class="field-label">ได้รับจากผู้อุปการะ (บาท)</span>
-          <input type="number" name="inc_guardian" value="{{ v(student.inc_guardian) }}" placeholder="0" class="editable-input" readonly>
-        </div>
-        <div class="field-group">
-          <span class="field-label">ได้รับจากทุนการศึกษา (เฉลี่ยรายเดือน) (บาท)</span>
-          <input type="number" name="inc_scholarship" value="{{ v(student.inc_scholarship) }}" placeholder="0" class="editable-input" readonly>
-        </div>
-        <div class="field-group">
-          <span class="field-label">ได้รับจากการทำงาน (Part time) (บาท)</span>
-          <input type="number" name="inc_parttime" value="{{ v(student.inc_parttime) }}" placeholder="0" class="editable-input" readonly>
-        </div>
+        <div class="field-group"><span class="field-label">ได้รับจากบิดา (บาท) <span class="field-req">*</span></span><input type="number" id="f_inc_father" name="inc_father" value="{{ v(student.inc_father) }}" placeholder="0" class="editable-input" readonly></div>
+        <div class="field-group"><span class="field-label">ได้รับจากมารดา (บาท) <span class="field-req">*</span></span><input type="number" id="f_inc_mother" name="inc_mother" value="{{ v(student.inc_mother) }}" placeholder="0" class="editable-input" readonly></div>
+        <div class="field-group"><span class="field-label">ได้รับจากผู้อุปการะ (บาท)</span><input type="number" name="inc_guardian" value="{{ v(student.inc_guardian) }}" placeholder="0" class="editable-input" readonly></div>
+        <div class="field-group"><span class="field-label">ได้รับจากทุนการศึกษา (เฉลี่ยรายเดือน) (บาท)</span><input type="number" name="inc_scholarship" value="{{ v(student.inc_scholarship) }}" placeholder="0" class="editable-input" readonly></div>
+        <div class="field-group"><span class="field-label">ได้รับจากการทำงาน (Part time) (บาท)</span><input type="number" name="inc_parttime" value="{{ v(student.inc_parttime) }}" placeholder="0" class="editable-input" readonly></div>
       </div>
-      <div class="income-summary" id="incomeSummaryBox">
-        <span class="label">💵 รายได้รวมต่อเดือน (ประมาณการ)</span>
-        <span class="amount" id="totalIncomeDisplay">— บาท</span>
-      </div>
+      <div class="income-summary"><span class="label">💵 รายได้รวมต่อเดือน (ประมาณการ)</span><span class="amount" id="totalIncomeDisplay">— บาท</span></div>
 
       <div class="div-label" style="margin-top:1.5rem;">ค่าใช้จ่ายนักศึกษาต่อเดือน</div>
       <div class="g2" style="margin-bottom:.5rem;">
-        <div class="field-group">
-          <span class="field-label">ค่าอาหาร (บาท)</span>
-          <input type="number" name="exp_food" value="{{ v(student.exp_food) }}" placeholder="0" class="editable-input" readonly>
-        </div>
-        <div class="field-group">
-          <span class="field-label">ค่าหอพัก (บาท)</span>
-          <input type="number" name="exp_dorm" value="{{ v(student.exp_dorm) }}" placeholder="0" class="editable-input" readonly>
-        </div>
-        <div class="field-group">
-          <span class="field-label">ค่าพาหนะ/เดินทาง (บาท)</span>
-          <input type="number" name="exp_transport" value="{{ v(student.exp_transport) }}" placeholder="0" class="editable-input" readonly>
-        </div>
-        <div class="field-group">
-          <span class="field-label">ค่าใช้จ่ายอื่นๆ (บาท)</span>
-          <input type="number" name="exp_other" value="{{ v(student.exp_other) }}" placeholder="0" class="editable-input" readonly>
-        </div>
+        <div class="field-group"><span class="field-label">ค่าอาหาร (บาท) <span class="field-req">*</span></span><input type="number" id="f_exp_food" name="exp_food" value="{{ v(student.exp_food) }}" placeholder="0" class="editable-input" readonly></div>
+        <div class="field-group"><span class="field-label">ค่าหอพัก (บาท) <span class="field-req">*</span></span><input type="number" id="f_exp_dorm" name="exp_dorm" value="{{ v(student.exp_dorm) }}" placeholder="0" class="editable-input" readonly></div>
+        <div class="field-group"><span class="field-label">ค่าพาหนะ/เดินทาง (บาท)</span><input type="number" name="exp_transport" value="{{ v(student.exp_transport) }}" placeholder="0" class="editable-input" readonly></div>
+        <div class="field-group"><span class="field-label">ค่าใช้จ่ายอื่นๆ (บาท)</span><input type="number" name="exp_other" value="{{ v(student.exp_other) }}" placeholder="0" class="editable-input" readonly></div>
       </div>
-      <div class="expense-summary" id="expenseSummaryBox">
-        <span class="label">🧾 ค่าใช้จ่ายรวมต่อเดือน (ประมาณการ)</span>
-        <span class="amount" id="totalExpenseDisplay">— บาท</span>
-      </div>
-
+      <div class="expense-summary"><span class="label">🧾 ค่าใช้จ่ายรวมต่อเดือน (ประมาณการ)</span><span class="amount" id="totalExpenseDisplay">— บาท</span></div>
     </div>
   </div>
 
@@ -449,16 +449,14 @@
     </div>
     <div class="s-body">
 
-      {# บิดา / มารดา #}
       <div class="g2" style="margin-bottom:1.5rem;">
         <div class="parent-card">
           <div class="parent-header father">👨 ข้อมูลบิดา</div>
           <div class="parent-body">
             <div class="field-group"><span class="field-label">ชื่อ-นามสกุล</span><input type="text" name="father_name" value="{{ v(student.father_name) }}" placeholder="ชื่อ-นามสกุลบิดา" class="editable-input" readonly></div>
-            <div class="field-group"><span class="field-label">อาชีพ</span><input type="text" name="father_job" value="{{ v(student.father_job) }}" placeholder="อาชีพ" class="editable-input" readonly></div>
+            <div class="field-group"><span class="field-label">อาชีพ <span class="field-req">*</span></span><input type="text" id="f_father_job" name="father_job" value="{{ v(student.father_job) }}" placeholder="อาชีพ" class="editable-input" readonly></div>
             <div class="g2">
-              <div class="field-group"><span class="field-label">รายได้ / เดือน (฿)</span><input type="number" name="father_income" value="{{ v(student.father_income) }}" placeholder="0" class="editable-input" readonly></div>
-              <div class="field-group"><span class="field-label">ส่งให้ผู้สมัคร / เดือน (฿) <span class="field-note">(แก้ไขได้ที่ข้อ 4)</span></span><input type="number" value="{{ v(student.inc_father) }}" placeholder="0" class="locked" readonly tabindex="-1"></div>
+              <div class="field-group"><span class="field-label">รายได้ / เดือน (฿) <span class="field-req">*</span></span><input type="number" id="f_father_income" name="father_income" value="{{ v(student.father_income) }}" placeholder="0" class="editable-input" readonly></div>
             </div>
             <div class="field-group"><span class="field-label">ปัญหาสุขภาพ</span><input type="text" name="father_health" value="{{ v(student.father_health) }}" placeholder="ปัญหาสุขภาพ (ถ้ามี)" class="editable-input" readonly></div>
           </div>
@@ -467,57 +465,53 @@
           <div class="parent-header mother">👩 ข้อมูลมารดา</div>
           <div class="parent-body">
             <div class="field-group"><span class="field-label">ชื่อ-นามสกุล</span><input type="text" name="mother_name" value="{{ v(student.mother_name) }}" placeholder="ชื่อ-นามสกุลมารดา" class="editable-input" readonly></div>
-            <div class="field-group"><span class="field-label">อาชีพ</span><input type="text" name="mother_job" value="{{ v(student.mother_job) }}" placeholder="อาชีพ" class="editable-input" readonly></div>
+            <div class="field-group"><span class="field-label">อาชีพ <span class="field-req">*</span></span><input type="text" id="f_mother_job" name="mother_job" value="{{ v(student.mother_job) }}" placeholder="อาชีพ" class="editable-input" readonly></div>
             <div class="g2">
-              <div class="field-group"><span class="field-label">รายได้ / เดือน (฿)</span><input type="number" name="mother_income" value="{{ v(student.mother_income) }}" placeholder="0" class="editable-input" readonly></div>
-            
+              <div class="field-group"><span class="field-label">รายได้ / เดือน (฿) <span class="field-req">*</span></span><input type="number" id="f_mother_income" name="mother_income" value="{{ v(student.mother_income) }}" placeholder="0" class="editable-input" readonly></div>
             </div>
             <div class="field-group"><span class="field-label">ปัญหาสุขภาพ</span><input type="text" name="mother_health" value="{{ v(student.mother_health) }}" placeholder="ปัญหาสุขภาพ (ถ้ามี)" class="editable-input" readonly></div>
           </div>
         </div>
       </div>
 
-      {# สถานภาพสมรส #}
-      <div class="div-label">สถานภาพสมรสบิดา-มารดา</div>
-      <div class="radio-group">
+      <div class="div-label">สถานภาพสมรสบิดา-มารดา <span class="field-req">*</span></div>
+      <div class="radio-group" id="rg_parents_status">
         {% set ps = student.parents_status %}
         {% for status in ['อยู่ด้วยกัน','แยกกันอยู่','หย่าร้าง','บิดาเสียชีวิต','มารดาเสียชีวิต','ทั้งสองเสียชีวิต'] %}
-        <label class="rpill"><input type="radio" name="parents_status" value="{{ status }}" {% if ps == status %}checked{% endif %} class="editable-radio" disabled> {{ status }}</label>
+        <label class="rpill"><input type="radio" name="parents_status" value="{{ status }}" {% if ps == status %}checked{% endif %} class="editable-radio" disabled onchange="runValidation()"> {{ status }}</label>
         {% endfor %}
       </div>
 
-      {# ที่อยู่อาศัย #}
-      <div class="div-label">ลักษณะที่อยู่อาศัย</div>
+      <div class="div-label">ลักษณะที่อยู่อาศัย <span class="field-req">*</span></div>
       {% set ht = student.housing_status %}
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <label class="rpill" style="width:fit-content;"><input type="radio" name="housing_status" value="own" {% if ht == 'own' %}checked{% endif %} onclick="toggleHousing()" class="editable-radio" disabled> บ้านตัวเอง</label>
+      <div style="display:flex;flex-direction:column;gap:10px;" id="rg_housing">
+        <label class="rpill" style="width:fit-content;"><input type="radio" name="housing_status" value="own" {% if ht == 'own' %}checked{% endif %} onclick="toggleHousing(); runValidation();" class="editable-radio" disabled> บ้านตัวเอง</label>
         <div>
-          <label class="rpill" style="width:fit-content;"><input type="radio" name="housing_status" value="rent" {% if ht == 'rent' %}checked{% endif %} onclick="toggleHousing()" class="editable-radio" disabled> บ้านเช่า</label>
+          <label class="rpill" style="width:fit-content;"><input type="radio" name="housing_status" value="rent" {% if ht == 'rent' %}checked{% endif %} onclick="toggleHousing(); runValidation();" class="editable-radio" disabled> บ้านเช่า</label>
           <div class="sub-wrap {% if ht != 'rent' %}hidden{% endif %}" id="rentWrap">
-            <input type="number" name="rent_amount" value="{{ v(student.rent_amount) }}" placeholder="อัตราค่าเช่าเดือนละ (บาท)" class="editable-input" style="max-width:260px;" readonly>
+            <input type="number" id="f_rent_amount" name="rent_amount" value="{{ v(student.rent_amount) }}" placeholder="อัตราค่าเช่าเดือนละ (บาท)" class="editable-input" style="max-width:260px;" readonly>
           </div>
         </div>
         <div>
-          <label class="rpill" style="width:fit-content;"><input type="radio" name="housing_status" value="other" {% if ht == 'other' %}checked{% endif %} onclick="toggleHousing()" class="editable-radio" disabled> อาศัยผู้อื่น</label>
+          <label class="rpill" style="width:fit-content;"><input type="radio" name="housing_status" value="other" {% if ht == 'other' %}checked{% endif %} onclick="toggleHousing(); runValidation();" class="editable-radio" disabled> อาศัยผู้อื่น</label>
           <div class="sub-wrap {% if ht != 'other' %}hidden{% endif %}" id="otherHousingWrap">
             <input type="text" name="housing_other" value="{{ v(student.housing_other) }}" placeholder="ระบุลักษณะที่อยู่อาศัย" class="editable-input" style="max-width:260px;" readonly>
           </div>
         </div>
       </div>
 
-      {# ที่ดินเกษตร #}
-      <div class="div-label">ที่ดินทำการเกษตร</div>
+      <div class="div-label">ที่ดินทำการเกษตร <span class="field-req">*</span></div>
       {% set ls = student.land_status %}
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <label class="rpill" style="width:fit-content;"><input type="radio" name="land_status" value="none" {% if ls == 'ไม่มี' or ls == 'none' %}checked{% endif %} onclick="toggleAgri()" class="editable-radio" disabled> ไม่มี</label>
+      <div style="display:flex;flex-direction:column;gap:10px;" id="rg_land">
+        <label class="rpill" style="width:fit-content;"><input type="radio" name="land_status" value="none" {% if ls == 'ไม่มี' or ls == 'none' %}checked{% endif %} onclick="toggleAgri(); runValidation();" class="editable-radio" disabled> ไม่มี</label>
         <div>
-          <label class="rpill" style="width:fit-content;"><input type="radio" name="land_status" value="own" {% if ls == 'มีที่ดินตัวเอง' or ls == 'own' %}checked{% endif %} onclick="toggleAgri()" class="editable-radio" disabled> เป็นของตนเอง</label>
+          <label class="rpill" style="width:fit-content;"><input type="radio" name="land_status" value="own" {% if ls == 'มีที่ดินตัวเอง' or ls == 'own' %}checked{% endif %} onclick="toggleAgri(); runValidation();" class="editable-radio" disabled> เป็นของตนเอง</label>
           <div class="sub-wrap" id="agriOwnWrap" style="display:none;">
             <input type="number" name="agri_own_amount" value="{{ v(student.agri_own_amount) }}" placeholder="จำนวน (ไร่)" class="editable-input" style="max-width:180px;" readonly>
           </div>
         </div>
         <div>
-          <label class="rpill" style="width:fit-content;"><input type="radio" name="land_status" value="rent" {% if ls == 'เช่าผู้อื่น' or ls == 'rent' %}checked{% endif %} onclick="toggleAgri()" class="editable-radio" disabled> เช่าผู้อื่น</label>
+          <label class="rpill" style="width:fit-content;"><input type="radio" name="land_status" value="rent" {% if ls == 'เช่าผู้อื่น' or ls == 'rent' %}checked{% endif %} onclick="toggleAgri(); runValidation();" class="editable-radio" disabled> เช่าผู้อื่น</label>
           <div class="sub-wrap" id="agriRentBox" style="display:none;">
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
               <input type="number" name="agri_rent_amount" value="{{ v(student.agri_rent_amount) }}" placeholder="จำนวน (ไร่)" class="editable-input" style="max-width:160px;" readonly>
@@ -526,24 +520,29 @@
           </div>
         </div>
         <div>
-          <label class="rpill" style="width:fit-content;"><input type="radio" name="land_status" value="other" {% if ls == 'อาศัยผู้อื่น' or ls == 'other' %}checked{% endif %} onclick="toggleAgri()" class="editable-radio" disabled> อาศัยผู้อื่น</label>
+          <label class="rpill" style="width:fit-content;"><input type="radio" name="land_status" value="other" {% if ls == 'อาศัยผู้อื่น' or ls == 'other' %}checked{% endif %} onclick="toggleAgri(); runValidation();" class="editable-radio" disabled> อาศัยผู้อื่น</label>
           <div class="sub-wrap" id="agriOtherWrap" style="display:none;">
             <input type="text" name="agri_other_detail" value="{{ v(student.agri_other_detail) }}" placeholder="ระบุรายละเอียด" class="editable-input" style="max-width:280px;" readonly>
           </div>
         </div>
       </div>
 
-      {# ผู้อุปการะ #}
-      <div class="div-label">ข้อมูลผู้อุปการะ <span style="font-size:.72rem;font-weight:400;color:var(--muted);margin-left:4px;">(ถ้ามี)</span></div>
-      <div class="g2">
-        <div class="field-group"><span class="field-label">ชื่อ-นามสกุล</span><input type="text" name="guardian_name" value="{{ v(student.guardian_name) }}" placeholder="ชื่อ-นามสกุลผู้อุปการะ" class="editable-input" readonly></div>
-        <div class="field-group"><span class="field-label">ความสัมพันธ์</span><input type="text" name="guardian_relation" value="{{ v(student.guardian_relation) }}" placeholder="เช่น ลุง, ป้า, ปู่, ย่า" class="editable-input" readonly></div>
-        <div class="field-group"><span class="field-label">อาชีพ</span><input type="text" name="guardian_job" value="{{ v(student.guardian_job) }}" placeholder="อาชีพ" class="editable-input" readonly></div>
-        <div class="field-group"><span class="field-label">รายได้ / เดือน (฿)</span><input type="number" name="guardian_income" value="{{ v(student.guardian_income) }}" placeholder="0" class="editable-input" readonly></div>
+      <div class="div-label">ข้อมูลผู้อุปการะ <span style="font-size:.72rem;font-weight:400;color:var(--muted);margin-left:4px;">(ถ้ามี — กรอกชื่อก่อน ระบบจะขอข้อมูลเพิ่มเติมอัตโนมัติ)</span></div>
+      <div class="g2" id="guardianFields">
+        <div class="field-group">
+          <span class="field-label">ชื่อ-นามสกุล <span class="field-note">(กรอกถ้ามีผู้อุปการะ)</span></span>
+          <input type="text" id="f_guardian_name" name="guardian_name" value="{{ v(student.guardian_name) }}" placeholder="ชื่อ-นามสกุลผู้อุปการะ" class="editable-input" readonly oninput="toggleGuardianRequired(); runValidation();">
+        </div>
+        <div class="field-group"><span class="field-label">ความสัมพันธ์ <span id="req_guardian_relation" class="field-req" style="display:none;">*</span></span><input type="text" id="f_guardian_relation" name="guardian_relation" value="{{ v(student.guardian_relation) }}" placeholder="เช่น ลุง, ป้า, ปู่, ย่า" class="editable-input" readonly></div>
+        <div class="field-group"><span class="field-label">อาชีพ <span id="req_guardian_job" class="field-req" style="display:none;">*</span></span><input type="text" id="f_guardian_job" name="guardian_job" value="{{ v(student.guardian_job) }}" placeholder="อาชีพ" class="editable-input" readonly></div>
+        <div class="field-group"><span class="field-label">รายได้ / เดือน (฿) <span id="req_guardian_income" class="field-req" style="display:none;">*</span></span><input type="number" id="f_guardian_income" name="guardian_income" value="{{ v(student.guardian_income) }}" placeholder="0 (ใส่ 0 ถ้าไม่มีรายได้)" class="editable-input" readonly></div>
+      </div>
+      <div id="guardianHint" style="display:none;margin-top:6px;font-size:.75rem;color:#b45309;display:flex;align-items:center;gap:5px;padding:7px 12px;background:#fef9ec;border-radius:8px;border:1px solid #fde68a;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="#f59e0b" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        เมื่อกรอกชื่อผู้อุปการะแล้ว กรุณากรอกความสัมพันธ์ อาชีพ และรายได้ให้ครบด้วย
       </div>
 
-      {# พี่น้อง #}
-      <div class="div-label">จำนวนพี่น้องร่วมบิดามารดาเดียวกัน <span style="font-size:.72rem;font-weight:400;color:var(--muted);margin-left:4px;">(รวมตัวผู้สมัคร)</span></div>
+      <div class="div-label">จำนวนพี่น้องร่วมบิดามารดาเดียวกัน <span class="field-req">*</span> <span style="font-size:.72rem;font-weight:400;color:var(--muted);margin-left:4px;">(รวมตัวผู้สมัคร อย่างน้อย 1 คน)</span></div>
       <div class="sib-table-wrap">
         <table class="sib-table">
           <thead>
@@ -559,9 +558,7 @@
           </thead>
           <tbody id="siblingsTableBody">
             <tr>
-              <td colspan="7" style="text-align:center;padding:2.5rem;color:var(--muted);font-size:.875rem;">
-                ยังไม่มีข้อมูลพี่น้อง
-              </td>
+              <td colspan="7" style="text-align:center;padding:2.5rem;color:var(--muted);font-size:.875rem;">ยังไม่มีข้อมูลพี่น้อง</td>
             </tr>
           </tbody>
         </table>
@@ -572,257 +569,511 @@
         </div>
       </div>
 
-    </div>{# /s-body #}
-  </div>{# /section-card #}
+    </div>
+  </div>
 
-  {# hidden field — JS จะ inject JSON พี่น้องก่อน submit #}
   <input type="hidden" name="siblings_json" id="siblings_json_input" value="[]">
-
   </form>
 
   {# ══ STICKY ACTION BAR ══ #}
   <div class="action-bar">
-    <p class="action-hint" id="editHint">
-      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-      กรุณากดปุ่ม "แก้ไข" ก่อนทำการเปลี่ยนข้อมูล
-    </p>
+    <div class="action-left">
+      <p class="action-hint" id="editHint">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        กรุณากดปุ่ม "แก้ไข" ก่อนทำการเปลี่ยนข้อมูล
+      </p>
+      <div class="vbar-wrap" id="vbarWrap">
+        <div class="vbar-label" id="vbarLabel">กำลังตรวจสอบ...</div>
+        <div class="vbar-track"><div class="vbar-fill" id="vbarFill" style="width:0%"></div></div>
+      </div>
+    </div>
     <div class="action-btns">
       <button type="button" id="editBtn" class="btn-edit">
         <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/></svg>
         แก้ไขข้อมูล
       </button>
-      <button type="submit" form="profileForm" id="saveBtn" disabled class="btn-save">
-        💾 บันทึกข้อมูล
-      </button>
+      <div class="save-wrap">
+        <button type="button" id="saveBtn" disabled class="btn-save">💾 บันทึกข้อมูล</button>
+        <div class="save-tooltip" id="saveTooltip">
+          <span class="tt-title">⚠️ ยังกรอกไม่ครบ</span>
+          <ul id="tooltipList"></ul>
+        </div>
+      </div>
     </div>
   </div>
 
-</div>{# /container #}
-</div>{# /page-bg #}
+</div>
+</div>
+
+{# ══ VALIDATION MODAL ══ #}
+<div class="vmodal-bg" id="vModal">
+  <div class="vmodal">
+    <div class="vmodal-head">
+      <div class="vmodal-icon">⚠️</div>
+      <div>
+        <div class="vmodal-title">กรอกข้อมูลไม่ครบถ้วน</div>
+        <div class="vmodal-sub">กรุณากรอกข้อมูลที่จำเป็น (<span class="field-req">*</span>) ให้ครบก่อนบันทึก</div>
+      </div>
+    </div>
+    <ul class="vmodal-list" id="vModalList"></ul>
+    <div class="vmodal-footer">
+      <button class="vmodal-close" onclick="document.getElementById('vModal').classList.remove('open')">รับทราบ — กลับไปแก้ไข</button>
+    </div>
+  </div>
+</div>
 
 <script>
+// ══════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════
 let siblings = JSON.parse('{{ (student.siblings_list or []) | tojson | safe }}');
 let currentPage = 0;
 const rowsPerPage = 3;
+let isEditMode = false;
 
-const tableBody = document.getElementById("siblingsTableBody");
-const addBtn    = document.getElementById("addSiblingBtn");
-const prevBtn   = document.getElementById("prevSiblingBtn");
-const nextBtn   = document.getElementById("nextSiblingBtn");
+const tableBody = document.getElementById('siblingsTableBody');
+const addBtn    = document.getElementById('addSiblingBtn');
+const prevBtn   = document.getElementById('prevSiblingBtn');
+const nextBtn   = document.getElementById('nextSiblingBtn');
 const editBtn   = document.getElementById('editBtn');
 const saveBtn   = document.getElementById('saveBtn');
 const sibJson   = document.getElementById('siblings_json_input');
 
-// ── Income / Expense live calculator ──────────────────────────
-const incomeFields  = ['inc_father','inc_mother','inc_guardian','inc_scholarship','inc_parttime'];
-const expenseFields = ['exp_food','exp_dorm','exp_transport','exp_other'];
+// ══════════════════════════════════════════════════════════
+// VALIDATION RULES
+// ══════════════════════════════════════════════════════════
+const RULES = [
+  {
+    id: 'mobile',
+    label: 'เบอร์โทรศัพท์มือถือ',
+    check: () => {
+      const v = document.querySelector('[name="mobile"]')?.value.trim() || '';
+      return v.length > 0;
+    },
+    highlight: () => markField('f_mobile', true),
+    clear:     () => markField('f_mobile', false),
+  },
+  {
+    id: 'address_current',
+    label: 'ที่อยู่ปัจจุบัน',
+    check: () => (document.querySelector('[name="address_current"]')?.value.trim() || '').length > 0,
+    highlight: () => markField('f_address_current', true),
+    clear:     () => markField('f_address_current', false),
+  },
+  {
+    id: 'father_job',
+    label: 'อาชีพบิดา',
+    check: () => (document.querySelector('[name="father_job"]')?.value.trim() || '').length > 0,
+    highlight: () => markField('f_father_job', true),
+    clear:     () => markField('f_father_job', false),
+  },
+  {
+    id: 'father_income',
+    label: 'รายได้บิดาต่อเดือน (ใส่ 0 ถ้าไม่มีรายได้)',
+    check: () => (document.querySelector('[name="father_income"]')?.value ?? '').trim() !== '',
+    highlight: () => markField('f_father_income', true),
+    clear:     () => markField('f_father_income', false),
+  },
+  {
+    id: 'mother_job',
+    label: 'อาชีพมารดา',
+    check: () => (document.querySelector('[name="mother_job"]')?.value.trim() || '').length > 0,
+    highlight: () => markField('f_mother_job', true),
+    clear:     () => markField('f_mother_job', false),
+  },
+  {
+    id: 'mother_income',
+    label: 'รายได้มารดาต่อเดือน (ใส่ 0 ถ้าไม่มีรายได้)',
+    check: () => (document.querySelector('[name="mother_income"]')?.value ?? '').trim() !== '',
+    highlight: () => markField('f_mother_income', true),
+    clear:     () => markField('f_mother_income', false),
+  },
+  {
+    id: 'parents_status',
+    label: 'สถานภาพสมรสบิดา-มารดา',
+    check: () => !!document.querySelector('[name="parents_status"]:checked'),
+    highlight: () => markRadioGroup('rg_parents_status', true),
+    clear:     () => markRadioGroup('rg_parents_status', false),
+  },
+  {
+    id: 'housing_status',
+    label: 'ลักษณะที่อยู่อาศัย',
+    check: () => !!document.querySelector('[name="housing_status"]:checked'),
+    highlight: () => markRadioGroup('rg_housing', true),
+    clear:     () => markRadioGroup('rg_housing', false),
+  },
+  {
+    id: 'rent_amount',
+    label: 'ค่าเช่าบ้านต่อเดือน (เมื่อเลือกบ้านเช่า)',
+    check: () => {
+      const hs = document.querySelector('[name="housing_status"]:checked')?.value;
+      if (hs !== 'rent') return true; // ไม่ต้องตรวจถ้าไม่เลือกบ้านเช่า
+      return (document.querySelector('[name="rent_amount"]')?.value ?? '').trim() !== '';
+    },
+    highlight: () => {
+      const hs = document.querySelector('[name="housing_status"]:checked')?.value;
+      if (hs === 'rent') markField('f_rent_amount', true);
+    },
+    clear: () => markField('f_rent_amount', false),
+  },
+  {
+    id: 'land_status',
+    label: 'สถานะที่ดินทำการเกษตร',
+    check: () => !!document.querySelector('[name="land_status"]:checked'),
+    highlight: () => markRadioGroup('rg_land', true),
+    clear:     () => markRadioGroup('rg_land', false),
+  },
+  {
+    id: 'loan_student_fund',
+    label: 'สถานะการกู้ยืม กยศ.',
+    check: () => !!document.querySelector('[name="loan_student_fund"]:checked'),
+    highlight: () => markRadioGroup('rg_loan_fund', true),
+    clear:     () => markRadioGroup('rg_loan_fund', false),
+  },
+  {
+    id: 'loan_type',
+    label: 'ลักษณะการกู้ยืม กยศ. (เมื่อเลือกกู้ยืม)',
+    check: () => {
+      const fund = document.querySelector('[name="loan_student_fund"]:checked')?.value;
+      if (fund !== 'TRUE') return true; // ไม่ต้องตรวจถ้าไม่กู้
+      return !!document.querySelector('[name="loan_type"]:checked');
+    },
+    highlight: () => {
+      const fund = document.querySelector('[name="loan_student_fund"]:checked')?.value;
+      if (fund === 'TRUE') markRadioGroup('loanTypeGroup', true);
+    },
+    clear: () => markRadioGroup('loanTypeGroup', false),
+  },
+  // ── Section 4: รายได้
+  {
+    id: 'inc_father',
+    label: 'รายได้ที่ได้รับจากบิดาต่อเดือน (ใส่ 0 ถ้าไม่มี)',
+    check: () => (document.querySelector('[name="inc_father"]')?.value ?? '').trim() !== '',
+    highlight: () => markField('f_inc_father', true),
+    clear:     () => markField('f_inc_father', false),
+  },
+  {
+    id: 'inc_mother',
+    label: 'รายได้ที่ได้รับจากมารดาต่อเดือน (ใส่ 0 ถ้าไม่มี)',
+    check: () => (document.querySelector('[name="inc_mother"]')?.value ?? '').trim() !== '',
+    highlight: () => markField('f_inc_mother', true),
+    clear:     () => markField('f_inc_mother', false),
+  },
+  // ── Section 4: ค่าใช้จ่าย
+  {
+    id: 'exp_food',
+    label: 'ค่าอาหารต่อเดือน (ใส่ 0 ถ้าไม่มี)',
+    check: () => (document.querySelector('[name="exp_food"]')?.value ?? '').trim() !== '',
+    highlight: () => markField('f_exp_food', true),
+    clear:     () => markField('f_exp_food', false),
+  },
+  {
+    id: 'exp_dorm',
+    label: 'ค่าหอพักต่อเดือน (ใส่ 0 ถ้าไม่มี)',
+    check: () => (document.querySelector('[name="exp_dorm"]')?.value ?? '').trim() !== '',
+    highlight: () => markField('f_exp_dorm', true),
+    clear:     () => markField('f_exp_dorm', false),
+  },
+  // ── Guardian (conditional) ──────────────────────────────
+  {
+    id: 'guardian_relation',
+    label: 'ความสัมพันธ์ของผู้อุปการะ (เมื่อกรอกชื่อผู้อุปการะแล้ว)',
+    check: () => {
+      const name = (document.querySelector('[name="guardian_name"]')?.value ?? '').trim();
+      if (!name) return true; // ไม่มีผู้อุปการะ ไม่ต้องตรวจ
+      return (document.querySelector('[name="guardian_relation"]')?.value ?? '').trim() !== '';
+    },
+    highlight: () => markField('f_guardian_relation', true),
+    clear:     () => markField('f_guardian_relation', false),
+  },
+  {
+    id: 'guardian_job',
+    label: 'อาชีพผู้อุปการะ (เมื่อกรอกชื่อผู้อุปการะแล้ว)',
+    check: () => {
+      const name = (document.querySelector('[name="guardian_name"]')?.value ?? '').trim();
+      if (!name) return true;
+      return (document.querySelector('[name="guardian_job"]')?.value ?? '').trim() !== '';
+    },
+    highlight: () => markField('f_guardian_job', true),
+    clear:     () => markField('f_guardian_job', false),
+  },
+  {
+    id: 'guardian_income',
+    label: 'รายได้ผู้อุปการะต่อเดือน (เมื่อกรอกชื่อผู้อุปการะแล้ว)',
+    check: () => {
+      const name = (document.querySelector('[name="guardian_name"]')?.value ?? '').trim();
+      if (!name) return true;
+      return (document.querySelector('[name="guardian_income"]')?.value ?? '').trim() !== '';
+    },
+    highlight: () => markField('f_guardian_income', true),
+    clear:     () => markField('f_guardian_income', false),
+  },
+  {
+    id: 'siblings',
+    label: 'ข้อมูลพี่น้องอย่างน้อย 1 คน (รวมตัวผู้สมัคร)',
+    check: () => siblings.length >= 1,
+    highlight: () => {
+      const wrap = document.querySelector('.sib-table-wrap');
+      if (wrap) { wrap.style.outline = '2px solid #ef4444'; wrap.style.borderRadius = '8px'; }
+    },
+    clear: () => {
+      const wrap = document.querySelector('.sib-table-wrap');
+      if (wrap) { wrap.style.outline = ''; }
+    },
+  },
+];
 
-function recalcSummary() {
-  const sumIncome  = incomeFields.reduce((s,n) => s + (parseFloat(document.querySelector(`[name="${n}"]`)?.value || 0)), 0);
-  const sumExpense = expenseFields.reduce((s,n) => s + (parseFloat(document.querySelector(`[name="${n}"]`)?.value || 0)), 0);
-  const fmt = v => v > 0 ? v.toLocaleString('th-TH') + ' บาท' : '— บาท';
-  document.getElementById('totalIncomeDisplay').textContent  = fmt(sumIncome);
-  document.getElementById('totalExpenseDisplay').textContent = fmt(sumExpense);
+// ── helpers ──────────────────────────────────────────────
+function markField(id, isError) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle('input-error', isError);
+}
+function markRadioGroup(id, isError) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle('radio-error', isError);
 }
 
-[...incomeFields,...expenseFields].forEach(name => {
-  document.querySelector(`[name="${name}"]`)?.addEventListener('input', recalcSummary);
-});
-recalcSummary();
+// ── core validation runner ────────────────────────────────
+function runValidation() {
+  if (!isEditMode) return;
 
-// ── sync siblings array → hidden JSON field ก่อน submit ────────
-function syncSiblingsJson() {
-  const rows = tableBody.querySelectorAll('tr[data-idx]');
-  rows.forEach(row => {
-    const idx = parseInt(row.dataset.idx);
-    if (idx >= 0 && idx < siblings.length) {
-      siblings[idx].name   = row.querySelector('input[name="sibling_name[]"]')?.value   ?? '';
-      siblings[idx].age    = row.querySelector('input[name="sibling_age[]"]')?.value    ?? '';
-      siblings[idx].job    = row.querySelector('input[name="sibling_job[]"]')?.value    ?? '';
-      siblings[idx].place  = row.querySelector('input[name="sibling_place[]"]')?.value  ?? '';
-      siblings[idx].income = row.querySelector('input[name="sibling_income[]"]')?.value ?? '';
-    }
+  const errors = RULES.filter(r => !r.check());
+  const total  = RULES.length;
+  const passed = total - errors.length;
+  const pct    = Math.round((passed / total) * 100);
+
+  // update progress bar
+  const fill  = document.getElementById('vbarFill');
+  const label = document.getElementById('vbarLabel');
+  fill.style.width = pct + '%';
+  if (pct < 50)       { fill.style.background = '#f87171'; }
+  else if (pct < 100) { fill.style.background = '#fbbf24'; }
+  else                { fill.style.background = '#22c55e'; }
+
+  if (errors.length === 0) {
+    label.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="#16a34a" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>&nbsp;<span style="color:#16a34a;">ข้อมูลครบถ้วน พร้อมบันทึก ✅</span>`;
+  } else {
+    label.innerHTML = `<span style="color:#b45309;">ยังขาด <strong>${errors.length}</strong> รายการ จาก ${total} รายการที่จำเป็น</span>`;
+  }
+
+  // highlight / clear each rule
+  RULES.forEach(r => {
+    const fail = !r.check();
+    if (fail) r.highlight();
+    else      r.clear();
   });
-  sibJson.value = JSON.stringify(siblings);
+
+  // save button + tooltip
+  saveBtn.disabled = errors.length > 0;
+  document.getElementById('tooltipList').innerHTML =
+    errors.map(r => `<li>${r.label}</li>`).join('');
+
+  return errors;
 }
 
-document.getElementById('profileForm').addEventListener('submit', (e) => {
-  // Validate: if กู้ยืม is selected, loan_type must be chosen
-  const isLoan = document.querySelector('input[name="loan_student_fund"]:checked')?.value === 'TRUE';
-  const loanType = document.querySelector('input[name="loan_type"]:checked');
-  if (isLoan && !loanType) {
-    e.preventDefault();
-    const hint = document.getElementById('loanTypeHint');
-    const wrap = document.getElementById('loanTypeWrap');
-    if (hint) hint.style.display = 'flex';
-    // Highlight the loan type section
-    wrap.style.outline = '2px solid #ef4444';
-    wrap.style.borderRadius = '8px';
-    wrap.style.padding = '8px';
-    wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    setTimeout(() => { wrap.style.outline = ''; wrap.style.padding = ''; }, 2500);
+// ── attach live listeners to all editable inputs ──────────
+function toggleGuardianRequired() {
+  const hasGuardian = (document.querySelector('[name="guardian_name"]')?.value ?? '').trim() !== '';
+  ['req_guardian_relation','req_guardian_job','req_guardian_income'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = hasGuardian ? 'inline' : 'none';
+  });
+  const hint = document.getElementById('guardianHint');
+  if (hint) hint.style.display = hasGuardian ? 'flex' : 'none';
+}
+
+function attachLiveListeners() {
+  document.querySelectorAll('.editable-input').forEach(el => {
+    el.addEventListener('input',  runValidation);
+    el.addEventListener('change', runValidation);
+  });
+  // guardian_name also triggers toggleGuardianRequired
+  document.getElementById('f_guardian_name')?.addEventListener('input', () => {
+    toggleGuardianRequired();
+    runValidation();
+  });
+  // radio onchange already calls runValidation() inline
+}
+
+// ══════════════════════════════════════════════════════════
+// SAVE BUTTON CLICK
+// ══════════════════════════════════════════════════════════
+saveBtn.addEventListener('click', () => {
+  const errors = runValidation();
+  if (errors && errors.length > 0) {
+    // show modal as failsafe
+    document.getElementById('vModalList').innerHTML =
+      errors.map(r => `<li><span class="dot">●</span>${r.label}</li>`).join('');
+    document.getElementById('vModal').classList.add('open');
     return;
   }
-  syncSiblingsJson();
+  saveCurrentPage();
+  sibJson.value = JSON.stringify(siblings);
+  document.getElementById('profileForm').submit();
 });
 
-// ── กยศ. loan type toggle ──────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+// TOGGLE FUNCTIONS
+// ══════════════════════════════════════════════════════════
 function toggleLoanType() {
-  const isLoan = document.querySelector('input[name="loan_student_fund"]:checked')?.value === 'TRUE';
-  const wrap   = document.getElementById('loanTypeWrap');
-  const hint   = document.getElementById('loanTypeHint');
+  const isLoan   = document.querySelector('[name="loan_student_fund"]:checked')?.value === 'TRUE';
+  const wrap     = document.getElementById('loanTypeWrap');
   const reqBadge = document.getElementById('loanTypeRequired');
-  const radios = document.querySelectorAll('.loan-type-radio');
-
+  const hint     = document.getElementById('loanTypeHint');
+  const radios   = document.querySelectorAll('.loan-type-radio');
   if (isLoan) {
-    wrap.style.opacity        = '1';
-    wrap.style.pointerEvents  = 'auto';
-    wrap.style.transform      = 'none';
-    reqBadge.style.display    = 'inline';
-    // enable radios only if edit mode is on
-    const editMode = document.getElementById('saveBtn').disabled === false;
-    if (editMode) radios.forEach(r => r.removeAttribute('disabled'));
-    // show hint if nothing selected
-    const anyChecked = document.querySelector('input[name="loan_type"]:checked');
+    wrap.style.opacity = '1'; wrap.style.pointerEvents = 'auto';
+    reqBadge.style.display = 'inline';
+    if (isEditMode) radios.forEach(r => r.removeAttribute('disabled'));
+    const anyChecked = document.querySelector('[name="loan_type"]:checked');
     if (hint) hint.style.display = anyChecked ? 'none' : 'flex';
   } else {
-    wrap.style.opacity        = '0.4';
-    wrap.style.pointerEvents  = 'none';
-    reqBadge.style.display    = 'none';
+    wrap.style.opacity = '0.4'; wrap.style.pointerEvents = 'none';
+    reqBadge.style.display = 'none';
     if (hint) hint.style.display = 'none';
-    // clear selection & disable
-    radios.forEach(r => { r.checked = false; r.setAttribute('disabled', ''); });
-    // re-render pill styles
-    document.querySelectorAll('#loanTypeGroup .rpill').forEach(p => p.style.borderColor = '');
+    radios.forEach(r => { r.checked = false; r.setAttribute('disabled',''); });
   }
 }
 
-// watch loan_type radios to hide hint once selected
-document.addEventListener('change', (e) => {
-  if (e.target.name === 'loan_type') {
-    const hint = document.getElementById('loanTypeHint');
-    if (hint) hint.style.display = 'none';
-  }
-});
-
 function toggleHousing() {
-  const v = document.querySelector('input[name="housing_status"]:checked')?.value;
+  const v = document.querySelector('[name="housing_status"]:checked')?.value;
   document.getElementById('rentWrap')?.classList.toggle('hidden', v !== 'rent');
   document.getElementById('otherHousingWrap')?.classList.toggle('hidden', v !== 'other');
 }
 function toggleAgri() {
-  const v = document.querySelector('input[name="land_status"]:checked')?.value;
-  const show = (id, cond) => { const el = document.getElementById(id); if(el) el.style.display = cond ? 'block' : 'none'; };
+  const v = document.querySelector('[name="land_status"]:checked')?.value;
+  const show = (id, c) => { const el = document.getElementById(id); if(el) el.style.display = c ? 'block' : 'none'; };
   show('agriOwnWrap',  v === 'own');
   show('agriRentBox',  v === 'rent');
   show('agriOtherWrap',v === 'other');
 }
 
+// ══════════════════════════════════════════════════════════
+// INCOME / EXPENSE CALCULATOR
+// ══════════════════════════════════════════════════════════
+const incomeFields  = ['inc_father','inc_mother','inc_guardian','inc_scholarship','inc_parttime'];
+const expenseFields = ['exp_food','exp_dorm','exp_transport','exp_other'];
+function recalcSummary() {
+  const sumI = incomeFields.reduce((s,n)  => s + (parseFloat(document.querySelector(`[name="${n}"]`)?.value||0)),0);
+  const sumE = expenseFields.reduce((s,n) => s + (parseFloat(document.querySelector(`[name="${n}"]`)?.value||0)),0);
+  const fmt = v => v > 0 ? v.toLocaleString('th-TH') + ' บาท' : '— บาท';
+  document.getElementById('totalIncomeDisplay').textContent  = fmt(sumI);
+  document.getElementById('totalExpenseDisplay').textContent = fmt(sumE);
+}
+[...incomeFields,...expenseFields].forEach(n =>
+  document.querySelector(`[name="${n}"]`)?.addEventListener('input', recalcSummary)
+);
+
+// ══════════════════════════════════════════════════════════
+// SIBLINGS TABLE
+// ══════════════════════════════════════════════════════════
 function renderSiblings() {
   if (siblings.length === 0) {
     tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2.5rem;color:var(--muted);font-size:.875rem;">ยังไม่มีข้อมูลพี่น้อง</td></tr>`;
-    // ซ่อน delete header เมื่อไม่มีข้อมูล
     document.getElementById('sibDeleteHeader')?.classList.add('hidden');
+    runValidation();
     return;
   }
-  const editMode = document.getElementById('saveBtn').disabled === false;
-  const ro = editMode ? '' : 'readonly';
+  const ro  = isEditMode ? '' : 'readonly';
+  const cur = isEditMode ? 'cursor:text;' : 'cursor:not-allowed;';
+  const activeSty = isEditMode ? 'background:#fff;border-color:#93c5fd;box-shadow:0 0 0 3px rgba(147,197,253,.2);' : '';
   const start = currentPage * rowsPerPage;
-  tableBody.innerHTML = siblings.slice(start, start + rowsPerPage).map((s, i) => `
-    <tr data-idx="${start + i}">
-      <td style="text-align:center;font-weight:600;color:#475569;">${start + i + 1}</td>
-      <td><input type="text"   name="sibling_name[]"   value="${s.name   ?? ''}" placeholder="ชื่อ-นามสกุล"             class="editable-input" ${ro} style="${editMode ? '' : 'cursor:not-allowed;'}"></td>
-      <td><input type="number" name="sibling_age[]"    value="${s.age    ?? ''}" placeholder="อายุ"                      class="editable-input" ${ro} style="max-width:70px;${editMode ? '' : 'cursor:not-allowed;'}"></td>
-      <td><input type="text"   name="sibling_job[]"    value="${s.job    ?? ''}" placeholder="อาชีพ / ระดับชั้น"         class="editable-input" ${ro} style="${editMode ? '' : 'cursor:not-allowed;'}"></td>
-      <td><input type="text"   name="sibling_place[]"  value="${s.place  ?? ''}" placeholder="สถานที่ทำงาน / สถานศึกษา" class="editable-input" ${ro} style="${editMode ? '' : 'cursor:not-allowed;'}"></td>
-      <td><input type="number" name="sibling_income[]" value="${s.income ?? ''}" placeholder="0"                         class="editable-input" ${ro} style="max-width:120px;${editMode ? '' : 'cursor:not-allowed;'}"></td>
-      <td style="text-align:center;">
-        <button type="button" class="btn-del-sib" onclick="deleteSibling(${start + i})" title="ลบ">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-        </button>
-      </td>
-    </tr>`).join('');
-
-  // แสดง delete header เสมอเมื่อมีข้อมูล
+  tableBody.innerHTML = siblings.slice(start, start + rowsPerPage).map((s, i) => {
+    const idx = start + i;
+    const delBtn = isEditMode
+      ? `<button type="button" class="btn-del-sib" onclick="deleteSibling(${idx})" title="ลบแถวนี้">
+           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+         </button>`
+      : '';
+    return `<tr data-idx="${idx}">
+      <td style="text-align:center;font-weight:600;color:#475569;">${idx+1}</td>
+      <td><input type="text"   name="sibling_name[]"   value="${s.name??''}"   placeholder="ชื่อ-นามสกุล"             class="editable-input" ${ro} style="${cur}${activeSty}"></td>
+      <td><input type="number" name="sibling_age[]"    value="${s.age??''}"    placeholder="อายุ"                      class="editable-input" ${ro} style="max-width:70px;${cur}${activeSty}"></td>
+      <td><input type="text"   name="sibling_job[]"    value="${s.job??''}"    placeholder="อาชีพ / ระดับชั้น"         class="editable-input" ${ro} style="${cur}${activeSty}"></td>
+      <td><input type="text"   name="sibling_place[]"  value="${s.place??''}"  placeholder="สถานที่ทำงาน / สถานศึกษา" class="editable-input" ${ro} style="${cur}${activeSty}"></td>
+      <td><input type="number" name="sibling_income[]" value="${s.income??''}" placeholder="0"                         class="editable-input" ${ro} style="max-width:120px;${cur}${activeSty}"></td>
+      <td style="text-align:center;">${delBtn}</td>
+    </tr>`;
+  }).join('');
   document.getElementById('sibDeleteHeader')?.classList.remove('hidden');
-
-  // apply edit styling to newly rendered inputs if in edit mode
-  if (editMode) {
-    tableBody.querySelectorAll('.editable-input').forEach(el => {
-      el.style.cursor      = 'text';
-      el.style.background  = '#fff';
-      el.style.borderColor = '#93c5fd';
-      el.style.boxShadow   = '0 0 0 3px rgba(147,197,253,.2)';
-    });
-  }
+  runValidation();
 }
 
 function saveCurrentPage() {
-  const rows = tableBody.querySelectorAll('tr[data-idx]');
-  rows.forEach(row => {
+  tableBody.querySelectorAll('tr[data-idx]').forEach(row => {
     const idx = parseInt(row.dataset.idx);
     if (idx >= 0 && idx < siblings.length) {
-      siblings[idx].name   = row.querySelector('input[name="sibling_name[]"]')?.value   ?? '';
-      siblings[idx].age    = row.querySelector('input[name="sibling_age[]"]')?.value    ?? '';
-      siblings[idx].job    = row.querySelector('input[name="sibling_job[]"]')?.value    ?? '';
-      siblings[idx].place  = row.querySelector('input[name="sibling_place[]"]')?.value  ?? '';
-      siblings[idx].income = row.querySelector('input[name="sibling_income[]"]')?.value ?? '';
+      siblings[idx].name   = row.querySelector('[name="sibling_name[]"]')?.value   ?? '';
+      siblings[idx].age    = row.querySelector('[name="sibling_age[]"]')?.value    ?? '';
+      siblings[idx].job    = row.querySelector('[name="sibling_job[]"]')?.value    ?? '';
+      siblings[idx].place  = row.querySelector('[name="sibling_place[]"]')?.value  ?? '';
+      siblings[idx].income = row.querySelector('[name="sibling_income[]"]')?.value ?? '';
     }
   });
 }
 
-editBtn.addEventListener('click', () => {
-  document.querySelectorAll('.editable-input').forEach(el => {
-    el.removeAttribute('readonly');
-    el.style.cursor = 'text';
-    el.style.background = '#fff';
-    el.style.borderColor = '#93c5fd';
-    el.style.boxShadow = '0 0 0 3px rgba(147,197,253,.2)';
-  });
-  document.querySelectorAll('.editable-radio').forEach(r => r.removeAttribute('disabled'));
-
-  // After enabling radios, re-evaluate loan type state
-  toggleLoanType();
-
-  // Re-attach live recalc listeners after inputs become editable
-  [...incomeFields,...expenseFields].forEach(name => {
-    document.querySelector(`[name="${name}"]`)?.addEventListener('input', recalcSummary);
-  });
-
-  saveBtn.disabled = false;
-  editBtn.style.display = 'none';
-  addBtn.classList.remove('hidden');
-  renderSiblings(); // re-render เพื่อให้ inputs เป็น editable
-
-  document.getElementById('editHint').innerHTML = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
-    🔓 พร้อมแก้ไขแล้ว — อย่าลืมกดบันทึกด้วยนะครับ`;
-});
-
-addBtn.addEventListener("click", () => {
-  saveCurrentPage();
-  siblings.push({ name:"", age:"", job:"", place:"" });
-  currentPage = Math.floor((siblings.length - 1) / rowsPerPage);
-  renderSiblings();
-});
-
 function deleteSibling(idx) {
   saveCurrentPage();
   siblings.splice(idx, 1);
-  // ปรับหน้าถ้าลบแล้วหน้าปัจจุบันเกิน
-  const maxPage = Math.max(0, Math.ceil(siblings.length / rowsPerPage) - 1);
-  if (currentPage > maxPage) currentPage = maxPage;
+  currentPage = Math.min(currentPage, Math.max(0, Math.ceil(siblings.length/rowsPerPage)-1));
   renderSiblings();
 }
-prevBtn.addEventListener("click", () => { if (currentPage > 0) { saveCurrentPage(); currentPage--; renderSiblings(); } });
-nextBtn.addEventListener("click", () => { if ((currentPage+1)*rowsPerPage < siblings.length) { saveCurrentPage(); currentPage++; renderSiblings(); } });
 
+addBtn.addEventListener('click', () => {
+  saveCurrentPage();
+  siblings.push({ name:'', age:'', job:'', place:'', income:'' });
+  currentPage = Math.floor((siblings.length-1)/rowsPerPage);
+  renderSiblings();
+});
+prevBtn.addEventListener('click', () => { if(currentPage>0){ saveCurrentPage(); currentPage--; renderSiblings(); } });
+nextBtn.addEventListener('click', () => { if((currentPage+1)*rowsPerPage<siblings.length){ saveCurrentPage(); currentPage++; renderSiblings(); } });
+
+// ══════════════════════════════════════════════════════════
+// UNLOCK FORM
+// ══════════════════════════════════════════════════════════
+editBtn.addEventListener('click', () => {
+  isEditMode = true;
+
+  document.querySelectorAll('.editable-input').forEach(el => {
+    el.removeAttribute('readonly');
+    el.style.cursor      = 'text';
+    el.style.background  = '#fff';
+    el.style.borderColor = '#93c5fd';
+    el.style.boxShadow   = '0 0 0 3px rgba(147,197,253,.2)';
+  });
+  document.querySelectorAll('.editable-radio').forEach(r => r.removeAttribute('disabled'));
+
+  editBtn.style.display = 'none';
+  addBtn.classList.remove('hidden');
+
+  // show progress bar, hide static hint
+  document.getElementById('editHint').style.display = 'none';
+  document.getElementById('vbarWrap').style.display = 'flex';
+
+  toggleLoanType();
+
+  [...incomeFields,...expenseFields].forEach(n =>
+    document.querySelector(`[name="${n}"]`)?.addEventListener('input', recalcSummary)
+  );
+
+  attachLiveListeners();
+  toggleGuardianRequired();
+  renderSiblings(); // re-render with delete buttons + editable style
+  runValidation();  // initial check right after unlock
+});
+
+// ══════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
   toggleHousing();
   toggleAgri();
   toggleLoanType();
   if (siblings.length > 0) renderSiblings();
   recalcSummary();
+  toggleGuardianRequired();
 });
 </script>
 {% endblock %}

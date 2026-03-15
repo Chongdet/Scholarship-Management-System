@@ -176,9 +176,15 @@ class Student(db.Model):
 # 2.1 ข้อมูลทุนการศึกษา
 class Scholarship(db.Model):
     __tablename__ = 'scholarship'
+<<<<<<< HEAD
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     amount = db.Column(db.Float, nullable=True)
+=======
+    id = db.Column(db.String(20), primary_key=True)
+    name = db.Column(db.String(100), nullable=False) # ชื่อทุน
+    amount = db.Column(db.Float, nullable=True) # ทุนละเท่าไหร่
+>>>>>>> 74c5a695f247e7393e84e2e99af503361cf2829c
 
     # --- เงื่อนไขการรับสมัคร ---
     start_date        = db.Column(db.DateTime)          # วันที่เริ่มเปิดรับ
@@ -186,9 +192,31 @@ class Scholarship(db.Model):
     faculty_condition = db.Column(db.String(255))       # คณะที่ระบุ หรือ "ทุกคณะ"
     min_gpax          = db.Column(db.Float, default=0.0) # เกรดเฉลี่ยขั้นต่ำ
     income_cap        = db.Column(db.Float)             # รายได้ครอบครัวไม่เกิน
+<<<<<<< HEAD
     quota             = db.Column(db.Integer)           # จำนวนที่เปิดรับ
 
     criteria     = db.relationship('Criterion',   backref='scholarship', lazy=True)
+=======
+    number_of_scholarships = db.Column(db.Integer)           # จำนวนทุนที่เปิดรับ
+    scholarship_type  = db.Column(db.String(50)) # ประเภทของทุน (เช่น ทุน ภายใน/ภายนอก/บริจาค) 
+    provider          = db.Column(db.String(100)) # หน่วยงานของทุนนั้นๆ
+    status            = db.Column(db.String(20), default='open')  # สถานะของทุน open(เปิดรับ),checking=close(กำลังตรวจสอบ,ปิดทุน), interview(รายชื่อสัมภาษณ์), announce(รายชื่อได้รับทุน) 
+    interview_file_url = db.Column(db.String(500))    # ลิงก์ไฟล์ประกาศสัมภาษณ์
+    announce_file_url = db.Column(db.String(500))     # ลิงก์ไฟล์ประกาศคนได้ทุน
+    
+    # ฟิลด์ใหม่สำหรับรายละเอียดทุนการศึกษา
+    image = db.Column(db.String(200), nullable=True) # ชื่อไฟล์ภาพ
+    qualifications = db.Column(db.Text, nullable=True) # คุณสมบัติ
+    conditions = db.Column(db.Text, nullable=True) # เงื่อนไข
+    scholarship_nature = db.Column(db.String(50), nullable=True) # ลักษณะทุน (ทุนรายปี, ฯลฯ)
+    number_of_scholarships = db.Column(db.Integer, default=1) # จำนวนทุน
+    required_documents = db.Column(db.Text, nullable=True) # เอกสารที่ต้องส่ง
+    
+    criteria     = db.relationship('Criterion',   backref='scholarship', lazy=True)
+
+
+
+>>>>>>> 74c5a695f247e7393e84e2e99af503361cf2829c
     applications = db.relationship('Application', backref='scholarship', lazy=True)
 
     def is_open(self):
@@ -253,3 +281,17 @@ class Criterion(db.Model):
     scholarship_id = db.Column(db.Integer, db.ForeignKey('scholarship.id'))
     name = db.Column(db.String(100))
     max_score = db.Column(db.Integer)
+<<<<<<< HEAD
+=======
+
+
+# บันทึกการทำงานฝั่งกรรมการ (Director) - ตาราง audit_logs
+class DirectorAuditLog(db.Model):
+    __tablename__ = 'audit_logs'
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    user_name = db.Column(db.String(100), nullable=False)
+    action = db.Column(db.String(100), nullable=False)
+    details = db.Column(db.Text, nullable=True)
+    ip_address = db.Column(db.String(45), nullable=True)
+>>>>>>> 74c5a695f247e7393e84e2e99af503361cf2829c

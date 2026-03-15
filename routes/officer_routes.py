@@ -1,7 +1,8 @@
+import json
 import os
 import secrets
 from datetime import datetime
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, current_app, render_template, request, redirect, url_for, flash, session
 from werkzeug.utils import secure_filename
 from models import db, Application, Scholarship, AuditLog, Officer, Student
 from sqlalchemy import or_
@@ -15,6 +16,19 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def _get_student_email(application, student):
+    """ใช้อีเมลที่นศ.กรอกในฟอร์มสมัครเป็นหลัก ถ้าไม่มีค่อยใช้จาก Student"""
+    if application and getattr(application, 'form_data', None) and application.form_data:
+        try:
+            fd = json.loads(application.form_data)
+            em = fd.get('email', '').strip() if isinstance(fd.get('email'), str) else ''
+            if em and '@' in em:
+                return em
+        except (json.JSONDecodeError, TypeError):
+            pass
+    return (student.email if student and student.email else None) or ""
 
 def save_uploaded_file(file):
     """บันทึกไฟล์ที่อัปโหลดและคืนชื่อไฟล์ที่บันทึก"""
@@ -278,17 +292,21 @@ def home():
 
 @officer_bp.route('/applications')
 def applications():
+    if session.get("role") != "officer":
+        flash("กรุณาเข้าสู่ระบบเจ้าหน้าที่ก่อน", "error")
+        return redirect(url_for("login"))
     status_filter = request.args.get('status')
-    allowed_statuses = {'pending', 'reviewing', 'needs_edit', 'interview', 'approved'}
+    allowed_statuses = {'draft', 'pending', 'reviewing', 'needs_edit', 'interview', 'approved'}
     if status_filter not in allowed_statuses:
         status_filter = None
 
-    applications_query = Application.query
+    applications_query = Application.query.order_by(Application.created_at.desc())
     if status_filter:
         applications_query = applications_query.filter_by(status=status_filter)
     all_applications = applications_query.all()
     
     scholarships = Scholarship.query.all()
+    draft_count = Application.query.filter_by(status='draft').count()
     pending_count = Application.query.filter_by(status='pending').count()
     approved_count = Application.query.filter(
         or_(
@@ -310,6 +328,7 @@ def applications():
     return render_template('officer/applications.html', 
                          applications=all_applications,
                          scholarships=scholarships,
+                         draft_count=draft_count,
                          pending_count=pending_count,
                          approved_count=approved_count,
                          interview_count=interview_count,
@@ -340,7 +359,46 @@ def view_application(application_id):
             db.session.commit()
     
     student = Student.query.filter_by(student_id=application.student_id).first()
-    return render_template('officer/application-detail.html', application=application, student=student)
+    form_data = {}
+    if getattr(application, 'form_data', None) and application.form_data:
+        try:
+            form_data = json.loads(application.form_data)
+        except (json.JSONDecodeError, TypeError):
+            form_data = {}
+    # ดึงรายชื่อไฟล์ที่นักศึกษาแนบ
+    all_files = []
+    upload_dir = os.path.join(current_app.static_folder, 'uploads', str(application.student_id))
+    if os.path.exists(upload_dir):
+        all_entries = os.listdir(upload_dir)
+        all_files = [f for f in all_entries if f.startswith(f"app_{application.id}")]
+    return render_template('officer/application-detail.html', application=application, student=student, form_data=form_data, all_files=all_files)
+
+
+@officer_bp.route('/application/<string:application_id>/student-full')
+def view_student_full(application_id):
+    """ดูข้อมูลนักศึกษาทั้งหมด (สำหรับเจ้าหน้าที่ตรวจสอบเอกสาร)"""
+    current_officer = session.get("user_id") if session.get("role") == "officer" else None
+    if not current_officer:
+        flash('กรุณาเข้าสู่ระบบเจ้าหน้าที่ก่อน', 'error')
+        return redirect(url_for('login'))
+    application = Application.query.get_or_404(application_id)
+    student = Student.query.filter_by(student_id=application.student_id).first()
+
+    # ดึงรายชื่อไฟล์เอกสารที่นักศึกษาแนบ (ตามรูปแบบใน student/status)
+    all_files = []
+    upload_dir = os.path.join(current_app.static_folder, 'uploads', str(application.student_id))
+    if os.path.exists(upload_dir):
+        all_entries = os.listdir(upload_dir)
+        all_files = [f for f in all_entries if f.startswith(f"app_{application.id}")]
+
+    form_data = {}
+    if getattr(application, 'form_data', None) and application.form_data:
+        try:
+            form_data = json.loads(application.form_data)
+        except (json.JSONDecodeError, TypeError):
+            form_data = {}
+    return render_template('officer/student_full_view.html', application=application, student=student, form_data=form_data, all_files=all_files)
+
 
 @officer_bp.route('/application/<string:application_id>/decision', methods=['POST'])
 def decide_application(application_id):
@@ -370,9 +428,9 @@ def decide_application(application_id):
                        previous_value=prev_status)
             db.session.commit()
 
-        # ส่งอีเมลแจ้งเตือนอนุมัติ/นัดสัมภาษณ์
+        # ส่งอีเมลแจ้งเตือนอนุมัติ/นัดสัมภาษณ์ — ใช้อีเมลที่นศ.กรอกในฟอร์ม
         student = Student.query.filter_by(student_id=application.student_id).first()
-        to_email = (student.email if student else None) or ""
+        to_email = _get_student_email(application, student)
         if student or os.getenv("EMAIL_OVERRIDE"):
             try:
                 from services.email_service import send_interview_notification
@@ -406,9 +464,9 @@ def decide_application(application_id):
                        previous_value=prev_status)
             db.session.commit()
 
-        # ส่งอีเมลแจ้งเตือนไปที่อีเมลนักศึกษาที่ผูกไว้ (หรือ EMAIL_OVERRIDE ถ้าตั้งค่า)
+        # ส่งอีเมลแจ้งเตือน — ใช้อีเมลที่นศ.กรอกในฟอร์มสมัคร
         student = Student.query.filter_by(student_id=application.student_id).first()
-        to_email = (student.email if student else None) or ""
+        to_email = _get_student_email(application, student)
         # ถ้ามี EMAIL_OVERRIDE ให้ลองส่งได้แม้นักศึกษาไม่มีอีเมล
         if student or os.getenv("EMAIL_OVERRIDE"):
             try:
@@ -485,9 +543,10 @@ def scholarship_recipients(scholarship_id):
             applications = Application.query.filter_by(scholarship_id=scholarship.id).all()
             date_display = announcement_date.strftime('%d/%m/%Y')
             sent_count = 0
+            email_override = os.getenv("EMAIL_OVERRIDE", "").strip()
             for app in applications:
                 student = Student.query.filter_by(student_id=app.student_id).first()
-                to_email = student.email if student else None
+                to_email = _get_student_email(app, student) or (email_override if email_override and "@" in email_override else None)
                 if to_email and "@" in str(to_email):
                     if send_announcement_notification(
                         to_email=to_email,

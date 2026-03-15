@@ -95,7 +95,7 @@ Email: ubustudent.d@ubu.ac.th
     smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
     smtp_port = int(os.getenv("SMTP_PORT", "587"))
     smtp_user = os.getenv("SMTP_USER", "")
-    smtp_pass = os.getenv("SMTP_PASSWORD", "")
+    smtp_pass = os.getenv("SMTP_PASSWORD", "").replace(" ", "")
 
     if not smtp_user or not smtp_pass:
         return False
@@ -112,7 +112,9 @@ Email: ubustudent.d@ubu.ac.th
             server.login(smtp_user, smtp_pass)
             server.sendmail(smtp_user, to_email, msg.as_string())
         return True
-    except Exception:
+    except Exception as e:
+        if debug:
+            print(f"[EMAIL] SMTP error: {e}")
         return False
 
 
@@ -178,7 +180,7 @@ Email: ubustudent.d@ubu.ac.th
     smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
     smtp_port = int(os.getenv("SMTP_PORT", "587"))
     smtp_user = os.getenv("SMTP_USER", "")
-    smtp_pass = os.getenv("SMTP_PASSWORD", "")
+    smtp_pass = os.getenv("SMTP_PASSWORD", "").replace(" ", "").replace(" ", "")
     if not smtp_user or not smtp_pass:
         return False
 
@@ -193,7 +195,9 @@ Email: ubustudent.d@ubu.ac.th
             server.login(smtp_user, smtp_pass)
             server.sendmail(smtp_user, to_email, msg.as_string())
         return True
-    except Exception:
+    except Exception as e:
+        if debug:
+            print(f"[EMAIL] Interview SMTP error: {e}")
         return False
 
 
@@ -267,7 +271,7 @@ Email: ubustudent.d@ubu.ac.th
     smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
     smtp_port = int(os.getenv("SMTP_PORT", "587"))
     smtp_user = os.getenv("SMTP_USER", "")
-    smtp_pass = os.getenv("SMTP_PASSWORD", "")
+    smtp_pass = os.getenv("SMTP_PASSWORD", "").replace(" ", "")
 
     if not smtp_user or not smtp_pass:
         return False
@@ -284,5 +288,7 @@ Email: ubustudent.d@ubu.ac.th
             server.login(smtp_user, smtp_pass)
             server.sendmail(smtp_user, to_email, msg.as_string())
         return True
-    except Exception:
+    except Exception as e:
+        if debug:
+            print(f"[EMAIL] Announcement SMTP error: {e}")
         return False

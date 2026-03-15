@@ -58,10 +58,14 @@
     </div>
 
     <!-- Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
         <a href="{{ url_for('officer.applications') }}" class="block bg-blue-50 border-l-4 border-blue-600 rounded-lg p-4 transition hover:shadow-sm{% if not selected_status %} ring-2 ring-blue-200{% endif %}">
             <p class="text-sm text-gray-600 font-medium">รวมทั้งหมด</p>
             <h3 class="text-3xl font-bold text-gray-800 mt-2">{{ total_count }}</h3>
+        </a>
+        <a href="{{ url_for('officer.applications', status='draft') }}" class="block bg-gray-50 border-l-4 border-gray-400 rounded-lg p-4 transition hover:shadow-sm{% if selected_status == 'draft' %} ring-2 ring-gray-200{% endif %}">
+            <p class="text-sm text-gray-600 font-medium">แบบร่าง</p>
+            <h3 class="text-3xl font-bold text-gray-800 mt-2">{{ draft_count }}</h3>
         </a>
         <a href="{{ url_for('officer.applications', status='pending') }}" class="block bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-4 transition hover:shadow-sm{% if selected_status == 'pending' %} ring-2 ring-yellow-200{% endif %}">
             <p class="text-sm text-gray-600 font-medium">รอตรวจสอบ</p>
@@ -109,13 +113,15 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-700">{{ application.gpa }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-700">{{ application.application_date }}</td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-center w-40 min-w-[160px]">
-                            {% if application.status == 'pending'  %}
-                            <span class="block w-full px-2 py-1 text-[11px] font-semibold rounded-lg bg-yellow-100 text-yellow-800 truncate">รอตรวจสอบ</span>
+                            {% if application.status == 'draft' %}
+                            <span class="block w-full px-2 py-1 text-[11px] font-semibold rounded-lg bg-gray-100 text-gray-700 truncate">แบบร่าง</span>
+                            {% elif application.status in ('pending', 'reviewing') %}
+                            <span class="block w-full px-2 py-1 text-[11px] font-semibold rounded-lg bg-yellow-100 text-yellow-800 truncate">{{ 'กำลังตรวจสอบ' if application.status == 'reviewing' else 'รอตรวจสอบ' }}</span>
                             {% elif application.status == 'needs_edit' %}
                             <span class="block w-full px-2 py-1 text-[11px] font-semibold rounded-lg bg-orange-100 text-orange-800 truncate">รอเเก้ไข</span>
                             {% elif application.status == 'interview' %}
                             <span class="block w-full px-2 py-1 text-[11px] font-semibold rounded-lg bg-purple-100 text-purple-800 truncate">เรียกสัมภาษณ์</span>
-                            {% elif application.status == 'approved' , 'ได้รับทุนการศึกษา' %}
+                            {% elif application.status in ('approved', 'Selected', 'ได้รับทุนการศึกษา') %}
                             <span class="block w-full px-2 py-1 text-[11px] font-semibold rounded-lg bg-green-100 text-green-800 truncate">ผ่านแล้ว</span>
                             {% elif application.status == 'Reserved' %}
                             <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-bold">ตัวสำรอง</span>

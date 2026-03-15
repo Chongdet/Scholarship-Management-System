@@ -1,7 +1,6 @@
 import os
 import json
 import uuid
-from datetime import datetime
 from flask import Blueprint, current_app, render_template, request, session, redirect, url_for, flash
 from werkzeug.utils import secure_filename
 
@@ -11,6 +10,14 @@ from services.matching_service import MatchingService
 
 student_bp = Blueprint('student', __name__)
 
+@student_bp.before_request
+def require_student_login():
+    """ตรวจสอบการล็อกอินก่อนเข้าถึงทุก Route ของ Student (ยกเว้นหน้า login)"""
+    if request.endpoint and request.endpoint != 'student.login':
+        if "user_id" not in session or session.get("role") != "student":
+            flash("กรุณาเข้าสู่ระบบในฐานะนักศึกษา", "error")
+            return redirect(url_for("student.login"))
+
 ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
 
 def allowed_file(filename):
@@ -19,12 +26,9 @@ def allowed_file(filename):
 # ==========================================
 # Dashboard & Landing
 # ==========================================
+# รับผิดชอบโดย: นางสาว ปัญญาพร มูลดับ
 @student_bp.route("/dashboard")
 def dashboard():
-    if "user_id" not in session or session.get("role") != "student":
-        flash("กรุณาเข้าสู่ระบบ", "error")
-        return redirect(url_for("student.login"))
-
     current_student_id = session["user_id"]
     student = Student.query.filter_by(student_id=current_student_id).first()
 
@@ -38,6 +42,7 @@ def dashboard():
 # ==========================================
 # Login / Logout
 # ==========================================
+# รับผิดชอบโดย: นาย กิตติพงษ์ เลี้ยงหิรัญถาวร
 @student_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -85,9 +90,6 @@ def logout():
 # ==========================================
 @student_bp.route("/profile", methods=["GET", "POST"])
 def profile():
-    if "user_id" not in session or session.get("role") != "student":
-        return redirect(url_for("student.login"))
-
     current_student_id = session["user_id"]
     student_record = Student.query.filter_by(student_id=current_student_id).first()
 
@@ -128,20 +130,15 @@ def profile():
 # ==========================================
 # Scholarship Matching & Application
 # ==========================================
+# รับผิดชอบโดย: นาย กิตติพงษ์ เลี้ยงหิรัญถาวร
 @student_bp.route('/auto-match')
 def auto_match():
-    if "user_id" not in session:
-        return redirect(url_for("student.login"))
-    
     student = Student.query.filter_by(student_id=session["user_id"]).first()
     matches = MatchingService.get_all_matches(student)
     return render_template("student/auto_match.html", student=student, matches=matches)
 
 @student_bp.route("/scholarships/<scholarship_id>")
 def scholarship_detail(scholarship_id):
-    if "user_id" not in session:
-        return redirect(url_for("student.login"))
-
     scholarship = Scholarship.query.get_or_404(scholarship_id)
     student = Student.query.filter_by(student_id=session["user_id"]).first()
     
@@ -155,11 +152,9 @@ def scholarship_detail(scholarship_id):
                            student=student, 
                            already_applied=existing_app is not None)
 
+# รับผิดชอบโดย: นาย จารุวัฒน์ บุญสาร
 @student_bp.route("/apply", methods=["GET", "POST"])
 def apply_scholarship():
-    if "user_id" not in session:
-        return redirect(url_for("student.login"))
-
     current_student_id = session["user_id"]
     student = Student.query.filter_by(student_id=current_student_id).first()
 
@@ -305,16 +300,39 @@ def apply_scholarship():
                            parent_statuses=parent_statuses,
                            housing_types=housing_types)
 
+# รับผิดชอบโดย: นาย จารุวัฒน์ บุญสาร
 @student_bp.route('/upload', methods=['POST'])
 def upload_documents():
     """อัปโหลดเอกสารประกอบการสมัคร (เผื่อใช้รับไฟล์ผ่าน AJAX แยกต่างหาก)"""
     return "Student: Document Upload endpoint"
 
+@student_bp.route("/scholarships")
+def announce_scholarships():
+    all_scholarships = Scholarship.query.all()
+    return render_template("student/scholarships.html", scholarships=all_scholarships)
+
+
+# รับผิดชอบโดย: นางสาว ปัญญาพร มูลดับ
 @student_bp.route("/status")
 def track_status():
     student_id = session.get("user_id")
-    if not student_id:
-        return redirect(url_for("student.login"))
 
-    applications = Application.query.filter_by(student_id=student_id).all()
-    return render_template("student/status.html", applications=applications)
+    page = request.args.get('page', 1, type=int)
+    pagination = Application.query.filter_by(student_id=student_id)\
+        .order_by(Application.created_at.desc())\
+        .paginate(page=page, per_page=5, error_out=False)
+
+    for app in pagination.items:
+        user_upload_dir = os.path.join(current_app.static_folder, 'uploads', str(student_id))
+        app.all_files = []
+        if os.path.exists(user_upload_dir):
+            all_entries = os.listdir(user_upload_dir)
+            app.all_files = [f for f in all_entries if f.startswith(f"app_{app.id}")]
+
+    return render_template("student/status.html", pagination=pagination)
+
+
+@student_bp.route("/status/detail/<app_id>")
+def status_detail(app_id):
+    application = Application.query.get_or_404(app_id)
+    return render_template("student/status_detail.html", app=application)

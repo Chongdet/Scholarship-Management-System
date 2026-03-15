@@ -251,7 +251,19 @@ class Application(db.Model):
         """วันที่สมัคร (alias ของ created_at)"""
         return self.created_at.strftime('%d/%m/%Y') if self.created_at else "-"
 
-# 2.3 บันทึกการทำงาน (Audit Log)
+# 2.3 ตารางการประเมินผลคะแนน (Evaluation)
+class Evaluation(db.Model):
+    __tablename__ = 'evaluations'
+    evaluation_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    application_id = db.Column(db.String, db.ForeignKey('application.id'), nullable=False)
+    committee_id = db.Column(db.String(50), nullable=True) # กรรมการท่านไหนเป็นคนให้คะแนน
+    score_financial = db.Column(db.Integer, default=0) # คะแนนความจำเป็น (เต็ม 30)
+    score_interview = db.Column(db.Integer, default=0) # คะแนนสัมภาษณ์ (เต็ม 50)
+    score_volunteer = db.Column(db.Integer, default=0) # คะแนนจิตอาสา (เต็ม 20)
+    
+    application = db.relationship('Application', backref=db.backref('evaluations', lazy=True))
+
+# 2.4 บันทึกการทำงาน (Audit Log)
 class AuditLog(db.Model):
     __tablename__ = 'audit_log'
     id = db.Column(db.Integer, primary_key=True)

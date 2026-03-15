@@ -41,37 +41,48 @@
 PROJECT_ROOT
 │
 ├── routes/                 # 📍 โฟลเดอร์จัดการ Routes (แบ่งตามผู้รับผิดชอบ)
-│   ├── director_routes.py  # ส่วนของกรรมการ (Scoring, Candidate Detail)
-│   ├── officer_routes.py   # ส่วนของเจ้าหน้าที่ (Scholarship Management)
-│   └── student_routes.py   # ส่วนของนักศึกษา (Application Form)
-├── static/                 # เก็บไฟล์ CSS, JS, Images และ Uploads
-│   ├── css/                # สไตล์การแต่งหน้าเว็บ
-│   ├── images/             # รูปภาพประกอบระบบ (เช่น ubu_logo.png)
-│   └── uploads/            # ไฟล์เอกสารสมัครทุนที่นักศึกษาอัพโหลด
-├── templates/              # 📁 เก็บไฟล์ HTML แบ่งตาม Role
-│   ├── director/           # scoring.html, give_score.html
-│   ├── officer/            # off.html
-│   ├── student/            # std.html
-│   └── home_page/          # หน้าแรกของระบบ
-├── venv/                   # สภาพแวดล้อมจำลอง (Virtual Environment)
-├── app.py                  # ไฟล์รันเซิร์ฟเวอร์หลัก (ศูนย์กลางการเชื่อมต่อ Blueprint)
-├── models.py               # 🗄️ โครงสร้างฐานข้อมูล (Database Schema)
-├── requirements.txt        # รายชื่อ Library ที่ต้องติดตั้ง
-├── scholarship.db          # 💾 ไฟล์ฐานข้อมูล SQLite
-├── Dockerfile              # ไฟล์ตั้งค่า Docker
-└── README.md               # คู่มือการใช้งานระบบ
+│   ├── director_routes.py  # ส่วนของกรรมการ (Scoring, Ranking)
+│   ├── officer_routes.py   # ส่วนของเจ้าหน้าที่ (Scholarship Management, Audit Log)
+│   └── student_routes.py   # ส่วนของนักศึกษา (Application Form, Status)
+├── services/               # ⚙️ เซอร์วิสการประมวลผล (RegService, MatchingService ฯลฯ)
+├── static/                 # 🎨 เก็บไฟล์ CSS, JS, Images และ Uploads
+│   ├── css/                # สไตล์การแต่งหน้าเว็บ (Tailwind CSS ฯลฯ)
+│   ├── images/             # รูปภาพประกอบระบบ
+│   └── uploads/            # โฟลเดอร์สำหรับเก็บเอกสารสมัครทุนที่นักศึกษาอัปโหลด
+├── templates/              # 📁 เก็บไฟล์ HTML (Jinja2) แบ่งตามผู้ใช้งาน
+│   ├── director/           # หน้าเว็บส่วนของกรรมการ
+│   ├── officer/            # หน้าเว็บส่วนของเจ้าหน้าที่
+│   ├── student/            # หน้าเว็บส่วนของนักศึกษา
+│   └── login.html, index.html # หน้าเข้าสู่ระบบและหน้าแรก
+├── app.py                  # 🚀 ไฟล์เซิร์ฟเวอร์หลัก (ศูนย์กลางเชื่อมต่อ Blueprint, Database)
+├── models.py               # 🗄️ โครงสร้างฐานข้อมูลตารางต่างๆ (Student, Scholarship, Application, Evaluation)
+├── route_explanations.txt  # 📝 ไฟล์อธิบายการทำงาน/Data Flow ของแต่ละ Route สำหรับเตรียมพรีเซนต์
+├── setup_evaluation.py     # 🔧 สคริปต์เสริมสำหรับเตรียมฐานข้อมูลคะแนน (Mock Data)
+├── requirements.txt        # 📦 รายชื่อ Library ที่ต้องติดตั้ง
+├── scholarship.db          # 💾 ไฟล์ฐานข้อมูล SQLite (หากลบไฟล์นี้ ระบบจะสร้างใหม่ตอนรันให้)
+├── Dockerfile              # 🐳 ไฟล์ตั้งค่าการสร้าง Docker Image
+└── README.md               # 📖 คู่มือการอธิบายโปรเจกต์
 ```
 ## 🚀 วิธีติดตั้งและรันโปรเจกต์ (Local Development)
 
 การรันโปรเจกต์บนเครื่องของคุณเอง ทำตามขั้นตอนง่ายๆ ดังนี้:
 
-### 1. สร้างและเปิดใช้งาน Virtual Environment
-เพื่อแยก dependencies ของโปรเจกต์ไม่ให้ปนกับระบบหลัก
+### 1. การติดตั้งและรันเซิร์ฟเวอร์
 **สำหรับ Windows (PowerShell/CMD):**
 ```bash
+# 1. สร้าง Virtual Environment เพื่อแยกไลบรารี
 python -m venv venv
+
+# 2. เปิดใช้งาน Virtual Environment
 .\venv\Scripts\activate
+
+# 3. ติดตั้ง Dependencies ยืนพื้นทั้งหมด
+pip install -r requirements.txt
+
+# 4. รันโปรแกรม (เซิร์ฟเวอร์ Flask จะไปทำงานที่ http://127.0.0.1:5000)
+python app.py
 ```
+*หมายเหตุ: หากมีการปรับเปลี่ยนโค้ดระหว่างรันเซิร์ฟเวอร์ (Debug Mode = True) โปรแกรมจะ Refresh ตัวเองอัตโนมัติ*
 
 ### 🐳 Docker (Optional)
 ## เปิด Docker desktop เพื่อรัน
@@ -148,9 +159,7 @@ git push origin feature/your-name-task
 
 ไปที่ GitHub → เปิด New Pull Request → รอเพื่อนในทีมรีวิวและอนุมัติ
 
-# 📂 Project Structure
 
-Plaintext
 
 # 🚫 .gitignore
 

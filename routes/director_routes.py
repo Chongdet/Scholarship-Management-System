@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from datetime import datetime
-from models import Student, db, Scholarship, Criterion, Application, DirectorAuditLog
+from models import Student, db, Scholarship, Criterion, Application, AuditLog
+from routes.officer_routes import director_audit_log
 
 director_bp = Blueprint("director", __name__)
 
@@ -92,7 +93,7 @@ def give_score(app_id):
         if request.form.get("approve_scholarship") == "1":
             application.status = "approved"
 
-        log = DirectorAuditLog(
+        log = director_audit_log(
             user_name="กรรมการ (Admin)",
             action="SCORING",
             details=f"ให้คะแนนนักศึกษา {application.student_name} รหัส {application.student_id} ทุน {application.scholarship.name} คะแนนรวม {total}",

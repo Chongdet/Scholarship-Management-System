@@ -15,6 +15,27 @@
         <p class="text-gray-500 text-sm mt-1">สร้างประกาศทุนใหม่และกำหนดรหัสทุนเพื่อใช้ในการอ้างอิงในระบบ</p>
     </div>
 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="mb-6">
+                {% for category, message in messages %}
+                    {% set isError = category in ['error','danger'] %}
+                    {% set isSuccess = category == 'success' %}
+                    <div class="mb-2 p-4 rounded-lg shadow-md \
+                                {{ 'bg-green-100 border-green-500 text-green-700' if isSuccess else '' }} \
+                                {{ 'bg-red-100 border-red-500 text-red-700' if isError else '' }}" role="alert">
+                        {% if isSuccess %}
+                            <strong>สำเร็จ!</strong>
+                        {% elif isError %}
+                            <strong>ผิดพลาด:</strong>
+                        {% endif %}
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
     <form method="POST" action="{{ url_for('officer.add_scholarship') }}" enctype="multipart/form-data" class="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden">
         <div class="p-8 space-y-6">
             

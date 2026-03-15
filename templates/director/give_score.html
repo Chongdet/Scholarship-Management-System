@@ -1,19 +1,37 @@
 {% extends "layouts/base_director.html" %} {% block content %}
-<div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-sm mt-10 font-prompt">
+<div
+  class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-sm mt-10 font-prompt"
+>
   <nav class="flex items-center text-sm text-gray-500 mb-6 space-x-2">
-    <a href="{{ url_for('director.scoring') }}" class="hover:text-blue-600 transition">พิจารณาทุน</a>
+    <a
+      href="{{ url_for('director.scoring') }}"
+      class="hover:text-blue-600 transition"
+      >พิจารณาทุน</a
+    >
     <span class="mx-2">></span>
-    <a href="{{ url_for('director.scholarship_students', scholarship_id=student.scholarship_id) }}" class="hover:text-blue-600 transition">รายชื่อผู้สมัคร</a>
+    <a
+      href="{{ url_for('director.scholarship_students', scholarship_id=student.scholarship_id) }}"
+      class="hover:text-blue-600 transition"
+      >รายชื่อผู้สมัคร</a
+    >
     <span class="mx-2">></span>
-    <span class="text-blue-600 font-bold">ให้คะแนน {{ student.student_name }}</span>
+    <span class="text-blue-600 font-bold"
+      >ให้คะแนน {{ student.student_name }}</span
+    >
   </nav>
 
   <div class="flex gap-8 border-b pb-6 mb-6">
-    <div class="w-32 h-40 bg-gray-200 border-2 border-dashed flex items-center justify-center overflow-hidden rounded">
+    <div
+      class="w-32 h-40 bg-gray-200 border-2 border-dashed flex items-center justify-center overflow-hidden rounded"
+    >
       {% if student.image_url %}
-        <img src="{{ url_for('static', filename=student.image_url) }}" alt="รูปถ่าย" class="w-full h-full object-cover">
+      <img
+        src="{{ url_for('static', filename=student.image_url) }}"
+        alt="รูปถ่าย"
+        class="w-full h-full object-cover"
+      />
       {% else %}
-        <span class="text-gray-400">รูปถ่าย</span>
+      <span class="text-gray-400">รูปถ่าย</span>
       {% endif %}
     </div>
     <div class="space-y-2">
@@ -28,26 +46,62 @@
   </div>
 
   <form method="POST">
-    {% for c in criteria %}
+    {% if not criteria %}
+    <div class="mb-4">
+      <label class="block text-sm font-medium text-gray-700 mb-1">
+        คะแนนรวม (คะแนนเต็ม 100)
+      </label>
+      <input
+        type="number"
+        name="total_score"
+        max="100"
+        min="0"
+        class="border border-gray-300 rounded px-3 py-2 w-full md:w-1/2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+        placeholder="กรอกคะแนนที่นี่..."
+        required
+      />
+    </div>
+    {% else %} {% for c in criteria %}
     <div class="mb-4">
       <label class="block text-sm font-medium text-gray-700 mb-1">
         {{ c.name }} (คะแนนเต็ม {{ c.max_score }})
       </label>
-      <input type="number" name="score_{{ c.id }}" max="{{ c.max_score }}" min="0" class="border border-gray-300 rounded px-3 py-2 w-full md:w-1/2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" required />
+      <input
+        type="number"
+        name="score_{{ c.id }}"
+        max="{{ c.max_score }}"
+        min="0"
+        class="border border-gray-300 rounded px-3 py-2 w-full md:w-1/2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+        required
+      />
     </div>
-    {% endfor %}
+    {% endfor %} {% endif %}
+
     <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
       <label class="flex items-center gap-2 cursor-pointer">
-        <input type="checkbox" name="approve_scholarship" value="1" class="w-4 h-4 accent-green-600" />
-        <span class="font-medium text-gray-800">อนุมัติได้รับทุน (ตั้งสถานะเป็น "ผ่าน")</span>
+        <input
+          type="checkbox"
+          name="approve_scholarship"
+          value="1"
+          class="w-4 h-4 accent-green-600"
+        />
+        <span class="font-medium text-gray-800"
+          >อนุมัติได้รับทุน (ตั้งสถานะเป็น "ผ่าน")</span
+        >
       </label>
-      <p class="text-sm text-gray-600 mt-1">เมื่อติ๊กถูก และบันทึก ผลจะไปแสดงสถานะ "ผ่าน" ในระบบเจ้าหน้าที่ทันที</p>
     </div>
+
     <div class="flex gap-3 mt-6 border-t pt-6">
-      <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition font-bold shadow-sm">
+      <button
+        type="submit"
+        class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition font-bold shadow-sm"
+      >
         บันทึกผลคะแนน
       </button>
-      <a href="{{ url_for('director.scholarship_students', scholarship_id=student.scholarship_id) }}" class="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition font-bold shadow-sm">
+      <a
+        href="{{ url_for('director.scholarship_students', scholarship_id=student.scholarship_id) }}"
+        class="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition font-bold shadow-sm"
+      >
         ยกเลิก
       </a>
     </div>

@@ -247,7 +247,7 @@ def apply_scholarship():
         ).first()
         
         if existing_app:
-            flash("คุณได้สมัครทุนนี้ไปแล้ว", "error")
+            flash("คุณได้สมัครทุนนี้ไปแล้ว ", "error")
             return redirect(url_for("student.dashboard"))
 
         # ข้อมูลนักศึกษาจากฟอร์ม

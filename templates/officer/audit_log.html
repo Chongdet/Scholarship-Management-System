@@ -38,7 +38,7 @@
                 </div>
                 <!-- Content -->
                 <div class="flex-1 min-w-0">
-                    <h3 class="font-bold text-gray-800 text-base mb-2">
+                    <h3 class="font-bold text-gray-800 text-base mb-1">
                         {{ log.action_title or (
                             'อนุมัติ' if log.action == 'approved' else
                             'ปฏิเสธ' if log.action == 'rejected' else
@@ -50,7 +50,9 @@
                             'ดาวน์โหลด' if log.action == 'download' else log.action
                         ) }}{% if log.reference_id %} #{{ log.reference_id }}{% else %} #{{ log.id }}{% endif %}
                     </h3>
-                    <p class="text-gray-600 text-sm mb-3">{{ log.details or '-' }}</p>
+                    <p class="text-gray-600 text-sm mb-2">
+                        {{ log.details or '-' }}
+                    </p>
                     <p class="text-gray-500 text-xs flex items-center gap-1">
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>

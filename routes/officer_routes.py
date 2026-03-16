@@ -187,10 +187,19 @@ def add_scholarship():
             flash('เพิ่มทุนสำเร็จ', 'success')
             officer = session.get("user_id") if session.get("role") == "officer" else None
             if officer:
-                _log_audit(officer, "add_scholarship", "เพิ่มทุน",
-                           reference_id=f"SCH{new_scholarship.id}",
-                           details=f"ทุน {s_name}",
-                           status_after=status_val or "Open")
+                # บันทึกประวัติ: สร้างทุนใหม่
+                _log_audit(
+                    officer,
+                    "add_scholarship",
+                    "เพิ่มทุน",
+                    reference_id=f"SCH{new_scholarship.id}",
+                    details=(
+                        f"ทำการสร้างทุนการศึกษา \"{s_name}\" "
+                        f"จำนวน {new_scholarship.number_of_scholarships or 1} ทุน "
+                        f"ทุนละ {new_scholarship.amount:,.0f} บาท"
+                    ),
+                    status_after=(status_val or "open"),
+                )
                 db.session.commit()
             return redirect(url_for('officer.list_scholarships'))
 
@@ -275,11 +284,20 @@ def edit_scholarship(scholarship_id):
             
             officer = session.get("user_id") if session.get("role") == "officer" else None
             if officer:
-                _log_audit(officer, "edit_scholarship", "แก้ไขทุน",
-                           reference_id=f"SCH{scholarship.id}",
-                           details=f"ทุน {s_name}",
-                           status_after=status_val or prev_status,
-                           previous_value=f"ชื่อ: {prev_name}, สถานะ: {prev_status}")
+                # บันทึกประวัติ: แก้ไขข้อมูลทุน
+                _log_audit(
+                    officer,
+                    "edit_scholarship",
+                    "แก้ไขทุน",
+                    reference_id=f"SCH{scholarship.id}",
+                    details=(
+                        f"แก้ไขทุนการศึกษา จากชื่อ \"{prev_name}\" เป็น \"{s_name}\" "
+                        f"สถานะจาก {prev_status or '-'} เป็น {(status_val or scholarship.status or '-')} "
+                        f"จำนวน {scholarship.number_of_scholarships or 1} ทุน ทุนละ {scholarship.amount:,.0f} บาท"
+                    ),
+                    status_after=(status_val or prev_status),
+                    previous_value=f"ชื่อ: {prev_name}, สถานะ: {prev_status}",
+                )
             db.session.commit()
             flash('แก้ไขข้อมูลทุนเรียบร้อยแล้ว', 'success')
             return redirect(url_for('officer.list_scholarships'))
@@ -297,10 +315,15 @@ def delete_scholarship(scholarship_id):
     try:
         officer = session.get("user_id") if session.get("role") == "officer" else None
         if officer:
-            _log_audit(officer, "delete_scholarship", "ลบทุน",
-                       reference_id=f"SCH{scholarship_id}",
-                       details=f"ทุน {sch_name}",
-                       status_after="ลบแล้ว")
+            # บันทึกประวัติ: ลบทุน
+            _log_audit(
+                officer,
+                "delete_scholarship",
+                "ลบทุน",
+                reference_id=f"SCH{scholarship_id}",
+                details=f"ลบทุนการศึกษา \"{sch_name}\" ออกจากระบบแล้ว",
+                status_after="ลบแล้ว",
+            )
         db.session.delete(scholarship)
         db.session.commit()
         flash(f'ลบทุน {sch_name} สำเร็จแล้ว', 'success')
@@ -474,11 +497,20 @@ def decide_application(application_id):
         officer = session.get("user_id") if session.get("role") == "officer" else None
         if officer:
             sch_name = application.scholarship.name if application.scholarship else "ทุน"
-            _log_audit(officer, "approve_interview", "ยืนยันนัดสัมภาษณ์",
-                       reference_id=f"APP{application.id}",
-                       details=f"{application.student_name} - {sch_name}",
-                       status_after="interview",
-                       previous_value=prev_status)
+            # บันทึกประวัติ: อนุมัติและนัดสัมภาษณ์
+            _log_audit(
+                officer,
+                "approve_interview",
+                "อนุมัติและนัดสัมภาษณ์",
+                reference_id=f"APP{application.id}",
+                details=(
+                    f"อนุมัติใบสมัครทุน \"{sch_name}\" ของ {application.student_name} "
+                    f"และนัดสัมภาษณ์ในวันที่ {application.interview_date or '-'} "
+                    f"เวลา {application.interview_time or '-'} สถานที่ {application.interview_location or '-'}"
+                ),
+                status_after="interview",
+                previous_value=prev_status,
+            )
             db.session.commit()
 
         # ส่งอีเมลแจ้งเตือนอนุมัติ/นัดสัมภาษณ์ — ใช้อีเมลที่นศ.กรอกในฟอร์ม
@@ -510,11 +542,19 @@ def decide_application(application_id):
         officer = session.get("user_id") if session.get("role") == "officer" else None
         if officer:
             sch_name = application.scholarship.name if application.scholarship else "ทุน"
-            _log_audit(officer, "reject_needs_edit", "ส่งกลับให้แก้ไข",
-                       reference_id=f"APP{application.id}",
-                       details=f"{application.student_name} - {sch_name}",
-                       status_after="needs_edit",
-                       previous_value=prev_status)
+            # บันทึกประวัติ: ส่งกลับใบสมัครให้แก้ไข
+            _log_audit(
+                officer,
+                "reject_needs_edit",
+                "ส่งกลับให้แก้ไข",
+                reference_id=f"APP{application.id}",
+                details=(
+                    f"ส่งกลับใบสมัครทุน \"{sch_name}\" ของ {application.student_name} "
+                    f"ให้แก้ไขเพิ่มเติม เหตุผล: {application.status_description}"
+                ),
+                status_after="needs_edit",
+                previous_value=prev_status,
+            )
             db.session.commit()
 
         # ส่งอีเมลแจ้งเตือน — ใช้อีเมลที่นศ.กรอกในฟอร์มสมัคร
@@ -613,10 +653,15 @@ def scholarship_recipients(scholarship_id):
 
             officer = session.get("user_id") if session.get("role") == "officer" else None
             if officer:
-                _log_audit(officer, "set_announcement", "กำหนดวันประกาศทุน",
-                           reference_id=f"SCH{scholarship.id}",
-                           details=f"{scholarship.name} - วันที่ {date_display}",
-                           status_after=date_display)
+                # บันทึกประวัติ: กำหนดวันประกาศทุน
+                _log_audit(
+                    officer,
+                    "set_announcement",
+                    "กำหนดวันประกาศทุน",
+                    reference_id=f"SCH{scholarship.id}",
+                    details=f"กำหนดวันประกาศผลทุน \"{scholarship.name}\" เป็นวันที่ {date_display or '-'}",
+                    status_after=date_display,
+                )
                 db.session.commit()
 
             if sent_count > 0:

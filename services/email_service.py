@@ -118,7 +118,14 @@ Email: ubustudent.d@ubu.ac.th
         return False
 
 
-def send_interview_notification(to_email: str, student_name: str, scholarship_name: str) -> bool:
+def send_interview_notification(
+    to_email: str, 
+    student_name: str, 
+    scholarship_name: str,
+    interview_date: str = None,
+    interview_time: str = None,
+    interview_location: str = None
+) -> bool:
     """
     ส่งอีเมลแจ้งเตือนเมื่อใบสมัครผ่านการตรวจเอกสารและอนุมัตินัดสัมภาษณ์แล้ว
     """
@@ -134,13 +141,25 @@ def send_interview_notification(to_email: str, student_name: str, scholarship_na
         from_email = "ubustudent.d@ubu.ac.th"
 
     subject = f"แจ้งเตือน: ใบสมัครทุน {scholarship_name} - ผ่านการตรวจเอกสาร/นัดสัมภาษณ์"
+    
+    details_section = ""
+    if interview_date or interview_time or interview_location:
+        details_section = "\nรายละเอียดการสัมภาษณ์:\n"
+        if interview_date:
+            details_section += f"- วันที่: {interview_date}\n"
+        if interview_time:
+            details_section += f"- เวลา: {interview_time}\n"
+        if interview_location:
+            details_section += f"- สถานที่: {interview_location}\n"
+
     body = f"""
 สวัสดีคุณ {student_name}
 
 ระบบทุนการศึกษา มหาวิทยาลัยอุบลราชธานี แจ้งว่า ใบสมัครทุน "{scholarship_name}" ของคุณผ่านการตรวจเอกสารและได้รับการอนุมัติให้นัดสัมภาษณ์แล้ว
-
+{details_section}
 กรุณาติดตามกำหนดการสัมภาษณ์ผ่านระบบหรือประกาศของคณะ/หน่วยงานที่เกี่ยวข้อง
 https://scholarship.ubu.ac.th (หรือ URL ของระบบ)
+
 
 หากมีคำถาม กรุณาติดต่อสำนักงานพัฒนานักศึกษา
 Email: ubustudent.d@ubu.ac.th
@@ -202,11 +221,11 @@ Email: ubustudent.d@ubu.ac.th
 
 
 def send_announcement_notification(
-    to_email: str, student_name: str, scholarship_name: str, announcement_date: str
+    to_email: str, student_name: str, scholarship_name: str, announcement_date: str, is_awarded: bool = False
 ) -> bool:
     """
     ส่งอีเมลแจ้งเตือนเมื่อกำหนดวันที่ประกาศทุน
-    ส่งให้นักศึกษาทุกคนที่สมัครทุนนี้
+    ส่งให้นักศึกษาทุกคนที่สมัครทุนนี้ (แจ้งผลได้/ไม่ได้)
     """
     override = os.getenv("EMAIL_OVERRIDE", "").strip()
     if override and "@" in override:
@@ -219,25 +238,49 @@ def send_announcement_notification(
     if not from_email or "@" not in from_email:
         from_email = "ubustudent.d@ubu.ac.th"
 
-    subject = f"ประกาศทุน {scholarship_name} - วันที่ {announcement_date}"
+    if is_awarded:
+        subject = f"ขอแสดงความยินดี: คุณได้รับทุน {scholarship_name}"
+        status_text = "<h2 style='color: #28a745; margin: 0;'>🎉 ขอแสดงความยินดี! คุณได้รับทุนการศึกษา</h2>"
+        desc_text = f"<p style='font-size: 16px;'>ระบบตกลงพิจารณาให้คุณเป็นผู้ได้รับทุน <strong>{scholarship_name}</strong></p>"
+    else:
+        subject = f"แจ้งผลการพิจารณาทุน {scholarship_name}"
+        status_text = "<h2 style='color: #dc3545; margin: 0;'>ผลการพิจารณาทุนการศึกษา</h2>"
+        desc_text = f"<p style='font-size: 16px;'>ขอแสดงความเสียใจ คุณไม่ผ่านการพิจารณาสำหรับรับทุน <strong>{scholarship_name}</strong> ในครั้งนี้</p>"
+
     body = f"""
-สวัสดีคุณ {student_name}
+    <html>
+    <body style="font-family: 'Sarabun', Arial, sans-serif; color: #333; line-height: 1.6; background-color: #f4f6f9; padding: 20px;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-top: 5px solid {'#28a745' if is_awarded else '#dc3545'};">
+            
+            <div style="text-align: center; margin-bottom: 25px;">
+                {status_text}
+            </div>
 
-ระบบทุนการศึกษา มหาวิทยาลัยอุบลราชธานี แจ้งว่า ทุน "{scholarship_name}" ได้ประกาศแล้ว
+            <p style="font-size: 16px;">เรียน คุณ <strong>{student_name}</strong>,</p>
+            {desc_text}
+            
+            <div style="background-color: #f8f9fa; border-left: 4px solid #0056b3; padding: 15px 20px; margin: 25px 0; border-radius: 0 8px 8px 0;">
+                <p style="margin: 0 0 10px 0; font-size: 15px; color: #555;">วันที่ประกาศผลอ้างอิง: <strong>{announcement_date}</strong></p>
+                <p style="margin: 0; font-size: 15px;">กรุณาเข้าสู่ระบบเพื่อตรวจสอบรายละเอียดเพิ่มเติม ปริ้นเอกสาร หรือดำเนินการในขั้นตอนต่อไป</p>
+                <div style="text-align: center; margin-top: 20px;">
+                    <a href="https://scholarship.ubu.ac.th" style="display: inline-block; padding: 12px 25px; background-color: #0056b3; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">เข้าสู่ระบบจัดการทุน</a>
+                </div>
+            </div>
 
-วันที่ประกาศ: {announcement_date}
-
-กรุณาเข้าสู่ระบบเพื่อตรวจสอบผลการพิจารณา
-https://scholarship.ubu.ac.th (หรือ URL ของระบบ)
-
-หากมีคำถาม กรุณาติดต่อสำนักงานพัฒนานักศึกษา
-Email: ubustudent.d@ubu.ac.th
-โทร: 045-353000 ต่อ 1210
-
-สำนักงานพัฒนานักศึกษา
-มหาวิทยาลัยอุบลราชธานี
-""".strip()
-
+            <hr style="border: 0; border-top: 1px solid #eeeeee; margin: 30px 0;" />
+            
+            <div style="font-size: 14px; color: #777;">
+                <p style="margin: 0 0 5px 0;">หากมีข้อสงสัยเพิ่มเติม กรุณาติดต่อ:</p>
+                <p style="margin: 0 0 15px 0;">
+                    <strong>สำนักงานพัฒนานักศึกษา มหาวิทยาลัยอุบลราชธานี</strong><br>
+                    📧 Email: <a href="mailto:ubustudent.d@ubu.ac.th" style="color: #0056b3;">ubustudent.d@ubu.ac.th</a><br>
+                    📞 โทร: 045-353000 ต่อ 1210
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
     api_token = os.getenv("MAILTRAP_API_TOKEN", "").strip()
     debug = os.getenv("DEBUG_EMAIL", "").lower() in ("1", "true", "yes")
     if api_token and requests:
@@ -252,7 +295,7 @@ Email: ubustudent.d@ubu.ac.th
                     "from": {"email": from_email, "name": "สำนักงานพัฒนานักศึกษา"},
                     "to": [{"email": to_email}],
                     "subject": subject,
-                    "text": body,
+                    "html": body,
                 },
                 timeout=10,
             )
@@ -280,7 +323,7 @@ Email: ubustudent.d@ubu.ac.th
     msg["Subject"] = subject
     msg["From"] = f"สำนักงานพัฒนานักศึกษา <{from_email}>"
     msg["To"] = to_email
-    msg.attach(MIMEText(body, "plain", "utf-8"))
+    msg.attach(MIMEText(body, "html", "utf-8"))
 
     try:
         with smtplib.SMTP(smtp_host, smtp_port) as server:

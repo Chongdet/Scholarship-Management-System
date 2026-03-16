@@ -19,11 +19,19 @@
     </div>
 
     <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
-        <form method="post" class="mb-6">
-            <label class="block text-sm font-medium text-gray-700">วันที่ประกาศทุน</label>
-            <div class="flex items-center gap-2 mt-2">
-                <input type="date" name="announcement_date" value="{{ scholarship.announcement_date if scholarship.announcement_date else '' }}" class="border border-gray-300 rounded px-2 py-1" />
-                <button type="submit" class="px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">บันทึก/แก้ไข</button>
+        <form method="post" action="{{ url_for('officer.scholarship_recipients', scholarship_id=scholarship.id) }}" class="mb-6 bg-blue-50 p-6 rounded-xl border border-blue-100">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">วันที่ประกาศทุน <span class="text-red-500">*</span></label>
+                    <input type="date" name="announcement_date" required
+                           value="{{ scholarship.announcement_date.strftime('%Y-%m-%d') if scholarship.announcement_date else '' }}" 
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" />
+                </div>
+            </div>
+            <div class="mt-4 flex justify-end">
+                <button type="submit" class="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 shadow flex items-center gap-2 transition-colors">
+                    <i class="fas fa-bullhorn relative -top-0.5"></i> บันทึกและประกาศผล
+                </button>
             </div>
         </form>
         {% if applications %}

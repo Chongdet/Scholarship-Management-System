@@ -32,28 +32,27 @@ class RegService:
             {"student_id": "6811454007", "name": "นายวรวุฒิ ประสงค์ดี",       "email": "worawut.p@ubu.ac.th",     "faculty": "คณะวิทยาศาสตร์",     "gpax": 2.95},
             {"student_id": "6811454008", "name": "นางสาวชนิดา รุ่งเรือง",     "email": "chanida.r@ubu.ac.th",     "faculty": "คณะนิติศาสตร์",      "gpax": 3.62},
             {"student_id": "6811454009", "name": "นายปิยะพัฒน์ สุขสงวน",     "email": "piyapat.s@ubu.ac.th",     "faculty": "คณะบริหารศาสตร์",    "gpax": 3.05},
-            {"student_id": "6811454010", "name": "นางสาวอารียา ดวงจันทร์",    "email": "areeya.d@ubu.ac.th",     "faculty": "คณะเภสัชศาสตร์",     "gpax": 3.88 },
+            {"student_id": "6811454010", "name": "นางสาวอารียา ดวงจันทร์",    "email": "areeya.d@ubu.ac.th",     "faculty": "คณะเภสัชศาสตร์",     "gpax": 3.88},
         ]
 
         for i, data in enumerate(students_data, 1):
             student_id = data["student_id"]
             dis_status = "ไม่มี" if i % 4 != 0 else "มี"
-            profile_pic_path = f"/static/images/students/{student_id}.jpg"            
+            
             mock_db[student_id] = {
                 "student_id": student_id,
                 "name": data["name"],
                 "faculty": data["faculty"],
                 "year": 2, 
                 "gpax": data["gpax"],
-                "advisor_name": f"ผศ.ดร. ที่ปรึกษา {i}",
+                "advisor_name": f"ผศ.ดร. ที่ปรึกษา {i+1}",
                 "disciplinary_status": dis_status,
                 "email": data["email"],
                 "citizen_id": f"1234567890{i:02d}",
                 "address_domicile": f"บ้านเลขที่ {i}/99 ต.ในเมือง อ.เมือง จ.อุบลราชธานี",
                 "address_current": f"หอพักนักศึกษา อาคาร {i} มหาวิทยาลัยอุบลราชธานี",
                 "father_name": f"นายสมชาย ทดสอบ (บิดา {i})",
-                "mother_name": f"นางสมศรี ทดสอบ (มารดา {i})",
-                "profile_pic":profile_pic_path 
+                "mother_name": f"นางสมศรี ทดสอบ (มารดา {i})"
             }
 
         return mock_db

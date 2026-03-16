@@ -2,6 +2,7 @@ import os
 import json
 import uuid
 from flask import Blueprint, current_app, render_template, request, session, redirect, url_for, flash
+from sqlalchemy import desc
 from werkzeug.utils import secure_filename
 
 from models import db, Student, Scholarship, Application
@@ -200,7 +201,26 @@ def profile():
         return redirect(url_for("student.profile"))
  
     
-    return render_template("student/profile.html", student=student_record)
+    # ดึงประวัติการรับทุน (สมมติว่าใช้สถานะ 'approved' หรือ 'ได้รับทุน')
+    # อาจจะใช้สถานะอื่น ๆ ตามที่ระบบออกแบบ เช่น 'announced', 'completed'
+    applications = Application.query.filter_by(
+        student_id=current_student_id,
+        status='approved'   # หรือ 'ได้รับทุน' ตามที่ใช้จริง
+    ).order_by(desc(Application.created_at)).all()
+
+    # ถ้าต้องการ pagination (ตามปุ่มที่มีใน template) ให้ใช้ paginate()
+    page = request.args.get('page', 1, type=int)
+    pagination = Application.query.filter_by(
+        student_id=current_student_id,
+        status='approved'
+    ).order_by(desc(Application.created_at)).paginate(page=page, per_page=5, error_out=False)
+    apps = pagination.items
+
+    return render_template("student/profile.html", 
+                           student=student_record,
+                           applications=apps,          # สำหรับแสดงในตาราง
+                           pagination=pagination)      # สำหรับปุ่มก่อนหน้า/ถัดไป
+
 
 # ==========================================
 # Scholarship Matching & Application

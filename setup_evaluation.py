@@ -1,5 +1,5 @@
 from app import app, db
-from models import Evaluation, Scholarship, Application, Student
+from models import Scholarship, Application, Student
 import random
 
 def setup():

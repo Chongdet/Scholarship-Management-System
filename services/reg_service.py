@@ -1,6 +1,8 @@
 # services/reg_service.py
 from datetime import datetime
 
+import urllib
+
 
 class RegService:
     """
@@ -30,13 +32,13 @@ class RegService:
             {"student_id": "6811454007", "name": "นายวรวุฒิ ประสงค์ดี",       "email": "worawut.p@ubu.ac.th",     "faculty": "คณะวิทยาศาสตร์",     "gpax": 2.95},
             {"student_id": "6811454008", "name": "นางสาวชนิดา รุ่งเรือง",     "email": "chanida.r@ubu.ac.th",     "faculty": "คณะนิติศาสตร์",      "gpax": 3.62},
             {"student_id": "6811454009", "name": "นายปิยะพัฒน์ สุขสงวน",     "email": "piyapat.s@ubu.ac.th",     "faculty": "คณะบริหารศาสตร์",    "gpax": 3.05},
-            {"student_id": "6811454010", "name": "นางสาวอารียา ดวงจันทร์",    "email": "areeya.d@ubu.ac.th",     "faculty": "คณะเภสัชศาสตร์",     "gpax": 3.88},
+            {"student_id": "6811454010", "name": "นางสาวอารียา ดวงจันทร์",    "email": "areeya.d@ubu.ac.th",     "faculty": "คณะเภสัชศาสตร์",     "gpax": 3.88 },
         ]
 
         for i, data in enumerate(students_data, 1):
             student_id = data["student_id"]
             dis_status = "ไม่มี" if i % 4 != 0 else "มี"
-            
+            profile_pic_path = f"/static/images/students/{student_id}.jpg"            
             mock_db[student_id] = {
                 "student_id": student_id,
                 "name": data["name"],
@@ -50,7 +52,8 @@ class RegService:
                 "address_domicile": f"บ้านเลขที่ {i}/99 ต.ในเมือง อ.เมือง จ.อุบลราชธานี",
                 "address_current": f"หอพักนักศึกษา อาคาร {i} มหาวิทยาลัยอุบลราชธานี",
                 "father_name": f"นายสมชาย ทดสอบ (บิดา {i})",
-                "mother_name": f"นางสมศรี ทดสอบ (มารดา {i})"
+                "mother_name": f"นางสมศรี ทดสอบ (มารดา {i})",
+                "profile_pic":profile_pic_path 
             }
 
         return mock_db
@@ -103,7 +106,8 @@ class RegService:
         student_model.advisor_name = reg_data.get('advisor_name')
         student_model.citizen_id = reg_data.get('citizen_id')
         student_model.address_domicile = reg_data.get('address_domicile')
-
+        if reg_data.get('profile_pic'):
+            student_model.profile_pic = reg_data.get('profile_pic')
         # ❌ ไม่ sync student_id (Primary Key ห้ามทับ)
 
         # --------------------------------
@@ -130,5 +134,24 @@ class RegService:
         # father_name / mother_name
         # ไม่ดึงจาก REG อีกต่อไป
         # ให้ระบบทุนเป็นแหล่งข้อมูลหลักแทน
+
+        return student_model
+
+
+@classmethod
+def get_profile_picture(cls, student_id):
+        """ส่งคืน URL รูปโปรไฟล์ของนักศึกษา (เรียกใช้ get_profile_picture_url)"""
+        return cls.get_profile_picture_url(student_id)
+    # Optional: update sync_student_data to set picture when first created
+@classmethod
+def sync_student_data(cls, student_model, reg_data):
+        # ... existing sync logic ...
+
+        # Set profile picture if not already present
+        if not student_model.profile_pic:
+            student_model.profile_pic = cls.get_profile_picture_url(
+                student_model.student_id,
+                student_model.name
+            )
 
         return student_model

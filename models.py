@@ -119,7 +119,7 @@ class Student(db.Model):
     total_family_income     = db.Column(db.Float,   default=0.0)  # รายได้รวมครอบครัว (คำนวณอัตโนมัติ)
     financial_hardship_score = db.Column(db.Float,  default=0.0)  # ดัชนีความลำบากทางการเงิน (0-1)
     is_profile_locked       = db.Column(db.Boolean, default=False) # ล็อกโปรไฟล์หลังส่งใบสมัคร
-
+    profile_pic = db.Column(db.String(500), nullable=True)  # URL of profile picture
     # ──────────────────────────────────────────────────────────────
     def calculate_total_income(self):
         """คำนวณรายได้รวมครอบครัว: บิดา + มารดา + ผู้อุปการะ"""

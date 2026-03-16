@@ -54,17 +54,18 @@ def login():
         if is_valid:
             reg_data = RegService.fetch_profile(input_student_id)
             student = Student.query.filter_by(student_id=input_student_id).first()
-            
             if not student:
                 student = Student(student_id=input_student_id)
                 db.session.add(student)
 
-            # Sync ข้อมูลจาก REG Service
-            student.gpax = reg_data.get('gpax')
-            student.faculty = reg_data.get('faculty')
-            student.year = reg_data.get('year')
-            student.disciplinary_status = reg_data.get('disciplinary_status')
+            # Sync REG data (including name, faculty, etc.)
+            student = RegService.sync_student_data(student, reg_data)
             student.set_password(input_password)
+
+            # Set profile picture if missing (sync_student_data may already do it)
+            if not student.profile_pic:
+                student.profile_pic = "https://api.dicebear.com/9.x/initials/svg?seed=Student&radius=0&size=150"
+
 
             db.session.commit()
 
@@ -102,7 +103,7 @@ def profile():
         return redirect(url_for("student.login"))
  
     if request.method == "POST":
- 
+        
         # ── Helper: แปลง float ปลอดภัย (รับ '' และ None ได้) ──────────
         def safe_float(key, default=None):
             val = request.form.get(key, '').strip()
@@ -117,7 +118,7 @@ def profile():
         # [Security] ห้ามรับ gpax / faculty / year / citizen_id /
         #             address_domicile / disciplinary_status จาก form
         # ══════════════════════════════════════════════════════════════
- 
+        
         # ── 1. ประวัติส่วนตัว (editable) ─────────────────────────────
         student_record.mobile           = request.form.get("mobile",   "").strip() or None
         student_record.facebook         = request.form.get("facebook", "").strip() or None
@@ -198,6 +199,7 @@ def profile():
         flash("บันทึกข้อมูลส่วนตัวเรียบร้อยแล้ว ✅", "success")
         return redirect(url_for("student.profile"))
  
+    
     return render_template("student/profile.html", student=student_record)
 
 # ==========================================

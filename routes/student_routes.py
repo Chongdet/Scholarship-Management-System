@@ -222,10 +222,23 @@ def scholarship_detail(scholarship_id):
         scholarship_id=scholarship_id
     ).first()
 
+    # ตรวจสอบความสมบูรณ์ของโปรไฟล์และคุณสมบัติ
+    profile_complete = False
+    is_eligible = False
+    eligibility_reasons = []
+
+    if student:
+        profile_complete = (student.profile_completeness == 100)
+        is_eligible, eligibility_reasons = MatchingService.check_eligibility(student, scholarship)
+
     return render_template("student/scholarship_detail.html", 
                            scholarship=scholarship, 
                            student=student, 
-                           already_applied=existing_app is not None)
+                           already_applied=existing_app is not None,
+                           existing_app=existing_app,
+                           profile_complete=profile_complete,
+                           is_eligible=is_eligible,
+                           eligibility_reasons=eligibility_reasons)
 
 
 
@@ -306,8 +319,19 @@ def apply_scholarship():
     prefill = {}
     if student:
         parts = student.name.split() if student.name else [""]
-        first_name = parts[0]
-        last_name = " ".join(parts[1:]) if len(parts) > 1 else ""
+        title_val = ""
+        if len(parts) >= 3 and parts[0] in ["นาย", "นาง", "นางสาว", "Mr.", "Ms.", "Mrs.", "ด.ช.", "ด.ญ."]:
+            first_name = parts[1]
+            last_name = " ".join(parts[2:])
+            title_val = parts[0]
+        else:
+            first_name = parts[0]
+            last_name = " ".join(parts[1:]) if len(parts) > 1 else ""
+            for t in ["นางสาว", "นาง", "นาย", "Mr.", "Ms.", "Mrs.", "ด.ช.", "ด.ญ."]:
+                if first_name.startswith(t):
+                    title_val = t
+                    first_name = first_name[len(t):].strip()
+                    break
         
         father_inc = getattr(student, 'father_income', None) or 0
         mother_inc = getattr(student, 'mother_income', None) or 0
@@ -317,6 +341,7 @@ def apply_scholarship():
         siblings = len(siblings_lst) if siblings_lst else ""
         
         prefill = {
+            "title": title_val,
             "student_id": student.student_id,
             "first_name": first_name,
             "last_name": last_name,
@@ -336,7 +361,13 @@ def apply_scholarship():
             "family_income": family_income,
             "siblings": siblings,
             "siblings_list": siblings_lst if siblings_lst else [],
-            "parents_status": getattr(student, 'parents_status', '')
+            "parents_status": getattr(student, 'parents_status', ''),
+            "inc_father": getattr(student, 'inc_father', ''),
+            "inc_mother": getattr(student, 'inc_mother', ''),
+            "inc_guardian": getattr(student, 'inc_guardian', ''),
+            "inc_scholarship": getattr(student, 'inc_scholarship', ''),
+            "inc_parttime": getattr(student, 'inc_parttime', ''),
+            "national_id": getattr(student, 'citizen_id', '')
         }
 
     titles = ["นาย", "นางสาว", "นาง"]
@@ -369,7 +400,18 @@ def upload_documents():
 @student_bp.route("/scholarships")
 def announce_scholarships():
     all_scholarships = Scholarship.query.all()
-    return render_template("student/scholarships.html", scholarships=all_scholarships)
+    
+    recipients = {}
+    for sch in all_scholarships:
+        if sch.status in ['interview', 'announce']:
+            # Fetch passing candidates for this scholarship
+            apps = Application.query.filter(
+                Application.scholarship_id == sch.id,
+                Application.status.in_(['interview', 'approved', 'Selected', 'Reserved', 'อนุมัติ', 'completed'])
+            ).all()
+            recipients[sch.id] = apps
+
+    return render_template("student/scholarships.html", scholarships=all_scholarships, recipients=recipients)
 
 
 # รับผิดชอบโดย: นางสาว ปัญญาพร มูลดับ

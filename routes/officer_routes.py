@@ -269,6 +269,21 @@ def edit_scholarship(scholarship_id):
                     image_filename = save_uploaded_file(file)
                     if image_filename:
                         scholarship.image = image_filename
+                        
+            # จัดการไฟล์ประกาศ PDF
+            if 'interview_file' in request.files:
+                file = request.files['interview_file']
+                if file and file.filename:
+                    filename = save_uploaded_file(file)
+                    if filename:
+                        scholarship.interview_file_url = f"uploads/{filename}"
+            
+            if 'announce_file' in request.files:
+                file = request.files['announce_file']
+                if file and file.filename:
+                    filename = save_uploaded_file(file)
+                    if filename:
+                        scholarship.announce_file_url = f"uploads/{filename}"
             
             # อัปเดตฟิลด์ใหม่
             scholarship.qualifications = request.form.get('qualifications')
@@ -523,6 +538,9 @@ def decide_application(application_id):
                     to_email=to_email or "test@test.com",
                     student_name=application.student_name or (student.name if student else "นักศึกษา"),
                     scholarship_name=application.scholarship.name if application.scholarship else "ทุนการศึกษา",
+                    interview_date=date_str,
+                    interview_time=application.interview_time,
+                    interview_location=application.interview_location
                 )
                 if sent:
                     flash("ทำการยืนยันนัดสัมภาษณ์และส่งอีเมลแจ้งเตือนเรียบร้อยแล้ว", "success")
@@ -630,6 +648,8 @@ def scholarship_recipients(scholarship_id):
         if date_str:
             announcement_date = datetime.strptime(date_str, '%Y-%m-%d')
             scholarship.announcement_date = announcement_date
+            scholarship.status = 'announce'
+
             db.session.commit()
 
             # ส่งอีเมลแจ้งเตือนให้นักศึกษาทุกคนที่สมัครทุนนี้
@@ -639,17 +659,22 @@ def scholarship_recipients(scholarship_id):
             date_display = announcement_date.strftime('%d/%m/%Y')
             sent_count = 0
             email_override = os.getenv("EMAIL_OVERRIDE", "").strip()
-            for app in applications:
-                student = Student.query.filter_by(student_id=app.student_id).first()
-                to_email = _get_student_email(app, student) or (email_override if email_override and "@" in email_override else None)
-                if to_email and "@" in str(to_email):
-                    if send_announcement_notification(
-                        to_email=to_email,
-                        student_name=app.student_name or (student.name if student else "นักศึกษา"),
-                        scholarship_name=scholarship.name,
-                        announcement_date=date_display,
-                    ):
-                        sent_count += 1
+            try:
+                for app in applications:
+                    student = Student.query.filter_by(student_id=app.student_id).first()
+                    to_email = _get_student_email(app, student) or (email_override if email_override and "@" in email_override else None)
+                    if to_email and "@" in str(to_email):
+                        is_awarded = app.status in ['approved', 'completed', 'อนุมัติ']
+                        if send_announcement_notification(
+                            to_email=to_email,
+                            student_name=app.student_name or (student.name if student else "นักศึกษา"),
+                            scholarship_name=scholarship.name,
+                            announcement_date=date_display,
+                            is_awarded=is_awarded
+                        ):
+                            sent_count += 1
+            except Exception as e:
+                print(f"Error sending announcement emails: {e}")
 
             officer = session.get("user_id") if session.get("role") == "officer" else None
             if officer:

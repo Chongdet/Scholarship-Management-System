@@ -17,6 +17,7 @@ def seed_users():
             {"student_id": "6811454008", "name": "นางสาวชนิดา รุ่งเรือง",     "email": "chanida.r@ubu.ac.th",     "faculty": "คณะนิติศาสตร์",      "gpax": 3.62},
             {"student_id": "6811454009", "name": "นายปิยะพัฒน์ สุขสงวน",     "email": "piyapat.s@ubu.ac.th",     "faculty": "คณะบริหารศาสตร์",    "gpax": 3.05},
             {"student_id": "6811454010", "name": "นางสาวอารียา ดวงจันทร์",    "email": "areeya.d@ubu.ac.th",     "faculty": "คณะเภสัชศาสตร์",     "gpax": 3.88},
+            {"student_id": "6811454011", "name": "นาย ทรงเดช จำปาเทศ",    "email": "chongdet.ja.68@ubu.ac.th",     "faculty": "คณะวิทยาศาสตร์",     "gpax": 4.00},
         ]
 
         added_students = 0

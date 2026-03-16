@@ -199,21 +199,17 @@
       <div class="s-body">
         <div class="g3">
           <div class="field-group">
-            <span class="field-label">คำนำหน้า <span class="field-note">*</span></span>
-            <select name="title" required class="form-input">
-              <option value="">-- เลือก --</option>
-              {% for t in titles %}
-                <option value="{{ t }}" {{ 'selected' if prefill.get('title') == t else '' }}>{{ t }}</option>
-              {% endfor %}
-            </select>
+            <span class="field-label">คำนำหน้า (ล็อก) <span class="field-note">*</span></span>
+            <input type="text" name="title" value="{{ prefill.get('title', '') }}" required readonly class="form-input bg-gray-100 cursor-not-allowed text-gray-500">
+            <!-- Hidden field for keeping select logic if backend requires it exactly, though text may be enough -->
           </div>
           <div class="field-group">
-            <span class="field-label">ชื่อ <span class="field-note">*</span></span>
-            <input type="text" name="first_name" value="{{ prefill.get('first_name', '') }}" placeholder="ชื่อ" required class="form-input">
+            <span class="field-label">ชื่อ (ล็อก) <span class="field-note">*</span></span>
+            <input type="text" name="first_name" value="{{ prefill.get('first_name', '') }}" placeholder="ชื่อ" required readonly class="form-input bg-gray-100 cursor-not-allowed text-gray-500">
           </div>
           <div class="field-group">
-            <span class="field-label">นามสกุล <span class="field-note">*</span></span>
-            <input type="text" name="last_name" value="{{ prefill.get('last_name', '') }}" placeholder="นามสกุล" required class="form-input">
+            <span class="field-label">นามสกุล (ล็อก) <span class="field-note">*</span></span>
+            <input type="text" name="last_name" value="{{ prefill.get('last_name', '') }}" placeholder="นามสกุล" required readonly class="form-input bg-gray-100 cursor-not-allowed text-gray-500">
           </div>
           <div class="field-group">
             <span class="field-label">ชื่อ (ภาษาอังกฤษ)</span>
@@ -224,8 +220,8 @@
             <input type="text" name="last_name_en" value="{{ prefill.get('last_name_en', '') }}" placeholder="Last Name" class="form-input">
           </div>
           <div class="field-group">
-            <span class="field-label">เลขบัตรประชาชน <span class="field-note">*</span></span>
-            <input type="text" name="national_id" value="{{ prefill.get('national_id', '') }}" placeholder="x-xxxx-xxxxx-xx-x" maxlength="13" required class="form-input">
+            <span class="field-label">เลขบัตรประชาชน (ล็อก) <span class="field-note">*</span></span>
+            <input type="text" name="national_id" value="{{ prefill.get('national_id', '') }}" placeholder="x-xxxx-xxxxx-xx-x" maxlength="13" required readonly class="form-input bg-gray-100 cursor-not-allowed text-gray-500">
           </div>
           <div class="field-group">
             <span class="field-label">วันเดือนปีเกิด <span class="field-note">*</span></span>
@@ -249,8 +245,8 @@
             <input type="text" name="religion" value="{{ prefill.get('religion', '') }}" placeholder="เช่น พุทธ" class="form-input">
           </div>
           <div class="field-group">
-            <span class="field-label">เบอร์โทรศัพท์ <span class="field-note">*</span></span>
-            <input type="tel" name="phone" value="{{ prefill.get('phone', '') }}" placeholder="0xx-xxx-xxxx" required class="form-input">
+            <span class="field-label">เบอร์โทรศัพท์ (ล็อก) <span class="field-note">*</span></span>
+            <input type="tel" name="phone" value="{{ prefill.get('phone', '') }}" placeholder="0xx-xxx-xxxx" required readonly class="form-input bg-gray-100 cursor-not-allowed text-gray-500">
           </div>
           <div class="field-group">
             <span class="field-label">อีเมล</span>
@@ -269,8 +265,8 @@
       </div>
       <div class="s-body">
         <div class="field-group" style="margin-bottom:1rem;">
-          <span class="field-label">บ้านเลขที่ / หมู่ที่ / ถนน / ซอย / อาคาร <span class="field-note">*</span></span>
-          <textarea name="address" rows="2" placeholder="เช่น 99 หมู่ 5 ถนนเจริญราษฎร์" required class="form-input">{{ prefill.get('address', '') }}</textarea>
+          <span class="field-label">บ้านเลขที่ / หมู่ที่ / ถนน / ซอย / อาคาร (ล็อก) <span class="field-note">*</span></span>
+          <textarea name="address" rows="2" placeholder="เช่น 99 หมู่ 5 ถนนเจริญราษฎร์" required readonly class="form-input bg-gray-100 cursor-not-allowed text-gray-500">{{ prefill.get('address', '') }}</textarea>
         </div>
         <div class="g4">
           <div class="field-group">

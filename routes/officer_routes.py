@@ -699,9 +699,11 @@ def scholarship_recipients(scholarship_id):
             flash("บันทึกวันที่ประกาศเรียบร้อย", "success")
         return redirect(url_for('officer.final_announcement'))
         
-    applications = Application.query.filter_by(scholarship_id=scholarship_id, status='approved').all()
-    if not applications:
-        applications = Application.query.filter_by(scholarship_id=scholarship_id, status='interview').all()
+    applications = Application.query.filter(
+        Application.scholarship_id == scholarship_id,
+        Application.status.in_(['interview', 'approved', 'Selected', 'Reserved', 'อนุมัติ', 'completed'])
+    ).all()
+    
     return render_template('officer/recipients.html', scholarship=scholarship, applications=applications)
 
 

@@ -194,6 +194,7 @@ class Scholarship(db.Model):
     announce_file_url = db.Column(db.String(500))     # ลิงก์ไฟล์ประกาศคนได้ทุน
 
     # ฟิลด์ใหม่สำหรับรายละเอียดทุนการศึกษา
+    announcement_date = db.Column(db.DateTime, nullable=True) # วันที่ประกาศผล
     image = db.Column(db.String(200), nullable=True) # ชื่อไฟล์ภาพ
     qualifications = db.Column(db.Text, nullable=True) # คุณสมบัติ
     conditions = db.Column(db.Text, nullable=True) # เงื่อนไข

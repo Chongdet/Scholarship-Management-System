@@ -33,6 +33,7 @@ class RegService:
             {"student_id": "6811454008", "name": "นางสาวชนิดา รุ่งเรือง",     "email": "chanida.r@ubu.ac.th",     "faculty": "คณะนิติศาสตร์",      "gpax": 3.62},
             {"student_id": "6811454009", "name": "นายปิยะพัฒน์ สุขสงวน",     "email": "piyapat.s@ubu.ac.th",     "faculty": "คณะบริหารศาสตร์",    "gpax": 3.05},
             {"student_id": "6811454010", "name": "นางสาวอารียา ดวงจันทร์",    "email": "areeya.d@ubu.ac.th",     "faculty": "คณะเภสัชศาสตร์",     "gpax": 3.88},
+            {"student_id": "6811454011", "name": "นาย ทรงเดช จำปาเทศ",    "email": "chongdet.ja.68@ubu.ac.th", "faculty": "คณะวิทยาศาสตร์",     "gpax": 4.00},
         ]
 
         for i, data in enumerate(students_data, 1):
@@ -52,7 +53,8 @@ class RegService:
                 "address_domicile": f"บ้านเลขที่ {i}/99 ต.ในเมือง อ.เมือง จ.อุบลราชธานี",
                 "address_current": f"หอพักนักศึกษา อาคาร {i} มหาวิทยาลัยอุบลราชธานี",
                 "father_name": f"นายสมชาย ทดสอบ (บิดา {i})",
-                "mother_name": f"นางสมศรี ทดสอบ (มารดา {i})"
+                "mother_name": f"นางสมศรี ทดสอบ (มารดา {i})",
+                "profile_pic": f"/static/images/students/{student_id}.jpg"
             }
 
         return mock_db
@@ -124,33 +126,5 @@ class RegService:
 
         if not student_model.mother_name:
             student_model.mother_name = reg_data.get('mother_name')
-
-        return student_model
-
-        # --------------------------------
-        # 🔓 FULLY EDITABLE (ไม่ผูก REG)
-        # --------------------------------
-        # father_name / mother_name
-        # ไม่ดึงจาก REG อีกต่อไป
-        # ให้ระบบทุนเป็นแหล่งข้อมูลหลักแทน
-
-        return student_model
-
-
-@classmethod
-def get_profile_picture(cls, student_id):
-        """ส่งคืน URL รูปโปรไฟล์ของนักศึกษา (เรียกใช้ get_profile_picture_url)"""
-        return cls.get_profile_picture_url(student_id)
-    # Optional: update sync_student_data to set picture when first created
-@classmethod
-def sync_student_data(cls, student_model, reg_data):
-        # ... existing sync logic ...
-
-        # Set profile picture if not already present
-        if not student_model.profile_pic:
-            student_model.profile_pic = cls.get_profile_picture_url(
-                student_model.student_id,
-                student_model.name
-            )
 
         return student_model

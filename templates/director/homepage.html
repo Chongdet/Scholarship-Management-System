@@ -82,7 +82,7 @@
                     <div class="{% if sch.status == 'open' %}bg-green-100 text-green-700{% elif sch.status == 'interview' %}bg-blue-100 text-blue-700{% elif sch.status == 'announce' %}bg-purple-100 text-purple-700{% else %}bg-gray-100 text-gray-600{% endif %} text-xs font-bold px-3 py-1 rounded-full shrink-0">
                         {% if sch.status == 'open' %}เปิดรับสมัคร
                         {% elif sch.status == 'interview' %}สัมภาษณ์
-                        {% elif sch.status == 'announce' %}ประกาศผล
+                        {% elif sch.status == 'announce' %}ประกาศทุน
                         {% elif sch.status == 'checking' %}ตรวจสอบเอกสาร
                         {% else %}{{ sch.status }}
                         {% endif %}

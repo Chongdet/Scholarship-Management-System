@@ -17,7 +17,7 @@ def main():
     is_announce = len(sys.argv) > 1 and sys.argv[1].lower() in ("announce", "ประกาศ", "2")
 
     print("=" * 50)
-    print("ทดสอบส่งอีเมล: " + ("ประกาศผลทุน" if is_announce else "ส่งกลับให้แก้ไข"))
+    print("ทดสอบส่งอีเมล: " + ("ประกาศทุน" if is_announce else "ส่งกลับให้แก้ไข"))
     print(f"  ไปที่: {to}")
     print("=" * 50)
 

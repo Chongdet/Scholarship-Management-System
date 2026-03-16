@@ -577,7 +577,7 @@ def audit_log():
 # รับผิดชอบโดย: นาย อติวิชญ์ สีหนันท์
 @officer_bp.route('/announcement')
 def final_announcement():
-    """หน้าประกาศผลทุน"""
+    """หน้าประกาศทุน"""
     scholarships = Scholarship.query.all()
     return render_template('officer/announcement.html', scholarships=scholarships)
 
@@ -613,7 +613,7 @@ def scholarship_recipients(scholarship_id):
 
             officer = session.get("user_id") if session.get("role") == "officer" else None
             if officer:
-                _log_audit(officer, "set_announcement", "กำหนดวันประกาศผลทุน",
+                _log_audit(officer, "set_announcement", "กำหนดวันประกาศทุน",
                            reference_id=f"SCH{scholarship.id}",
                            details=f"{scholarship.name} - วันที่ {date_display}",
                            status_after=date_display)

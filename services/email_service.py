@@ -205,7 +205,7 @@ def send_announcement_notification(
     to_email: str, student_name: str, scholarship_name: str, announcement_date: str
 ) -> bool:
     """
-    ส่งอีเมลแจ้งเตือนเมื่อกำหนดวันที่ประกาศผลทุน
+    ส่งอีเมลแจ้งเตือนเมื่อกำหนดวันที่ประกาศทุน
     ส่งให้นักศึกษาทุกคนที่สมัครทุนนี้
     """
     override = os.getenv("EMAIL_OVERRIDE", "").strip()
@@ -219,11 +219,11 @@ def send_announcement_notification(
     if not from_email or "@" not in from_email:
         from_email = "ubustudent.d@ubu.ac.th"
 
-    subject = f"ประกาศผลทุน {scholarship_name} - วันที่ {announcement_date}"
+    subject = f"ประกาศทุน {scholarship_name} - วันที่ {announcement_date}"
     body = f"""
 สวัสดีคุณ {student_name}
 
-ระบบทุนการศึกษา มหาวิทยาลัยอุบลราชธานี แจ้งว่า ผลทุน "{scholarship_name}" ได้ประกาศผลแล้ว
+ระบบทุนการศึกษา มหาวิทยาลัยอุบลราชธานี แจ้งว่า ทุน "{scholarship_name}" ได้ประกาศแล้ว
 
 วันที่ประกาศ: {announcement_date}
 

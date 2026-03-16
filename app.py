@@ -9,7 +9,7 @@ from routes.director_routes import director_bp
 from services.reg_service import RegService
 
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 
 
 # =========================================================
@@ -93,60 +93,50 @@ def register_routes(app):
         if request.method == "POST":
             username = request.form.get("username")
             password = request.form.get("password")
-            role_target = request.form.get("role")
 
             if not username or not password:
                 flash("กรุณากรอกชื่อผู้ใช้งานและรหัสผ่าน", "error")
                 return render_template("login.html")
 
-            # -------------------------------------------------
-            # STUDENT LOGIN (REG Sync)
-            # -------------------------------------------------
-            if not role_target:
-                success, reg_data = RegService.validate_credentials(username, password)
+            # 1. Check Officer
+            user = Officer.query.filter_by(username=username).first()
+            if user and user.check_password(password):
+                session.clear()
+                session["user_id"] = user.username
+                session["role"] = "officer"
+                session["user_name"] = user.name or user.username
+                flash(f"ยินดีต้อนรับคุณ {user.name}", "success")
+                return redirect(url_for("officer.list_scholarships"))
 
-                if success:
-                    student = Student.query.filter_by(student_id=username).first()
+            # 2. Check Director
+            user = Director.query.filter_by(username=username).first()
+            if user and user.check_password(password):
+                session.clear()
+                session["user_id"] = user.username
+                session["role"] = "director"
+                session["user_name"] = user.name or user.username
+                flash(f"ยินดีต้อนรับคุณ {user.name}", "success")
+                return redirect(url_for("director.home"))
 
-                    if not student:
-                        student = Student(student_id=username)
-                        student.set_password(password)
-                        db.session.add(student)
+            # 3. Check Student (REG Sync)
+            success, reg_data = RegService.validate_credentials(username, password)
+            if success:
+                student = Student.query.filter_by(student_id=username).first()
+                if not student:
+                    student = Student(student_id=username)
+                    student.set_password(password)
+                    db.session.add(student)
 
-                    # Sync REG data
-                    RegService.sync_student_data(student, reg_data)
-                    db.session.commit()
+                RegService.sync_student_data(student, reg_data)
+                db.session.commit()
 
-                    session.clear()
-                    session["user_id"] = student.student_id
-                    session["role"] = "student"
+                session.clear()
+                session["user_id"] = student.student_id
+                session["role"] = "student"
+                session["user_name"] = student.name
 
-                    flash(f"ยินดีต้อนรับคุณ {student.name}", "success")
-                    return redirect(url_for("student.dashboard"))
-
-            # -------------------------------------------------
-            # OFFICER / DIRECTOR LOGIN
-            # -------------------------------------------------
-            else:
-                user = None
-
-                if role_target == "officer":
-                    user = Officer.query.filter_by(username=username).first()
-                elif role_target == "director":
-                    user = Director.query.filter_by(username=username).first()
-
-                if user and user.check_password(password):
-                    session.clear()
-                    session["user_id"] = user.username
-                    session["role"] = role_target
-                    session["user_name"] = user.name or user.username
-
-                    flash(f"ยินดีต้อนรับคุณ {user.name}", "success")
-
-                    if role_target == "officer":
-                        return redirect(url_for("officer.list_scholarships"))
-                    elif role_target == "director":
-                        return redirect(url_for("director.home"))
+                flash(f"ยินดีต้อนรับคุณ {student.name}", "success")
+                return redirect(url_for("student.dashboard"))
 
             flash("ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง", "error")
 

@@ -28,34 +28,35 @@
     <!-- Search and Filter Section -->
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6">
         <h2 class="text-lg font-bold text-gray-800 mb-4">ค้นหาและกรอง</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <form method="GET" action="{{ url_for('officer.applications') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4" id="filter-form">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">ค้นหา</label>
-                <input type="text" placeholder="ชื่อ-นามสกุล หรือรหัสนักศึกษา" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition" />
+                <input type="text" name="search" value="{{ search_query }}" placeholder="ชื่อ-นามสกุล หรือรหัสนักศึกษา" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition" />
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">ทุน</label>
-                <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
-                    <option>ทั้งหมด</option>
+                <select name="scholarship_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
+                    <option value="">ทั้งหมด</option>
                     {% for scholarship in scholarships %}
-                    <option>{{ scholarship.name }}</option>
+                    <option value="{{ scholarship.id }}" {% if selected_scholarship_id == scholarship.id %}selected{% endif %}>{{ scholarship.name }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">สถานะ</label>
-                <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
-                    <option>ทั้งหมด</option>
-                    <option>รอการตรวจสอบ</option>
-                    <option>รอแก้ไข</option>
-                    <option>เรียกสัมภาษณ์</option>
-                    <option>ผ่าน</option>
+                <select name="status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
+                    <option value="">ทั้งหมด</option>
+                    <option value="pending" {% if selected_status == 'pending' %}selected{% endif %}>รอตรวจสอบ</option>
+                    <option value="needs_edit" {% if selected_status == 'needs_edit' %}selected{% endif %}>รอแก้ไข</option>
+                    <option value="interview" {% if selected_status == 'interview' %}selected{% endif %}>เรียกสัมภาษณ์</option>
+                    <option value="approved" {% if selected_status == 'approved' %}selected{% endif %}>ผ่านแล้ว</option>
                 </select>
             </div>
-        </div>
-        <div class="mt-4 flex justify-end">
-            <a href="{{ url_for('officer.applications') }}" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">ล้างการกรอง</a>
-        </div>
+            <div class="md:col-span-3 flex justify-end gap-3 mt-2">
+                <a href="{{ url_for('officer.applications') }}" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">ล้างการกรอง</a>
+                <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">ค้นหา</button>
+            </div>
+        </form>
     </div>
 
     <!-- Summary Cards -->

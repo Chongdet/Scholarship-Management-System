@@ -381,21 +381,43 @@ def home():
 @officer_bp.route('/applications')
 def applications():
     status_filter = request.args.get('status')
+    scholarship_id_filter = request.args.get('scholarship_id', type=int)
+    search_query = request.args.get('search', '').strip()
+
     allowed_statuses = {'draft', 'pending', 'reviewing', 'needs_edit', 'interview', 'approved'}
     if status_filter not in allowed_statuses:
         status_filter = None
 
     applications_query = Application.query.order_by(Application.created_at.desc())
+
+    # กรองตาม scholarship_id ถ้ามีการเลือก
+    if scholarship_id_filter:
+        applications_query = applications_query.filter_by(scholarship_id=scholarship_id_filter)
+
+    # กรองตามสถานะ
     if status_filter:
         applications_query = applications_query.filter_by(status=status_filter)
+
+    # ค้นหาตามชื่อ นามสกุล หรือรหัสนักศึกษา
+    if search_query:
+        applications_query = applications_query.filter(
+            or_(
+                Application.student_name.ilike(f'%{search_query}%'),
+                Application.student_id.ilike(f'%{search_query}%'),
+                Application.faculty.ilike(f'%{search_query}%'),
+            )
+        )
+
     all_applications = applications_query.all()
-    
+
     scholarships = Scholarship.query.all()
+
+    # นับสถิติทั้งหมด (ไม่ขึ้นกับ filter)
     draft_count = Application.query.filter_by(status='draft').count()
     pending_count = Application.query.filter_by(status='pending').count()
     approved_count = Application.query.filter(
         or_(
-            Application.status == 'approved', 
+            Application.status == 'approved',
             Application.status == 'Selected',
             Application.status == 'ได้รับทุนการศึกษา'
         )
@@ -403,25 +425,27 @@ def applications():
     interview_count = Application.query.filter_by(status='interview').count()
     needs_edit_count = Application.query.filter_by(status='needs_edit').count()
     total_count = Application.query.count()
-    
+
     page = 1
     per_page = 10
     total_pages = (len(all_applications) + per_page - 1) // per_page
     start_index = (page - 1) * per_page + 1 if all_applications else 0
     end_index = min(page * per_page, len(all_applications)) if all_applications else 0
-    
-    return render_template('officer/applications.html', 
-                         applications=all_applications,
-                         scholarships=scholarships,
-                         draft_count=draft_count,
-                         pending_count=pending_count,
-                         approved_count=approved_count,
-                         interview_count=interview_count,
-                         total_count=total_count,
-                         needs_edit_count=needs_edit_count,
-                         page=page, per_page=per_page, total_pages=total_pages,
-                         start_index=start_index, end_index=end_index,
-                         selected_status=status_filter)
+
+    return render_template('officer/applications.html',
+                           applications=all_applications,
+                           scholarships=scholarships,
+                           draft_count=draft_count,
+                           pending_count=pending_count,
+                           approved_count=approved_count,
+                           interview_count=interview_count,
+                           total_count=total_count,
+                           needs_edit_count=needs_edit_count,
+                           page=page, per_page=per_page, total_pages=total_pages,
+                           start_index=start_index, end_index=end_index,
+                           selected_status=status_filter,
+                           selected_scholarship_id=scholarship_id_filter,
+                           search_query=search_query)
 
 # รับผิดชอบโดย: นาย ธีรภัทร พิกุลศรี (ตรวจสอบเอกสารการสมัคร /verify)
 @officer_bp.route('/application/<string:application_id>')

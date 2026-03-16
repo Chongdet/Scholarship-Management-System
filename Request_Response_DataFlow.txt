@@ -1,0 +1,715 @@
+================================================================================
+  คำอธิบายการส่งข้อมูล-รับข้อมูล (Request/Response & Data Flow)
+  ระบบบริหารทุนการศึกษา — มหาวิทยาลัยอุบลราชธานี
+  เวอร์ชั่น: 1.0  |  วันที่เขียน: 17/03/2026
+================================================================================
+
+สารบัญ
+------
+  ส่วนที่ 1 : ภาพรวมของระบบ (System Overview)
+  ส่วนที่ 2 : Student Routes   (Blueprint: student_bp)
+  ส่วนที่ 3 : Officer Routes   (Blueprint: officer_bp)
+  ส่วนที่ 4 : Director Routes  (Blueprint: director_bp)
+  ส่วนที่ 5 : API Routes       (JSON-based, สำหรับ Postman/External)
+  ส่วนที่ 6 : Session & Authentication Flow
+  ส่วนที่ 7 : ตารางสถานะใบสมัคร (Application Status Lifecycle)
+
+================================================================================
+ส่วนที่ 1 : ภาพรวมของระบบ (System Overview)
+================================================================================
+
+  Framework    : Flask (Python)
+  Database     : SQLAlchemy ORM  (SQLite / PostgreSQL)
+  Template     : Jinja2
+  Upload Dir   : static/uploads/<student_id>/
+  Session      : Flask Session (cookie-based)
+
+  โมเดลหลัก (Models):
+    - Student         : ข้อมูลนักศึกษา
+    - Officer         : ข้อมูลเจ้าหน้าที่
+    - Director        : ข้อมูลกรรมการ
+    - Scholarship     : ข้อมูลทุนการศึกษา
+    - Application     : ใบสมัคร (เชื่อม Student <-> Scholarship)
+    - Evaluation      : คะแนนจากกรรมการ (เชื่อม Application)
+    - AuditLog        : ประวัติการกระทำของเจ้าหน้าที่
+    - DirectorAuditLog: ประวัติการกระทำของกรรมการ
+    - Criterion       : เกณฑ์การคัดเลือก
+
+  ระบบ Auth:
+    - ตรวจสอบสิทธิ์ผ่าน before_request hook ในแต่ละ Blueprint
+    - Session keys: user_id, role, user_name
+    - Role ที่รองรับ: "student", "officer", "director"
+
+  External Service:
+    - RegService        : จำลอง REG ฐานข้อมูลมหาวิทยาลัย (validate / fetch / sync)
+    - MatchingService   : ตรวจสอบคุณสมบัติและจับคู่ทุน
+    - EmailService      : ส่งอีเมลแจ้งนักศึกษา (interview notification)
+
+================================================================================
+ส่วนที่ 2 : Student Routes  (Blueprint: student_bp, prefix: /student)
+================================================================================
+
+ทุก Route ต้องผ่านการ authenticate ก่อน (ยกเว้น /student/login)
+ตรวจสอบใน: session["user_id"] และ session["role"] == "student"
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 1]  GET  /student/login
+           POST /student/login
+──────────────────────────────────────────────────────────────────────────────
+ผู้รับผิดชอบ : นาย กิตติพงษ์ เลี้ยงหิรัญถาวร
+
+[GET]
+  → Request  : ไม่มี Body / Param พิเศษ
+  → Response : render_template('login.html')
+
+[POST]
+  → Request Body (form-data):
+      student_id  : รหัสนักศึกษา (string, required)
+      password    : รหัสผ่าน (string, required)
+
+  → Data Flow:
+      1. RegService.validate_credentials(student_id, password)
+         → ถ้าไม่ผ่าน: flash error, return login.html
+         → ถ้าผ่าน:
+      2. RegService.fetch_profile(student_id)  → ดึงข้อมูลจาก REG mock DB
+      3. Student.query.filter_by(student_id=...)  → ค้นหาใน local DB
+         → ถ้าไม่มี: สร้าง Student ใหม่
+      4. RegService.sync_student_data(student, reg_data)  → sync ข้อมูล
+      5. student.set_password(password)
+      6. db.session.commit()
+      7. session['user_id'] = student_id
+         session['role'] = 'student'
+      8. redirect → /student/dashboard
+
+  → Response:
+      - สำเร็จ : redirect /student/dashboard + flash "เข้าสู่ระบบสำเร็จ"
+      - ล้มเหลว: render login.html + flash "การเข้าสู่ระบบล้มเหลว: ..."
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 2]  GET  /student/logout
+──────────────────────────────────────────────────────────────────────────────
+  → Data Flow:
+      1. session.clear()
+      2. flash "ออกจากระบบเรียบร้อยแล้ว"
+      3. redirect → /student/login
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 3]  GET  /student/dashboard
+──────────────────────────────────────────────────────────────────────────────
+ผู้รับผิดชอบ : นางสาว ปัญญาพร มูลดับ
+
+  → Request  : session["user_id"] (อ่านจาก session)
+
+  → Data Flow:
+      1. Student.query.filter_by(student_id=session["user_id"]).first()
+         → ถ้าไม่พบ: flash error, redirect login
+      2. Scholarship.query.all()  → ดึงทุนทั้งหมด
+
+  → Response: render_template('student/dashboard.html',
+                  student=student,
+                  scholarships=all_scholarships)
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 4]  GET  /student/profile
+           POST /student/profile
+──────────────────────────────────────────────────────────────────────────────
+ผู้รับผิดชอบ : นาย กิตติพงษ์ เลี้ยงหิรัญถาวร
+
+[GET]
+  → Data Flow:
+      1. Student.query.filter_by(student_id=...).first()
+      2. Application.query.filter_by(student_id=..., status='approved')
+         .paginate(page=1, per_page=5)
+  → Response: render_template('student/profile.html',
+                  student=student_record,
+                  applications=apps,
+                  pagination=pagination)
+
+[POST]
+  → Request Body (form-data):
+      mobile, facebook, line_id, address_current         : ข้อมูลการติดต่อ
+      father_name, father_job, father_income, father_health
+      mother_name, mother_job, mother_income, mother_health
+      parents_status                                     : สถานภาพสมรส
+      housing_status, rent_amount, housing_other         : ที่อยู่อาศัย
+      land_status, agri_own_amount, agri_rent_amount     : ที่ดินเกษตร
+      guardian_name, guardian_relation, guardian_job, guardian_income
+      loan_student_fund (TRUE/FALSE), loan_type          : กยศ.
+      siblings_json (JSON array)                         : ข้อมูลพี่น้อง
+      inc_guardian, inc_scholarship, inc_parttime        : รายได้
+      exp_food, exp_dorm, exp_transport, exp_other       : ค่าใช้จ่าย
+
+  ⚠️  ห้ามรับจาก form: gpax, faculty, year, citizen_id,
+                        address_domicile, disciplinary_status
+
+  → Data Flow:
+      1. อัปเดตค่าทุก field ใน student_record
+      2. student_record.calculate_total_income()
+      3. student_record.update_completeness()  → คำนวณ % ความสมบูรณ์
+      4. db.session.commit()
+  → Response: redirect /student/profile + flash "บันทึกข้อมูลเรียบร้อย"
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 5]  GET  /student/auto-match
+──────────────────────────────────────────────────────────────────────────────
+  → Data Flow:
+      1. Student.query.filter_by(student_id=...).first()
+      2. MatchingService.get_all_matches(student)
+         → จับคู่ทุนที่คุณสมบัติผ่านทั้งหมด (GPAX, คณะ, ฯลฯ)
+  → Response: render_template('student/auto_match.html',
+                  student=student, matches=matches)
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 6]  GET  /student/scholarships/<scholarship_id>
+──────────────────────────────────────────────────────────────────────────────
+  → Request Path Param: scholarship_id (int)
+
+  → Data Flow:
+      1. Scholarship.query.get_or_404(scholarship_id)
+      2. Student.query.filter_by(student_id=...).first()
+      3. Application.query.filter_by(student_id=..., scholarship_id=...)
+         → ตรวจสอบว่าเคยสมัครหรือไม่
+      4. MatchingService.check_eligibility(student, scholarship)
+         → คืนค่า (is_eligible: bool, reasons: list)
+  → Response: render_template('student/scholarship_detail.html',
+                  scholarship, student, already_applied,
+                  existing_app, profile_complete, is_eligible,
+                  eligibility_reasons)
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 7]  GET  /student/apply
+           POST /student/apply
+──────────────────────────────────────────────────────────────────────────────
+ผู้รับผิดชอบ : นาย จารุวัฒน์ บุญสาร
+
+[GET]
+  → Data Flow:
+      1. Scholarship.query.all()  → รายการทุนทั้งหมด
+      2. สร้าง prefill dict จากข้อมูล Student สำหรับ autofill ฟอร์ม
+  → Response: render_template('student/apply.html',
+                  scholarships, prefill, titles, genders, faculties,
+                  year_levels, parent_statuses, housing_types)
+
+[POST]
+  → Request Body (multipart/form-data):
+      scholarship_id  : รหัสทุนที่ต้องการสมัคร (required)
+      action          : "submit" | "save_draft"
+      first_name, last_name, faculty : ข้อมูลนักศึกษา
+      documents[]     : ไฟล์แนบ (pdf, png, jpg, jpeg)
+
+  → Data Flow:
+      1. ตรวจสอบว่า scholarship_id มีหรือไม่
+      2. ตรวจสอบว่าเคยสมัครทุนนี้แล้วหรือไม่
+         → ถ้าเคย: flash error "สมัครไปแล้ว"
+      3. สร้าง Application:
+            id     = str(uuid.uuid4())[:12]
+            status = "draft" ถ้า action=="save_draft"
+                   = "pending" ถ้า action=="submit"
+      4. db.session.add(new_app) → db.session.commit()
+      5. บันทึกไฟล์แนบ:
+            path: static/uploads/<student_id>/app_<app_id>_<filename>
+  → Response: redirect /student/dashboard + flash "บันทึกเรียบร้อย"
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 8]  GET  /student/scholarships   (ประกาศผล)
+──────────────────────────────────────────────────────────────────────────────
+  → Data Flow:
+      1. Scholarship.query.all()
+      2. For each sch ที่ status in ['interview', 'announce']:
+         Application.query.filter(
+             scholarship_id == sch.id,
+             status.in_(['interview', 'approved', 'Selected', 'Reserved'])
+         )  → สร้าง dict recipients = {sch.id: [apps]}
+  → Response: render_template('student/scholarships.html',
+                  scholarships=all_scholarships, recipients=recipients)
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 9]  GET  /student/status
+──────────────────────────────────────────────────────────────────────────────
+ผู้รับผิดชอบ : นางสาว ปัญญาพร มูลดับ
+
+  → Request Query Param: page (int, default=1)
+
+  → Data Flow:
+      1. Application.query.filter_by(student_id=student_id)
+         .order_by(created_at.desc())
+         .paginate(page=page, per_page=5)
+      2. For each app: อ่านไฟล์ใน static/uploads/<student_id>/ ที่ชื่อขึ้นต้นด้วย app_<app.id>
+  → Response: render_template('student/status.html', pagination=pagination)
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 10] GET  /student/status/detail/<app_id>
+──────────────────────────────────────────────────────────────────────────────
+  → Request Path Param: app_id (string)
+  → Data Flow:
+      1. Application.query.get_or_404(app_id)
+  → Response: render_template('student/status_detail.html', app=application)
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 11] POST /student/upload
+──────────────────────────────────────────────────────────────────────────────
+  → สำหรับ AJAX file upload (ยังอยู่ระหว่างพัฒนา)
+  → Response: "Student: Document Upload endpoint"
+
+
+================================================================================
+ส่วนที่ 3 : Officer Routes  (Blueprint: officer_bp, prefix: /officer)
+================================================================================
+
+ทุก Route ต้องผ่านการ authenticate ก่อน (ยกเว้น /officer/login และ /officer/api/scholarships)
+ตรวจสอบใน: session["role"] == "officer"
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 1]  GET  /officer/
+──────────────────────────────────────────────────────────────────────────────
+  → redirect → /officer/applications
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 2]  GET  /officer/profile
+──────────────────────────────────────────────────────────────────────────────
+  → Data Flow:
+      1. Officer.query.filter_by(username=session["user_id"]).first_or_404()
+  → Response: render_template('officer/profile.html', officer=officer)
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 3]  GET  /officer/scholarships
+──────────────────────────────────────────────────────────────────────────────
+  → Data Flow:
+      1. Scholarship.query.all()
+  → Response: render_template('officer/scholarships.html', scholarships=scholarships)
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 4]  GET  /officer/scholarships/add
+           POST /officer/scholarships/add
+──────────────────────────────────────────────────────────────────────────────
+ผู้รับผิดชอบ : นาย ยศสรัล ถิระบุตร
+
+[GET]  → Response: render_template('officer/add_scholarship.html')
+
+[POST]
+  → Request Body (multipart/form-data):
+      scholarship_name    : ชื่อทุน (required)
+      amount              : จำนวนเงิน (float)
+      min_gpax            : GPAX ขั้นต่ำ (float)
+      start_date          : วันเปิดรับ (YYYY-MM-DD)
+      end_date            : วันปิดรับ (YYYY-MM-DD)
+      faculty_condition   : เงื่อนไขคณะ (string)
+      status              : open|close|interview|announce
+      scholarship_image   : ไฟล์รูปภาพ (optional)
+      qualifications      : คุณสมบัติ (text)
+      conditions          : เงื่อนไข (text)
+      scholarship_type    : ประเภท
+      scholarship_nature  : ลักษณะทุน
+      number_of_scholarships : จำนวนทุน (int)
+      required_documents  : เอกสารที่ต้องการ
+
+  → Data Flow:
+      1. Validate scholarship_name
+      2. Parse dates และ floats
+      3. save_uploaded_file(image) → บันทึกรูปใน static/uploads/
+      4. สร้าง Scholarship object + db.session.add() + commit()
+      5. _log_audit(...) → บันทึก AuditLog
+  → Response: redirect /officer/scholarships + flash "เพิ่มทุนสำเร็จ"
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 5]  GET  /officer/scholarships/<scholarship_id>/edit
+           POST /officer/scholarships/<scholarship_id>/edit
+──────────────────────────────────────────────────────────────────────────────
+[GET]
+  → Data Flow: Scholarship.query.filter_by(id=...).first_or_404()
+  → Response: render_template('officer/edit_scholarship.html', scholarship=scholarship)
+
+[POST]
+  → Request Body: เหมือน add_scholarship (ด้านบน)
+
+  → Data Flow:
+      1. โหลด scholarship เดิม (เก็บชื่อและสถานะก่อนแก้ไข)
+      2. อัปเดตทุก field
+      3. จัดการไฟล์รูปใหม่ / ไฟล์ประกาศสัมภาษณ์ / ไฟล์ประกาศผล
+      4. _log_audit() บันทึกประวัติการแก้ไข
+      5. db.session.commit()
+  → Response: redirect /officer/scholarships + flash "แก้ไขเรียบร้อย"
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 6]  POST /officer/scholarships/<scholarship_id>/delete
+──────────────────────────────────────────────────────────────────────────────
+  → Data Flow:
+      1. Scholarship.query.filter_by(id=...).first_or_404()
+      2. _log_audit() บันทึกการลบ
+      3. db.session.delete(scholarship) + commit()
+         → ถ้ามี FK constraint: rollback + flash error
+  → Response: redirect /officer/scholarships
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 7]  GET  /officer/applications
+──────────────────────────────────────────────────────────────────────────────
+ผู้รับผิดชอบ : นาย ธีรภัทร พิกุลศรี
+
+  → Request Query Params:
+      status          : draft|pending|reviewing|needs_edit|interview|approved
+      scholarship_id  : int (กรองตามทุน)
+      search          : string (ค้นหาชื่อ/รหัส/คณะ)
+
+  → Data Flow:
+      1. Application.query.order_by(created_at.desc())
+      2. if scholarship_id_filter: .filter_by(scholarship_id=...)
+      3. if status_filter:          .filter_by(status=...)
+      4. if search_query:           .filter(student_name/student_id/faculty ILIKE)
+      5. Scholarship.query.all() → สำหรับ dropdown
+      6. นับสถิติ (draft, pending, approved, interview, needs_edit, total)
+
+  → Response: render_template('officer/applications.html',
+                  applications, scholarships,
+                  draft_count, pending_count, approved_count,
+                  interview_count, total_count, needs_edit_count,
+                  page, per_page, total_pages, start_index, end_index,
+                  selected_status, selected_scholarship_id, search_query)
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 8]  GET  /officer/application/<application_id>
+──────────────────────────────────────────────────────────────────────────────
+  → Request Path Param: application_id (string UUID-like)
+
+  → Data Flow:
+      1. Application.query.get_or_404(application_id)
+      2. ตรวจสอบว่ามีเจ้าหน้าที่คนอื่นตรวจสอบอยู่หรือไม่
+         → ถ้ามี: flash warning + redirect /officer/applications
+      3. ถ้า status in {pending, needs_edit, reviewing}:
+            application.status = 'reviewing'
+            application.reviewing_by = session["user_id"]
+            application.reviewing_at = datetime.utcnow()
+            db.session.commit()
+      4. Student.query.filter_by(student_id=application.student_id).first()
+      5. json.loads(application.form_data)  → แปลงข้อมูลฟอร์ม
+      6. อ่านไฟล์แนบใน static/uploads/<student_id>/ ที่ขึ้นต้น app_<app_id>
+  → Response: render_template('officer/application-detail.html',
+                  application, student, form_data, all_files,
+                  student_files, officer_files)
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 9]  GET  /officer/application/<application_id>/student-full
+──────────────────────────────────────────────────────────────────────────────
+  → Data Flow:
+      1. Application.query.get_or_404(application_id)
+      2. Student.query.filter_by(student_id=...).first()
+      3. อ่านไฟล์แนบ
+      4. json.loads(form_data)
+  → Response: render_template('officer/student_full_view.html',
+                  application, student, form_data, all_files)
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 10] POST /officer/application/<application_id>/decision
+──────────────────────────────────────────────────────────────────────────────
+  → Request Body (form-data):
+      decision         : "interview" | "needs_edit"
+      reject_reason    : เหตุผลการส่งกลับแก้ไข (ถ้า decision="needs_edit")
+      interview_date   : วันสัมภาษณ์ (YYYY-MM-DD)
+      interview_time   : เวลาสัมภาษณ์
+      interview_location : สถานที่สัมภาษณ์
+
+  → Data Flow (decision = "interview"):
+      1. application.status = 'interview'
+      2. กำหนดวัน/เวลา/สถานที่สัมภาษณ์
+      3. db.session.commit()
+      4. _log_audit("approve_interview", ...)
+      5. EmailService.send_interview_notification(...)
+         → ส่งอีเมลแจ้งนักศึกษา (อีเมลจาก form_data['email'] หรือ Student.email)
+
+  → Data Flow (decision = "needs_edit"):
+      1. application.status = 'needs_edit'
+      2. application.status_description = reject_reason
+      3. application.reject_reason = reject_reason
+      4. db.session.commit()
+      5. _log_audit("reject_needs_edit", ...)
+      6. EmailService.send_needs_edit_notification(...)
+
+  → Response: redirect /officer/applications + flash ผลการดำเนินการ
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 11] GET  /officer/final_announcement
+──────────────────────────────────────────────────────────────────────────────
+  → Data Flow:
+      1. Scholarship.query.all()
+      2. สร้าง stats ต่อทุน: total_applicants, interview_count, approved_count
+  → Response: render_template('officer/announcement.html', ...)
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 12] GET  /officer/audit_log
+──────────────────────────────────────────────────────────────────────────────
+  → Data Flow:
+      1. AuditLog.query.order_by(timestamp.desc()).all()
+  → Response: render_template('officer/audit_log.html', logs=all_logs)
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 13] GET  /officer/scholarship/<scholarship_id>/recipients
+──────────────────────────────────────────────────────────────────────────────
+  → Data Flow:
+      1. Scholarship.query.get_or_404(scholarship_id)
+      2. Application.query.filter_by(scholarship_id=...)
+         .filter(status.in_(['approved', 'Selected', 'ได้รับทุนการศึกษา']))
+  → Response: render_template('officer/recipients.html', ...)
+
+
+================================================================================
+ส่วนที่ 4 : Director Routes  (Blueprint: director_bp, prefix: /director)
+================================================================================
+
+ทุก Route ต้องผ่านการ authenticate ก่อน
+ตรวจสอบใน: session["role"] == "director"
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 1]  GET  /director/
+──────────────────────────────────────────────────────────────────────────────
+  → Data Flow:
+      1. Application.query.count()                   → total_apps
+      2. Application.query.filter(status.in_([...pending...])).count()
+      3. Application.query.filter(status.in_([...reviewed...])).count()
+      4. progress_pct = reviewed / total * 100
+      5. Scholarship.query.order_by(id.desc()).limit(5).all()  → recent 5 ทุน
+      6. datetime.now()  → today
+  → Response: render_template('director/homepage.html',
+                  pending_count, reviewed_count, progress_pct,
+                  recent_scholarships, today)
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 2]  GET  /director/scoring
+──────────────────────────────────────────────────────────────────────────────
+ผู้รับผิดชอบ : นาย ทรงเดช จำปาเทศ
+
+  → Data Flow:
+      1. Scholarship.query.all()
+      2. For each sch:
+           total_applicants = Application.query.filter_by(scholarship_id=sch.id).count()
+           passed_docs = Application.query.filter(
+               scholarship_id==sch.id,
+               status.in_(['interview', 'approved'])
+           ).count()
+  → Response: render_template('director/scoring.html',
+                  scholarships=scholarship_list)
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 3]  GET  /director/scoring/<scholarship_id>
+──────────────────────────────────────────────────────────────────────────────
+ผู้รับผิดชอบ : นาย กฤชณัท ศิริรังสรรค์กุล
+
+  → Request Path Param: scholarship_id
+
+  → Data Flow:
+      1. Scholarship.query.get_or_404(scholarship_id)
+      2. db.session.query(Application, Student)
+         .join(Student, Application.student_id == Student.student_id)
+         .filter(scholarship_id == ..., status.in_(['interview', 'approved']))
+         .all()
+      3. สร้าง formatted_candidates list:
+           {id, student_id, student_name, gpa, is_scored, total_score, status}
+  → Response: render_template('director/scoring_students.html',
+                  scholarship_id, scholarship_name, candidates)
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 4]  GET  /director/score_candidate/<app_id>
+           POST /director/score_candidate/<app_id>
+──────────────────────────────────────────────────────────────────────────────
+[GET]  → Response: render_template('director/give_score.html', student=application)
+
+[POST]
+  → Request Body (form-data):
+      score_financial   : คะแนนความจำเป็นทางการเงิน (0-40)
+      score_interview   : คะแนนสัมภาษณ์ (0-40)
+      score_volunteer   : คะแนนจิตอาสา (0-10)
+      approve_scholarship: "1" ถ้าต้องการอนุมัติทันที
+
+  → Data Flow:
+      1. แปลงค่าเป็น int
+      2. คำนวณ hidden_score:
+            reason_text = application.notes หรือ form_data['reason']
+            hidden_score = min(10, len(reason_text) // 20)
+      3. total = score_financial + score_interview + score_volunteer + hidden_score
+      4. Create/Update Evaluation:
+            Evaluation(application_id, committee_id, score_financial, score_interview, score_volunteer)
+      5. application.total_score = total
+         application.is_scored = True
+         ถ้า approve_scholarship=="1": application.status = "approved"
+      6. สร้าง DirectorAuditLog
+      7. db.session.commit()
+  → Response: redirect /director/scoring/<scholarship_id>
+              + flash "บันทึกคะแนน ... เรียบร้อย"
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 5]  POST /director/approve/<app_id>
+──────────────────────────────────────────────────────────────────────────────
+  → Data Flow:
+      1. Application.query.get_or_404(app_id)
+      2. ถ้า is_scored==True และ status=="interview":
+            application.status = "approved"
+            db.session.commit()
+  → Response: redirect /director/scoring/<scholarship_id>
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 6]  GET  /director/candidate/<app_id>
+──────────────────────────────────────────────────────────────────────────────
+ผู้รับผิดชอบ : นาย กฤชณัท ศิริรังสรรค์กุล
+
+  → Data Flow:
+      1. Application.query.get_or_404(app_id)
+      2. Student.query.filter_by(student_id=...).first()
+      3. ค้นหารูปนักศึกษา:
+            ลอง static/images/students/<student_id>.jpg ก่อน
+            → ถ้าไม่มี: ค้นจาก static/uploads/<student_id>/app_<app_id>_*
+  → Response: render_template('director/candidate_detail.html',
+                  student=application, photo_url=photo_url, student_obj=student)
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 7]  GET  /director/ranking/<scholarship_id>
+──────────────────────────────────────────────────────────────────────────────
+ผู้รับผิดชอบ : นาย ทรงเดช จำปาเทศ
+
+  → Data Flow:
+      1. Scholarship.query.get_or_404(scholarship_id)
+      2. Application.query.filter_by(scholarship_id=..., is_scored=True)
+         .order_by(total_score.desc()).all()
+      3. สร้าง stats: {total_ranked, max_score, quota}
+  → Response: render_template('director/ranking.html',
+                  scholarship, candidates, stats)
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 8]  POST /director/confirm_selection/<scholarship_id>
+──────────────────────────────────────────────────────────────────────────────
+  → Data Flow:
+      1. Scholarship.query.get_or_404(scholarship_id)
+      2. Application.query.filter_by(scholarship_id=..., is_scored=True)
+         .order_by(total_score.desc()).all()
+      3. For each candidate (เรียงตามคะแนน):
+            index < quota → status = "Selected"
+            index >= quota → status = "Reserved"
+      4. สร้าง DirectorAuditLog
+      5. db.session.commit()
+  → Response: redirect /director/ranking/<scholarship_id>
+              + flash "ยืนยันผลการคัดเลือก ... เรียบร้อย"
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 9]  GET  /director/ranking-selection
+──────────────────────────────────────────────────────────────────────────────
+  → Data Flow: Scholarship.query.all()
+  → Response: render_template('director/ranking_selection.html', scholarships)
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 10] GET  /director/audit_log
+──────────────────────────────────────────────────────────────────────────────
+  → Data Flow:
+      1. DirectorAuditLog.query.order_by(timestamp.desc()).all()
+  → Response: render_template('director/audit_log.html', logs=all_logs)
+
+──────────────────────────────────────────────────────────────────────────────
+[ROUTE 11] GET  /director/profile
+──────────────────────────────────────────────────────────────────────────────
+  → Data Flow:
+      1. Director.query.filter_by(username=session["user_id"]).first_or_404()
+  → Response: render_template('director/profile.html', director=director)
+
+
+================================================================================
+ส่วนที่ 5 : API Routes (JSON-based, สำหรับ Postman / External System)
+================================================================================
+
+──────────────────────────────────────────────────────────────────────────────
+[API 1]  GET   /officer/api/scholarships
+         POST  /officer/api/scholarships
+──────────────────────────────────────────────────────────────────────────────
+  ไม่ต้อง authenticate (ยกเว้น session ผ่าน)
+
+[GET]
+  → Response (JSON):
+      {
+        "status": "success",
+        "data": [
+          {
+            "id": 1,
+            "name": "ทุนวิศวกรรม",
+            "amount": 30000.0,
+            "min_gpax": 3.0,
+            "status": "open",
+            "number_of_scholarships": 5
+          }, ...
+        ]
+      }
+
+[POST]
+  → Request Body (application/json):
+      {
+        "name": "ชื่อทุน",            // required
+        "amount": 30000,
+        "min_gpax": 3.0,
+        "faculty_condition": "คณะวิศวกรรมศาสตร์",
+        "status": "open",
+        "number_of_scholarships": 5
+      }
+  → Response (201 Created):
+      {"status": "success", "message": "Created scholarship <name>"}
+  → Response (400 Bad Request):
+      {"status": "error", "message": "Missing 'name'"}
+  → Response (500 Server Error):
+      {"status": "error", "message": "<error message>"}
+
+
+================================================================================
+ส่วนที่ 6 : Session & Authentication Flow
+================================================================================
+
+Session Keys ที่ใช้ในระบบ:
+  - user_id   : username ของ officer/director หรือ student_id ของนักศึกษา
+  - role      : "student" | "officer" | "director"
+  - user_name : ชื่อแสดงผลใน navbar
+
+Authentication Flow (Unified Login - app.py):
+  POST /login
+    → username, password จาก form
+    → ลองตรวจสอบใน Officer, Director, Student ตามลำดับ
+       1. Officer.query.filter_by(username=...).first() → check_password()
+       2. Director.query.filter_by(username=...).first() → check_password()
+       3. RegService.validate_credentials(student_id, password)
+    → ถ้าผ่าน: set session + redirect ตาม role
+       - officer  → /officer/applications
+       - director → /director/
+       - student  → /student/dashboard
+
+Before Request Guards:
+  - student_bp.before_request:
+      require_student_login()
+      → redirect /login ถ้า role != "student"
+  - officer_bp.before_request:
+      require_officer_login()
+      → redirect /login ถ้า role != "officer"
+      → return 401 JSON ถ้าเข้าผ่าน /officer/api/...
+  - director_bp.before_request:
+      require_director_login()
+      → redirect /login ถ้า role != "director"
+
+
+================================================================================
+ส่วนที่ 7 : ตารางสถานะใบสมัคร (Application Status Lifecycle)
+================================================================================
+
+  สถานะ          ความหมาย                          เปลี่ยนโดย
+  ─────────────────────────────────────────────────────────────────
+  draft           บันทึกร่าง (ยังไม่ส่ง)            นักศึกษา
+  pending         ส่งใบสมัครแล้ว รอตรวจสอบ          นักศึกษา
+  reviewing       เจ้าหน้าที่กำลังตรวจสอบอยู่       ระบบ (อัตโนมัติ)
+  needs_edit      ต้องแก้ไขเอกสาร                   เจ้าหน้าที่
+  interview       ผ่านเอกสาร นัดสัมภาษณ์แล้ว        เจ้าหน้าที่
+  approved        กรรมการอนุมัติแล้ว (ได้รับทุน)     กรรมการ / เจ้าหน้าที่
+  Selected        ยืนยันผลการคัดเลือก (อยู่ใน quota)  กรรมการ
+  Reserved        สำรองไว้ (เกิน quota)              กรรมการ
+
+  flowchart:
+    draft → pending → reviewing → interview → approved → Selected
+                               ↘ needs_edit → pending (after edit)
+                                                       → Reserved (ถ้า quota เต็ม)
+
+  สำหรับการแสดงผล "ผ่านแล้ว" (badge สีเขียว):
+    ครอบคลุม: approved, Selected, ได้รับทุนการศึกษา
+
+
+================================================================================
+  จัดทำโดย: ระบบทุนการศึกษา UBU Development Team
+  อ้างอิงโค้ด: routes/student_routes.py, officer_routes.py, director_routes.py
+================================================================================

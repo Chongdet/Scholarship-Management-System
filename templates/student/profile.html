@@ -276,12 +276,44 @@
         <thead><tr>
           <th>ลำดับ</th><th>ชื่อทุนการศึกษา</th><th>ประเภท</th><th>หน่วยงานที่มอบ</th><th>วันที่</th><th>สถานะ</th>
         </tr></thead>
-        <tbody><tr><td colspan="6">ยังไม่มีประวัติการรับทุน</td></tr></tbody>
+        <tbody>
+          {% if applications %}
+            {% for app in applications %}
+            <tr>
+              <td style="text-align:center;">{{ (pagination.page - 1) * pagination.per_page + loop.index }}</td>
+              <td>{{ app.scholarship.name }}</td>
+              <td>{{ app.scholarship.scholarship_type or '-' }}</td>
+              <td>{{ app.scholarship.provider or '-' }}</td>
+              <td>{{ app.created_at.strftime('%d/%m/%Y') }}</td>
+              <td>
+                {% if app.status == 'approved' %}
+                  <span class="status-badge success">ได้รับทุนการศึกษา</span>
+                {% elif app.status == 'rejected' %}
+                  <span class="status-badge danger">ไม่ได้รับทุน</span>
+                {% else %}
+                  <span class="status-badge info">{{ app.status }}</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr><td colspan="6" style="text-align:center;padding:1.5rem;color:var(--muted);">ยังไม่มีประวัติการรับทุน</td></tr>
+          {% endif %}
+        </tbody>
       </table>
     </div>
     <div class="sib-footer">
-      <button type="button" class="btn-pg prev">← ก่อนหน้า</button>
-      <button type="button" class="btn-pg next">ถัดไป →</button>
+      {% if pagination.has_prev %}
+        <a href="{{ url_for('student.profile', page=pagination.prev_num) }}" class="btn-pg prev">← ก่อนหน้า</a>
+      {% else %}
+        <button type="button" class="btn-pg prev" disabled>← ก่อนหน้า</button>
+      {% endif %}
+
+      {% if pagination.has_next %}
+        <a href="{{ url_for('student.profile', page=pagination.next_num) }}" class="btn-pg next">ถัดไป →</a>
+      {% else %}
+        <button type="button" class="btn-pg next" disabled>ถัดไป →</button>
+      {% endif %}
     </div>
   </div>
 

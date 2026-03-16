@@ -194,6 +194,7 @@ def profile():
         student_record.exp_dorm      = safe_float("exp_dorm")
         student_record.exp_transport = safe_float("exp_transport")
         student_record.exp_other     = safe_float("exp_other")
+        
         db.session.commit()
         flash("บันทึกข้อมูลส่วนตัวเรียบร้อยแล้ว ✅", "success")
         return redirect(url_for("student.profile"))

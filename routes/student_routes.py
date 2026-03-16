@@ -225,146 +225,131 @@ def scholarship_detail(scholarship_id):
                            student=student, 
                            already_applied=existing_app is not None)
 
+
+
 # รับผิดชอบโดย: นาย จารุวัฒน์ บุญสาร
+# ==========================================
+# ฟีเจอร์: การสมัครทุนและจัดการไฟล์
+# ==========================================
+ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 @student_bp.route("/apply", methods=["GET", "POST"])
 def apply_scholarship():
+    housing_types = ["บ้านพัก", "ที่อยู่อาศัย", "ที่พัก"]
+    if "user_id" not in session or session.get("role") != "student":
+        flash("กรุณาเข้าสู่ระบบ", "error")
+        return redirect(url_for("student.login"))
+
     current_student_id = session["user_id"]
     student = Student.query.filter_by(student_id=current_student_id).first()
 
     if request.method == "POST":
+        # รับข้อมูลจากแบบฟอร์ม
         scholarship_id = request.form.get("scholarship_id")
-        action         = request.form.get("action", "submit")
+        action = request.form.get("action", "submit")
+        
+        # ข้อมูลนักศึกษาจากฟอร์ม
+        first_name = request.form.get("first_name", "")
+        last_name = request.form.get("last_name", "")
+        student_name = f"{first_name} {last_name}".strip()
+        faculty = request.form.get("faculty", "")
         
         if not scholarship_id:
             flash("กรุณาเลือกทุนการศึกษา", "error")
             return redirect(url_for("student.apply_scholarship"))
 
-        # ป้องกันการสมัครซ้ำ
-        existing_app = Application.query.filter_by(
-            student_id=current_student_id,
-            scholarship_id=scholarship_id
-        ).first()
-        
+        # ตรวจสอบว่าเคยสมัครทุนนี้หรือยัง
+        existing_app = Application.query.filter_by(student_id=current_student_id, scholarship_id=scholarship_id).first()
         if existing_app:
             flash("คุณได้สมัครทุนนี้ไปแล้ว", "error")
             return redirect(url_for("student.dashboard"))
-
-        # ข้อมูลนักศึกษาจากฟอร์ม
-        first_name   = request.form.get("first_name", "")
-        last_name    = request.form.get("last_name", "")
-        student_name = f"{first_name} {last_name}".strip()
-        faculty      = request.form.get("faculty", "")
-        email        = request.form.get("email", "").strip()
-        phone        = request.form.get("phone", "").strip()
-        gpa_val      = request.form.get("gpa")
-        address      = request.form.get("address", "")
-        reason       = request.form.get("reason", "").strip()
-
-        # อัปเดตข้อมูล Student จากฟอร์ม (เพื่อให้เจ้าหน้าที่เห็นข้อมูลถูกต้อง)
-        if student:
-            if student_name:
-                student.name = student_name
-            if faculty:
-                student.faculty = faculty
-            if email:
-                student.email = email
-            if phone:
-                student.mobile = phone
-            if address:
-                student.address_current = address
-            if gpa_val:
-                try:
-                    student.gpax = float(gpa_val)
-                except (ValueError, TypeError):
-                    pass
-            db.session.commit()
-
-        status = "draft" if action == "save_draft" else "pending"
-
-        # รวบรวมข้อมูลทั้งหมดจากฟอร์มเพื่อเก็บเป็น JSON
-        form_data_dict = {k: (v.strip() if isinstance(v, str) else v) for k, v in request.form.items()
-                          if k not in ('scholarship_id', 'action', 'upload_student_id') and v}
-        form_data_json = json.dumps(form_data_dict, ensure_ascii=False) if form_data_dict else None
         
+        # จัดการสถานะ (บันทึกร่าง หรือ ส่งใบสมัคร)
+        status = "draft" if action == "save_draft" else "pending"
+        
+        # บันทึกข้อมูลลงฐานข้อมูล Application
         new_app = Application(
-            id=f"APP-{current_student_id}-{scholarship_id}-{uuid.uuid4().hex[:4]}",
+            id=str(uuid.uuid4())[:12],
             student_id=current_student_id,
-            student_name=student_name if student_name else (student.name if student else ""),
-            faculty=faculty if faculty else (student.faculty if student else ""),
+            student_name=student_name if student_name else student.name,
+            faculty=faculty if faculty else student.faculty,
             scholarship_id=scholarship_id,
-            status=status,
-            notes=reason if reason else None,
-            form_data=form_data_json
+            status=status
         )
         db.session.add(new_app)
+        db.session.commit()
         
         # --- จัดการไฟล์แนบ ---
-        upload_folder = os.path.join(current_app.root_path, 'static', 'uploads', str(current_student_id))
+        upload_folder = os.path.join(current_app.root_path, 'static', 'uploads', current_student_id)
         os.makedirs(upload_folder, exist_ok=True)
-
-        # รับไฟล์ได้ทั้งจากชื่อ field 'documents' และ 'document'
+            
         files = request.files.getlist("documents")
-        if not files or all(f.filename == '' for f in files):
-            single_file = request.files.get("document")
-            if single_file and single_file.filename != '':
-                files = [single_file]
-
-        first_filename = None
         for file in files:
             if file and allowed_file(file.filename):
-                filename        = secure_filename(file.filename)
-                unique_filename = f"app_{new_app.id}_{uuid.uuid4().hex[:8]}_{filename}"
-
-                if not first_filename:
-                    first_filename = unique_filename
-
-                save_path = os.path.join(upload_folder, unique_filename)
+                filename = secure_filename(file.filename)
+                # ผูกไฟล์กับ Application ID เพื่อไม่ให้สับสน
+                save_path = os.path.join(upload_folder, f"app_{new_app.id}_{filename}")
                 file.save(save_path)
-
-        if first_filename:
-            new_app.application_file = first_filename
-
-        db.session.commit()
-        flash("ส่งใบสมัครเรียบร้อยแล้ว", "success")
-        return redirect(url_for("student.track_status"))
-
-    # --- ฝั่ง GET Method ---
+        
+        flash("บันทึกข้อมูลการสมัครเรียบร้อยแล้ว", "success")
+        return redirect(url_for("student.dashboard"))
+    
+    # GET method
     scholarships = Scholarship.query.all()
     
+    # ดึงข้อมูลนักศึกษามาแสดงไว้ก่อน (Prefill)
     prefill = {}
-    req_sch_id = request.args.get("scholarship_id")
-    if req_sch_id:
-        prefill["scholarship_id"] = req_sch_id
-        
     if student:
-        parts      = student.name.split() if student.name else [""]
+        parts = student.name.split() if student.name else [""]
         first_name = parts[0]
-        last_name  = " ".join(parts[1:]) if len(parts) > 1 else ""
-        prefill.update({
+        last_name = " ".join(parts[1:]) if len(parts) > 1 else ""
+        
+        father_inc = getattr(student, 'father_income', None) or 0
+        mother_inc = getattr(student, 'mother_income', None) or 0
+        family_income = father_inc + mother_inc if (father_inc or mother_inc) else ""
+        
+        siblings_lst = getattr(student, 'siblings_list', None)
+        siblings = len(siblings_lst) if siblings_lst else ""
+        
+        prefill = {
             "student_id": student.student_id,
             "first_name": first_name,
             "last_name": last_name,
-            "email": student.email or "",
-            "phone": student.mobile or "",
-            "faculty": student.faculty or "",
-            "gpa": student.gpax if student.gpax is not None else "",
-            "address": student.address_current or "",
-        })
+            "email": getattr(student, 'email', ''),
+            "faculty": student.faculty,
+            "phone": getattr(student, 'mobile', ''),
+            "address": getattr(student, 'address_current', ''),
+            "father_name": getattr(student, 'father_name', ''),
+            "father_occupation": getattr(student, 'father_job', ''),
+            "father_income": getattr(student, 'father_income', ''),
+            "mother_name": getattr(student, 'mother_name', ''),
+            "mother_occupation": getattr(student, 'mother_job', ''),
+            "mother_income": getattr(student, 'mother_income', ''),
+            "year_level": getattr(student, 'year', ''),
+            "gpa": getattr(student, 'gpax', ''),
+            "housing_type": getattr(student, 'housing_status', ''),
+            "family_income": family_income,
+            "siblings": siblings,
+            "siblings_list": siblings_lst if siblings_lst else [],
+            "parents_status": getattr(student, 'parents_status', '')
+        }
 
-    titles          = ["นาย", "นางสาว", "นาง"]
-    genders         = ["ชาย", "หญิง"]
-    housing_types   = ["บ้านพัก", "ที่อยู่อาศัย", "ที่พัก"]
-    parent_statuses = ["มีชีวิตอยู่", "ถึงแก่กรรม", "หย่าร้าง", "แยกกันอยู่"]
-    year_levels     = [1, 2, 3, 4, 5, 6]
-    faculties       = [
-        "คณะเกษตรศาสตร์", "คณะวิทยาศาสตร์", "คณะวิศวกรรมศาสตร์", "คณะศิลปศาสตร์",
-        "คณะเภสัชศาสตร์", "คณะบริหารศาสตร์", "คณะพยาบาลศาสตร์",
-        "วิทยาลัยแพทยศาสตร์และการสาธารณสุข", "คณะศิลปประยุกต์และสถาปัตยกรรมศาสตร์",
+    titles = ["นาย", "นางสาว", "นาง"]
+    genders = ["ชาย", "หญิง"]
+    faculties = [
+        "คณะเกษตรศาสตร์", "คณะวิทยาศาสตร์", "คณะวิศวกรรมศาสตร์", "คณะศิลปศาสตร์", 
+        "คณะเภสัชศาสตร์", "คณะบริหารศาสตร์", "คณะพยาบาลศาสตร์", 
+        "วิทยาลัยแพทยศาสตร์และการสาธารณสุข", "คณะศิลปประยุกต์และสถาปัตยกรรมศาสตร์", 
         "คณะนิติศาสตร์", "คณะรัฐศาสตร์"
     ]
+    year_levels = [1, 2, 3, 4, 5, 6]
+    parent_statuses = ["มีชีวิตอยู่", "ถึงแก่กรรม", "หย่าร้าง", "แยกกันอยู่"]
 
-    return render_template("student/apply.html",
-                           scholarships=scholarships,
+    return render_template("student/apply.html", 
+                           scholarships=scholarships, 
                            prefill=prefill,
                            titles=titles,
                            genders=genders,

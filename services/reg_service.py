@@ -18,26 +18,34 @@ class RegService:
     @classmethod
     def _build_mock_db(cls):
         mock_db = {}
-        faculties = [
-            "คณะวิทยาศาสตร์",
-            "คณะวิศวกรรมศาสตร์",
-            "คณะพยาบาลศาสตร์",
-            "คณะบริหารศาสตร์"
+        
+        # ข้อมูลนักศึกษาจริง (ตรงกับใน seed.py)
+        students_data = [
+            {"student_id": "6811454001", "name": "นายธนกฤต วงศ์สุวรรณ",      "email": "thanakrit.w@ubu.ac.th",    "faculty": "คณะวิศวกรรมศาสตร์",  "gpax": 3.21},
+            {"student_id": "6811454002", "name": "นางสาวพิมพ์ชนก ทองดี",      "email": "pimchanok.t@ubu.ac.th",    "faculty": "คณะวิทยาศาสตร์",     "gpax": 3.56},
+            {"student_id": "6811454003", "name": "นายอภิสิทธิ์ ศรีสมบูรณ์",   "email": "apisit.s@ubu.ac.th",      "faculty": "คณะบริหารศาสตร์",    "gpax": 2.89},
+            {"student_id": "6811454004", "name": "นางสาวกนกวรรณ แสงจันทร์",   "email": "kanokwan.s@ubu.ac.th",    "faculty": "คณะพยาบาลศาสตร์",    "gpax": 3.78},
+            {"student_id": "6811454005", "name": "นายณัฐพงษ์ ใจดี",           "email": "nattapong.j@ubu.ac.th",   "faculty": "คณะวิศวกรรมศาสตร์",  "gpax": 3.10},
+            {"student_id": "6811454006", "name": "นางสาวสุภาวดี มีสุข",       "email": "supawadee.m@ubu.ac.th",   "faculty": "คณะศิลปศาสตร์",      "gpax": 3.44},
+            {"student_id": "6811454007", "name": "นายวรวุฒิ ประสงค์ดี",       "email": "worawut.p@ubu.ac.th",     "faculty": "คณะวิทยาศาสตร์",     "gpax": 2.95},
+            {"student_id": "6811454008", "name": "นางสาวชนิดา รุ่งเรือง",     "email": "chanida.r@ubu.ac.th",     "faculty": "คณะนิติศาสตร์",      "gpax": 3.62},
+            {"student_id": "6811454009", "name": "นายปิยะพัฒน์ สุขสงวน",     "email": "piyapat.s@ubu.ac.th",     "faculty": "คณะบริหารศาสตร์",    "gpax": 3.05},
+            {"student_id": "6811454010", "name": "นางสาวอารียา ดวงจันทร์",    "email": "areeya.d@ubu.ac.th",     "faculty": "คณะเภสัชศาสตร์",     "gpax": 3.88},
         ]
 
-        for i in range(1, 11):
-            student_id = f"68113400{i:02d}"
+        for i, data in enumerate(students_data, 1):
+            student_id = data["student_id"]
             dis_status = "ไม่มี" if i % 4 != 0 else "มี"
             
             mock_db[student_id] = {
                 "student_id": student_id,
-                "name": f"นักศึกษา ทดสอบที่ {i}",
-                "faculty": faculties[i % len(faculties)],
-                "year": 2,  # ใช้ integer
-                "gpax": round(2.5 + (i * 0.15), 2),
-                "advisor_name": f"ผศ.ดร. ที่ปรึกษา ใจดี_{i}",
+                "name": data["name"],
+                "faculty": data["faculty"],
+                "year": 2, 
+                "gpax": data["gpax"],
+                "advisor_name": f"ผศ.ดร. ที่ปรึกษา {i}",
                 "disciplinary_status": dis_status,
-                "email": f"student{i}@ubu.ac.th",
+                "email": data["email"],
                 "citizen_id": f"1234567890{i:02d}",
                 "address_domicile": f"บ้านเลขที่ {i}/99 ต.ในเมือง อ.เมือง จ.อุบลราชธานี",
                 "address_current": f"หอพักนักศึกษา อาคาร {i} มหาวิทยาลัยอุบลราชธานี",
@@ -99,13 +107,22 @@ class RegService:
         # ❌ ไม่ sync student_id (Primary Key ห้ามทับ)
 
         # --------------------------------
-        # 🔓 DEFAULT FROM REG (แก้ไขได้)
+        # 🔓 DEFAULT FROM REG (ดึงมาตั้งต้น แต่แก้ไขได้)
         # --------------------------------
         if not student_model.email:
             student_model.email = reg_data.get('email')
 
         if not student_model.address_current:
             student_model.address_current = reg_data.get('address_current')
+
+        # 🌟 จุดที่เพิ่ม: ดึงชื่อบิดาและมารดามาด้วย ถ้ายังไม่มีข้อมูล
+        if not student_model.father_name:
+            student_model.father_name = reg_data.get('father_name')
+
+        if not student_model.mother_name:
+            student_model.mother_name = reg_data.get('mother_name')
+
+        return student_model
 
         # --------------------------------
         # 🔓 FULLY EDITABLE (ไม่ผูก REG)

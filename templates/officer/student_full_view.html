@@ -1,0 +1,169 @@
+{% extends "layouts/base.html" %}
+
+{% block nav_links %}
+    <a href="{{ url_for('officer.list_scholarships') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">จัดการทุน</a>
+    <a href="{{ url_for('officer.applications') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ตรวจสอบใบสมัคร</a>
+    <a href="{{ url_for('officer.final_announcement') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">ประกาศทุน</a>
+    <a href="{{ url_for('officer.audit_log') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">บันทึกการทำงาน</a>
+{% endblock %}
+
+{% block role_name %}เจ้าหน้าที่{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto p-6">
+    <div class="mb-4 flex items-center text-sm text-gray-500">
+        <a href="{{ url_for('officer.view_application', application_id=application.id) }}" class="hover:text-blue-600 transition">← กลับไปรายละเอียดใบสมัคร</a>
+    </div>
+
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">ข้อมูลนักศึกษาทั้งหมด - {{ application.student_name }}</h2>
+
+    {% macro fd(key) %}{{ (form_data or {}).get(key) or '-' }}{% endmacro %}
+    {% macro fdv(key, fallback) %}{{ (form_data or {}).get(key) or fallback or '-' }}{% endmacro %}
+
+    <div class="space-y-6">
+        <!-- 1. ข้อมูลส่วนตัว -->
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="bg-blue-50 px-6 py-3 border-b border-gray-200">
+                <h3 class="font-bold text-gray-800">1. ข้อมูลส่วนตัว</h3>
+            </div>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div><span class="text-gray-500 text-sm">คำนำหน้า</span><p class="font-medium">{{ fd('title') }}</p></div>
+                <div><span class="text-gray-500 text-sm">ชื่อ-นามสกุล</span><p class="font-medium">{% if (form_data or {}).get('first_name') or (form_data or {}).get('last_name') %}{{ fd('first_name') }} {{ fd('last_name') }}{% else %}{{ application.student_name or (student.name if student else '-') }}{% endif %}</p></div>
+                <div><span class="text-gray-500 text-sm">ชื่อ (ภาษาอังกฤษ)</span><p class="font-medium">{{ fd('first_name_en') }} {{ fd('last_name_en') }}</p></div>
+                <div><span class="text-gray-500 text-sm">เลขบัตรประชาชน</span><p class="font-medium">{{ fdv('national_id', student.citizen_id if student else '') }}</p></div>
+                <div><span class="text-gray-500 text-sm">วันเดือนปีเกิด</span><p class="font-medium">{{ fd('birth_date') }}</p></div>
+                <div><span class="text-gray-500 text-sm">เพศ</span><p class="font-medium">{{ fd('gender') }}</p></div>
+                <div><span class="text-gray-500 text-sm">สัญชาติ</span><p class="font-medium">{{ fd('nationality') }}</p></div>
+                <div><span class="text-gray-500 text-sm">ศาสนา</span><p class="font-medium">{{ fd('religion') }}</p></div>
+                <div><span class="text-gray-500 text-sm">เบอร์โทรศัพท์</span><p class="font-medium">{{ fdv('phone', student.mobile if student else '') }}</p></div>
+                <div><span class="text-gray-500 text-sm">อีเมล</span><p class="font-medium">{{ fdv('email', student.email if student else '') }}</p></div>
+            </div>
+        </div>
+
+        <!-- 2. ที่อยู่ปัจจุบัน -->
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="bg-blue-50 px-6 py-3 border-b border-gray-200">
+                <h3 class="font-bold text-gray-800">2. ที่อยู่ปัจจุบัน</h3>
+            </div>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="md:col-span-2"><span class="text-gray-500 text-sm">บ้านเลขที่/หมู่ที่/ถนน</span><p class="font-medium">{{ fdv('address', student.address_current if student else '') }}</p></div>
+                <div><span class="text-gray-500 text-sm">ตำบล/แขวง</span><p class="font-medium">{{ fd('sub_district') }}</p></div>
+                <div><span class="text-gray-500 text-sm">อำเภอ/เขต</span><p class="font-medium">{{ fd('district') }}</p></div>
+                <div><span class="text-gray-500 text-sm">จังหวัด</span><p class="font-medium">{{ fd('province') }}</p></div>
+                <div><span class="text-gray-500 text-sm">รหัสไปรษณีย์</span><p class="font-medium">{{ fd('postal_code') }}</p></div>
+            </div>
+        </div>
+
+        <!-- 3. ข้อมูลการศึกษา -->
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="bg-blue-50 px-6 py-3 border-b border-gray-200">
+                <h3 class="font-bold text-gray-800">3. ข้อมูลการศึกษา</h3>
+            </div>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div><span class="text-gray-500 text-sm">รหัสนักศึกษา</span><p class="font-medium">{{ fdv('student_id', application.student_id) }}</p></div>
+                <div><span class="text-gray-500 text-sm">คณะ</span><p class="font-medium">{{ fdv('faculty', application.faculty or (student.faculty if student else '')) }}</p></div>
+                <div><span class="text-gray-500 text-sm">สาขาวิชา</span><p class="font-medium">{{ fd('major') }}</p></div>
+                <div><span class="text-gray-500 text-sm">ชั้นปีที่</span><p class="font-medium">{% if (form_data or {}).get('year_level') %}ปีที่ {{ (form_data or {}).get('year_level') }}{% else %}-{% endif %}</p></div>
+                <div><span class="text-gray-500 text-sm">เกรดเฉลี่ยสะสม (GPA)</span><p class="font-medium">{{ fdv('gpa', application.gpa if application.gpa is not none else '') }}</p></div>
+                <div><span class="text-gray-500 text-sm">ปีการศึกษา</span><p class="font-medium">{{ fd('academic_year') }}</p></div>
+            </div>
+        </div>
+
+        <!-- 4. ข้อมูลผู้ปกครอง -->
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="bg-blue-50 px-6 py-3 border-b border-gray-200">
+                <h3 class="font-bold text-gray-800">4. ข้อมูลผู้ปกครอง / บิดา-มารดา</h3>
+            </div>
+            <div class="p-6 space-y-5">
+                <div>
+                    <p class="text-sm font-bold text-blue-800 mb-2">บิดา</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div><span class="text-gray-500 text-sm">ชื่อ-นามสกุล</span><p class="font-medium">{{ fdv('father_name', student.father_name if student else '') }}</p></div>
+                        <div><span class="text-gray-500 text-sm">อาชีพ</span><p class="font-medium">{{ fdv('father_occupation', student.father_job if student else '') }}</p></div>
+                        <div><span class="text-gray-500 text-sm">รายได้ต่อปี (บาท)</span><p class="font-medium">{{ fdv('father_income', student.father_income if student and student.father_income is not none else '') }}</p></div>
+                        <div><span class="text-gray-500 text-sm">เบอร์โทรศัพท์</span><p class="font-medium">{{ fd('father_phone') }}</p></div>
+                        <div><span class="text-gray-500 text-sm">สถานะ</span><p class="font-medium">{{ fd('father_status') }}</p></div>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-sm font-bold text-blue-800 mb-2">มารดา</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div><span class="text-gray-500 text-sm">ชื่อ-นามสกุล</span><p class="font-medium">{{ fdv('mother_name', student.mother_name if student else '') }}</p></div>
+                        <div><span class="text-gray-500 text-sm">อาชีพ</span><p class="font-medium">{{ fdv('mother_occupation', student.mother_job if student else '') }}</p></div>
+                        <div><span class="text-gray-500 text-sm">รายได้ต่อปี (บาท)</span><p class="font-medium">{{ fdv('mother_income', student.mother_income if student and student.mother_income is not none else '') }}</p></div>
+                        <div><span class="text-gray-500 text-sm">เบอร์โทรศัพท์</span><p class="font-medium">{{ fd('mother_phone') }}</p></div>
+                        <div><span class="text-gray-500 text-sm">สถานะ</span><p class="font-medium">{{ fd('mother_status') }}</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. รายได้ครอบครัว -->
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="bg-blue-50 px-6 py-3 border-b border-gray-200">
+                <h3 class="font-bold text-gray-800">5. รายได้ครอบครัว</h3>
+            </div>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div><span class="text-gray-500 text-sm">รายได้รวมทั้งครอบครัวต่อปี (บาท)</span><p class="font-medium">{{ fd('family_income') }}</p></div>
+                <div><span class="text-gray-500 text-sm">จำนวนพี่น้อง</span><p class="font-medium">{{ fd('siblings') }}</p></div>
+                <div><span class="text-gray-500 text-sm">เป็นบุตรคนที่</span><p class="font-medium">{{ fd('birth_order') }}</p></div>
+                <div><span class="text-gray-500 text-sm">ที่อยู่อาศัยปัจจุบัน</span><p class="font-medium">{{ fd('housing_type') }}</p></div>
+                <div class="md:col-span-2"><span class="text-gray-500 text-sm">หมายเหตุ / ข้อมูลเพิ่มเติมด้านรายได้ครอบครัว</span><p class="font-medium whitespace-pre-wrap">{{ fd('income_note') }}</p></div>
+            </div>
+        </div>
+
+        <!-- 6. ข้อมูลเพิ่มเติม -->
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="bg-blue-50 px-6 py-3 border-b border-gray-200">
+                <h3 class="font-bold text-gray-800">6. ข้อมูลเพิ่มเติม</h3>
+            </div>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div><span class="text-gray-500 text-sm">เคยได้รับทุนการศึกษามาก่อนหรือไม่</span><p class="font-medium">{{ 'เคย' if (form_data or {}).get('prev_scholarship') == 'yes' else ('ไม่เคย' if (form_data or {}).get('prev_scholarship') == 'no' else '-') }}</p></div>
+                <div class="md:col-span-2"><span class="text-gray-500 text-sm">ระบุชื่อทุนและปีที่ได้รับ (ถ้าเคย)</span><p class="font-medium">{{ fd('prev_scholarship_detail') }}</p></div>
+                <div class="md:col-span-2"><span class="text-gray-500 text-sm">กิจกรรมที่เคยเข้าร่วม / ความสามารถพิเศษ</span><p class="font-medium whitespace-pre-wrap">{{ fd('activities') }}</p></div>
+                <div class="md:col-span-2"><span class="text-gray-500 text-sm">เหตุผลที่ต้องการสมัครทุน</span><p class="font-medium whitespace-pre-wrap">{{ fdv('reason', application.notes) }}</p></div>
+            </div>
+        </div>
+
+        <!-- 7. แนบเอกสารประกอบการสมัคร (แสดงเสมอ ถ้าไม่มีแสดง "ไม่มีเอกสาร") -->
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="bg-blue-50 px-6 py-3 border-b border-gray-200">
+                <h3 class="font-bold text-gray-800">7. แนบเอกสารประกอบการสมัคร</h3>
+            </div>
+            <div class="p-6">
+                {% if all_files and all_files|length > 0 %}
+                <ul class="space-y-3">
+                    {% for f in all_files %}
+                    <li class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <span class="text-xl">📄</span>
+                        {% set file_path = 'uploads/' ~ application.student_id|string ~ '/' ~ f %}
+                        <a href="{{ url_for('static', filename=file_path) }}" target="_blank" class="text-blue-600 hover:text-blue-800 font-medium truncate flex-1">{{ f.split('_', 3)[-1] if f.count('_') >= 3 else f }}</a>
+                        <a href="{{ url_for('static', filename=file_path) }}" target="_blank" class="text-sm text-blue-600 hover:underline shrink-0">เปิดดู</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-gray-500">ไม่มีเอกสาร</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ทุนและวันที่สมัคร -->
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="bg-blue-50 px-6 py-3 border-b border-gray-200">
+                <h3 class="font-bold text-gray-800">ทุนที่สมัคร</h3>
+            </div>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div><span class="text-gray-500 text-sm">ชื่อทุน</span><p class="font-medium">{{ application.scholarship.name if application.scholarship else '-' }}</p></div>
+                <div><span class="text-gray-500 text-sm">วันที่สมัคร</span><p class="font-medium">{{ application.application_date }}</p></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-6">
+        <a href="{{ url_for('officer.view_application', application_id=application.id) }}" class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+            ← กลับไปตรวจสอบเอกสาร
+        </a>
+    </div>
+</div>
+{% endblock %}

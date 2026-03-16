@@ -36,7 +36,11 @@
         <div class="swiper-wrapper">
             {% for item in scholarships[:3] %}
             <div class="swiper-slide relative">
-                <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1200" class="absolute inset-0 w-full h-full object-cover" alt="Banner">
+                {% if item.image %}
+                    <img src="{{ url_for('static', filename='uploads/' + item.image) }}" class="absolute inset-0 w-full h-full object-cover" alt="Banner">
+                {% else %}
+                    <img src="{{ url_for('static', filename='images/scholarship_placeholder.jpg') }}" onerror="this.src='https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1200'" class="absolute inset-0 w-full h-full object-cover" alt="Banner">
+                {% endif %}
                 
                 <div class="absolute inset-0 bg-gradient-to-r from-blue-900 via-blue-900/60 to-transparent flex flex-col justify-center px-12 md:px-20 text-white">
                     <span class="bg-yellow-400 text-blue-900 px-3 py-1 rounded-full text-xs font-bold w-fit mb-4">กำลังเปิดรับสมัคร 🔥</span>
@@ -81,8 +85,12 @@
         {% if scholarships %}
             {% for item in scholarships %}
             <div class="bg-white rounded-[2rem] overflow-hidden shadow-lg flex flex-col hover:shadow-2xl transition-all border border-gray-100 group">
-                <div class="relative h-60 w-full overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=400" alt="Scholarship Cover" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                <div class="relative h-60 w-full overflow-hidden scholarship-card-img-wrapper">
+                    {% if item.image %}
+                        <img src="{{ url_for('static', filename='uploads/' + item.image) }}" alt="Scholarship Cover" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/scholarship_placeholder.jpg') }}" onerror="this.src='https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&q=80&w=400'" alt="Scholarship Cover" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                    {% endif %}
                     <div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-blue-900 shadow-sm uppercase">
                         UBU Scholarship
                     </div>

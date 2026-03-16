@@ -22,7 +22,7 @@
                 <div class="flex flex-wrap gap-4 mt-6">
                     <div class="bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/20">
                         <p class="text-xs text-blue-200 uppercase tracking-wider mb-1">จำนวนโควตา</p>
-                        <p class="text-2xl font-black">{{ scholarship.quota }} <span class="text-sm font-normal">ทุน</span></p>
+                        <p class="text-2xl font-black">{{ scholarship.number_of_scholarships }} <span class="text-sm font-normal">ทุน</span></p>
                     </div>
                     <div class="bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/20">
                         <p class="text-xs text-blue-200 uppercase tracking-wider mb-1">ผู้เข้าเกณฑ์ทั้งหมด</p>
@@ -52,7 +52,7 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100 bg-white">
                     {% for app in candidates %}
-                    {% set in_quota = loop.index <= scholarship.quota %}
+                    {% set in_quota = loop.index <= scholarship.number_of_scholarships %}
                     <tr class="{% if in_quota %}bg-emerald-50/40{% endif %} hover:bg-blue-50/30 transition-colors">
                         <td class="px-6 py-5 text-center">
                             <span class="inline-flex items-center justify-center w-9 h-9 rounded-xl {% if in_quota %}bg-emerald-600 text-white shadow-lg shadow-emerald-200{% else %}bg-gray-100 text-gray-500{% endif %} font-black text-base">
@@ -78,7 +78,7 @@
                                 </span>
                             {% else %}
                                 <span class="bg-amber-100 text-amber-700 px-4 py-1.5 rounded-full text-xs font-bold border border-amber-200">
-                                    ตัวสำรองอันดับ {{ loop.index - scholarship.quota }}
+                                    ตัวสำรองอันดับ {{ loop.index - scholarship.number_of_scholarships }}
                                 </span>
                             {% endif %}
                         </td>

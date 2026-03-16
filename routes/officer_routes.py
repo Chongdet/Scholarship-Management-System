@@ -1,7 +1,8 @@
+import json
 import os
 import secrets
 from datetime import datetime
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, current_app, render_template, request, redirect, url_for, flash, session
 from werkzeug.utils import secure_filename
 from models import db, Application, Scholarship, AuditLog, Officer, Student
 from sqlalchemy import or_
@@ -9,12 +10,38 @@ from sqlalchemy import or_
 # สร้าง Blueprint สำหรับ Officer
 officer_bp = Blueprint('officer', __name__)
 
+@officer_bp.before_request
+def require_officer_login():
+    """ตรวจสอบการล็อกอินก่อนเข้าถึงทุก Route ของ Officer (ยกเว้นหน้า login และ API)"""
+    exempt_routes = ['officer.login', 'officer.api_scholarships']
+    if request.endpoint and request.endpoint not in exempt_routes:
+        if "user_id" not in session or session.get("role") != "officer":
+            # ถ้าเรียกผ่าน API ให้ส่ง 401 Unauthorized กลับไปแทนที่จะ Redirect
+            if request.path.startswith('/officer/api/'):
+                return jsonify({"status": "error", "message": "Unauthorized API access. Session required."}), 401
+                
+            flash("กรุณาเข้าสู่ระบบในฐานะเจ้าหน้าที่", "error")
+            return redirect(url_for("login")) # Assuming login is the global login defined in app.py
+
 # ตั้งค่าการอัปโหลดไฟล์
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'static', 'uploads')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def _get_student_email(application, student):
+    """ใช้อีเมลที่นศ.กรอกในฟอร์มสมัครเป็นหลัก ถ้าไม่มีค่อยใช้จาก Student"""
+    if application and getattr(application, 'form_data', None) and application.form_data:
+        try:
+            fd = json.loads(application.form_data)
+            em = fd.get('email', '').strip() if isinstance(fd.get('email'), str) else ''
+            if em and '@' in em:
+                return em
+        except (json.JSONDecodeError, TypeError):
+            pass
+    return (student.email if student and student.email else None) or ""
 
 def save_uploaded_file(file):
     """บันทึกไฟล์ที่อัปโหลดและคืนชื่อไฟล์ที่บันทึก"""
@@ -37,6 +64,47 @@ def save_uploaded_file(file):
 # ผู้รับผิดชอบ: นาย ยศสรัล ถิระบุตร (Officer ส่วนเดิม)
 # ==========================================
 
+from flask import jsonify
+
+@officer_bp.route('/api/scholarships', methods=['GET', 'POST'])
+def api_scholarships():
+    """API สำหรับทดสอบด้วย Postman (ส่งรับเป็น JSON)"""
+    if request.method == 'GET':
+        scholarships = Scholarship.query.all()
+        result = []
+        for s in scholarships:
+            result.append({
+                "id": s.id,
+                "name": s.name,
+                "amount": s.amount,
+                "min_gpax": s.min_gpax,
+                "status": s.status,
+                "number_of_scholarships": s.number_of_scholarships
+            })
+        return jsonify({"status": "success", "data": result})
+        
+    if request.method == 'POST':
+        data = request.get_json()
+        if not data or not data.get('name'):
+            return jsonify({"status": "error", "message": "Missing 'name'"}), 400
+            
+        try:
+            new_scholarship = Scholarship(
+                name=data.get('name'),
+                amount=float(data.get('amount', 0)),
+                min_gpax=float(data.get('min_gpax', 0)),
+                faculty_condition=data.get('faculty_condition'),
+                status=data.get('status', 'open').lower(),
+                number_of_scholarships=int(data.get('number_of_scholarships', 1))
+            )
+            db.session.add(new_scholarship)
+            db.session.commit()
+            return jsonify({"status": "success", "message": f"Created scholarship {new_scholarship.name}"}), 201
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"status": "error", "message": str(e)}), 500
+
+# รับผิดชอบโดย: นาย ยศสรัล ถิระบุตร
 @officer_bp.route('/login', methods=['GET', 'POST'])
 def login():
     return "Officer: Login Page"
@@ -57,27 +125,15 @@ def add_scholarship():
         print(f"Form data received: {request.form}")
         print(f"All keys: {list(request.form.keys())}")
         # 1. ดึงค่าจาก HTML (ใช้ชื่อเดียวกับ attribute 'name' ใน <input>)
-        s_id = (request.form.get('scholarship_id') or '').strip()
         s_name = (request.form.get('scholarship_name') or '').strip()
-        print(f"scholarship_id: '{s_id}'")
         print(f"scholarship_name: '{s_name}'")
 
-        # Server-side validation: require id and name
-        if not s_id:
-            print("ERROR: scholarship_id is empty")
-            flash('กรุณากรอก รหัสทุนการศึกษา', 'error')
-            return render_template('officer/add_scholarship.html')
+        # Server-side validation: require name
         if not s_name:
             print("ERROR: scholarship_name is empty")
             flash('กรุณากรอก ชื่อทุนการศึกษา', 'error')
             return render_template('officer/add_scholarship.html')
 
-        # Prevent duplicate IDs
-        if Scholarship.query.filter_by(id=s_id).first():
-            print(f"ERROR: scholarship_id '{s_id}' already exists")
-            flash(f'รหัสทุน {s_id} มีอยู่ในระบบแล้ว กรุณาใช้รหัสอื่น', 'error')
-            return render_template('officer/add_scholarship.html')
-        
         # 2. แปลงข้อมูล
         try:
             amt = float(request.form.get('amount')) if request.form.get('amount') else 0.0
@@ -106,7 +162,6 @@ def add_scholarship():
             num_scholarships = int(num_scholarships) if num_scholarships else 1
             
             new_scholarship = Scholarship(
-                id=s_id,             # ใน Model คือ id
                 name=s_name,         # ใน Model คือ name
                 amount=amt,
                 min_gpax=min_g,
@@ -127,7 +182,7 @@ def add_scholarship():
             print(f"Creating scholarship: {new_scholarship}")
             db.session.add(new_scholarship)
             db.session.commit()
-            print(f"SUCCESS: Scholarship '{s_id}' created successfully")
+            print(f"SUCCESS: Scholarship '{new_scholarship.id}' created successfully")
             flash('เพิ่มทุนสำเร็จ', 'success')
             officer = session.get("user_id") if session.get("role") == "officer" else None
             if officer:
@@ -149,6 +204,7 @@ def add_scholarship():
     return render_template('officer/add_scholarship.html')
 
 
+# รับผิดชอบโดย: นาย ยศสรัล ถิระบุตร
 @officer_bp.route('/scholarships')
 def list_scholarships():
     scholarships = Scholarship.query.all()
@@ -279,16 +335,17 @@ def home():
 @officer_bp.route('/applications')
 def applications():
     status_filter = request.args.get('status')
-    allowed_statuses = {'pending', 'reviewing', 'needs_edit', 'interview', 'approved'}
+    allowed_statuses = {'draft', 'pending', 'reviewing', 'needs_edit', 'interview', 'approved'}
     if status_filter not in allowed_statuses:
         status_filter = None
 
-    applications_query = Application.query
+    applications_query = Application.query.order_by(Application.created_at.desc())
     if status_filter:
         applications_query = applications_query.filter_by(status=status_filter)
     all_applications = applications_query.all()
     
     scholarships = Scholarship.query.all()
+    draft_count = Application.query.filter_by(status='draft').count()
     pending_count = Application.query.filter_by(status='pending').count()
     approved_count = Application.query.filter(
         or_(
@@ -310,6 +367,7 @@ def applications():
     return render_template('officer/applications.html', 
                          applications=all_applications,
                          scholarships=scholarships,
+                         draft_count=draft_count,
                          pending_count=pending_count,
                          approved_count=approved_count,
                          interview_count=interview_count,
@@ -319,12 +377,10 @@ def applications():
                          start_index=start_index, end_index=end_index,
                          selected_status=status_filter)
 
+# รับผิดชอบโดย: นาย ธีรภัทร พิกุลศรี (ตรวจสอบเอกสารการสมัคร /verify)
 @officer_bp.route('/application/<string:application_id>')
 def view_application(application_id):
-    current_officer = session.get("user_id") if session.get("role") == "officer" else None
-    if not current_officer:
-        flash('กรุณาเข้าสู่ระบบเจ้าหน้าที่ก่อน', 'error')
-        return redirect(url_for('login'))
+    current_officer = session.get("user_id") # The before_request ensures this is an officer
         
     application = Application.query.get_or_404(application_id)
     
@@ -340,7 +396,43 @@ def view_application(application_id):
             db.session.commit()
     
     student = Student.query.filter_by(student_id=application.student_id).first()
-    return render_template('officer/application-detail.html', application=application, student=student)
+    form_data = {}
+    if getattr(application, 'form_data', None) and application.form_data:
+        try:
+            form_data = json.loads(application.form_data)
+        except (json.JSONDecodeError, TypeError):
+            form_data = {}
+    # ดึงรายชื่อไฟล์ที่นักศึกษาแนบ
+    all_files = []
+    upload_dir = os.path.join(current_app.static_folder, 'uploads', str(application.student_id))
+    if os.path.exists(upload_dir):
+        all_entries = os.listdir(upload_dir)
+        all_files = [f for f in all_entries if f.startswith(f"app_{application.id}")]
+    return render_template('officer/application-detail.html', application=application, student=student, form_data=form_data, all_files=all_files)
+
+
+@officer_bp.route('/application/<string:application_id>/student-full')
+def view_student_full(application_id):
+    """ดูข้อมูลนักศึกษาทั้งหมด (สำหรับเจ้าหน้าที่ตรวจสอบเอกสาร)"""
+    current_officer = session.get("user_id") # The before_request ensures this is an officer
+    application = Application.query.get_or_404(application_id)
+    student = Student.query.filter_by(student_id=application.student_id).first()
+
+    # ดึงรายชื่อไฟล์เอกสารที่นักศึกษาแนบ (ตามรูปแบบใน student/status)
+    all_files = []
+    upload_dir = os.path.join(current_app.static_folder, 'uploads', str(application.student_id))
+    if os.path.exists(upload_dir):
+        all_entries = os.listdir(upload_dir)
+        all_files = [f for f in all_entries if f.startswith(f"app_{application.id}")]
+
+    form_data = {}
+    if getattr(application, 'form_data', None) and application.form_data:
+        try:
+            form_data = json.loads(application.form_data)
+        except (json.JSONDecodeError, TypeError):
+            form_data = {}
+    return render_template('officer/student_full_view.html', application=application, student=student, form_data=form_data, all_files=all_files)
+
 
 @officer_bp.route('/application/<string:application_id>/decision', methods=['POST'])
 def decide_application(application_id):
@@ -370,9 +462,9 @@ def decide_application(application_id):
                        previous_value=prev_status)
             db.session.commit()
 
-        # ส่งอีเมลแจ้งเตือนอนุมัติ/นัดสัมภาษณ์
+        # ส่งอีเมลแจ้งเตือนอนุมัติ/นัดสัมภาษณ์ — ใช้อีเมลที่นศ.กรอกในฟอร์ม
         student = Student.query.filter_by(student_id=application.student_id).first()
-        to_email = (student.email if student else None) or ""
+        to_email = _get_student_email(application, student)
         if student or os.getenv("EMAIL_OVERRIDE"):
             try:
                 from services.email_service import send_interview_notification
@@ -406,9 +498,9 @@ def decide_application(application_id):
                        previous_value=prev_status)
             db.session.commit()
 
-        # ส่งอีเมลแจ้งเตือนไปที่อีเมลนักศึกษาที่ผูกไว้ (หรือ EMAIL_OVERRIDE ถ้าตั้งค่า)
+        # ส่งอีเมลแจ้งเตือน — ใช้อีเมลที่นศ.กรอกในฟอร์มสมัคร
         student = Student.query.filter_by(student_id=application.student_id).first()
-        to_email = (student.email if student else None) or ""
+        to_email = _get_student_email(application, student)
         # ถ้ามี EMAIL_OVERRIDE ให้ลองส่งได้แม้นักศึกษาไม่มีอีเมล
         if student or os.getenv("EMAIL_OVERRIDE"):
             try:
@@ -430,6 +522,7 @@ def decide_application(application_id):
         
     return redirect(url_for('officer.applications'))
 
+# รับผิดชอบโดย: นาย ธีรภัทร พิกุลศรี
 @officer_bp.route('/audit-log')
 def audit_log():
     """หน้าบันทึกการทำงาน (Audit Log) ของเจ้าหน้าที่"""
@@ -462,6 +555,7 @@ def audit_log():
 # ผู้รับผิดชอบ: นาย อติวิชญ์ สีหนันท์ (ประกาศทุน / ผู้ได้รับทุน)
 # ==========================================
 
+# รับผิดชอบโดย: นาย อติวิชญ์ สีหนันท์
 @officer_bp.route('/announcement')
 def final_announcement():
     """หน้าประกาศผลทุน"""
@@ -485,9 +579,10 @@ def scholarship_recipients(scholarship_id):
             applications = Application.query.filter_by(scholarship_id=scholarship.id).all()
             date_display = announcement_date.strftime('%d/%m/%Y')
             sent_count = 0
+            email_override = os.getenv("EMAIL_OVERRIDE", "").strip()
             for app in applications:
                 student = Student.query.filter_by(student_id=app.student_id).first()
-                to_email = student.email if student else None
+                to_email = _get_student_email(app, student) or (email_override if email_override and "@" in email_override else None)
                 if to_email and "@" in str(to_email):
                     if send_announcement_notification(
                         to_email=to_email,

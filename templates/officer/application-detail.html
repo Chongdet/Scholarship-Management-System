@@ -49,12 +49,26 @@
                 </div>
 
                 <div class="text-sm text-gray-700 space-y-2 mb-4 border border-gray-200 bg-gray-50 rounded-lg p-4">
-                    <div class="font-semibold text-gray-800 mb-2">ข้อมูลส่วนตัว</div>
+                    <div class="font-semibold text-gray-800 mb-2 flex items-center justify-between">
+                        <span>ข้อมูลส่วนตัว</span>
+                        <a href="{{ url_for('officer.view_student_full', application_id=application.id) }}" target="_blank" class="text-blue-600 hover:text-blue-800 text-xs font-medium flex items-center gap-1">
+                            ดูข้อมูลนักศึกษาทั้งหมด ↗
+                        </a>
+                    </div>
+                    {% if form_data and form_data|length > 0 %}
+                    {% set _fn = form_data.get('first_name', '') %}{% set _ln = form_data.get('last_name', '') %}
+                    <div>ชื่อ-นามสกุล: {{ (_fn ~ ' ' ~ _ln) if (_fn or _ln) else application.student_name }}</div>
+                    <div>คณะ: {{ form_data.get('faculty') or application.faculty }}</div>
+                    <div>GPAX: {{ form_data.get('gpa') or application.gpa }}</div>
+                    <div>เบอร์โทรศัพท์: {{ form_data.get('phone') or (student.mobile if student and student.mobile else '-') }}</div>
+                    <div>อีเมล: {{ form_data.get('email') or (student.email if student and student.email else '-') }}</div>
+                    {% else %}
                     <div>ชื่อ-นามสกุล: {{ application.student_name }}</div>
                     <div>คณะ: {{ application.faculty }}</div>
                     <div>GPAX: {{ application.gpa }}</div>
                     <div>เบอร์โทรศัพท์: {{ student.mobile if student and student.mobile else '-' }}</div>
                     <div>อีเมล: {{ student.email if student and student.email else '-' }}</div>
+                    {% endif %}
                 </div>
 
                 <div class="text-sm text-gray-700 space-y-2 mb-4 border border-gray-200 bg-gray-50 rounded-lg p-4">
@@ -65,39 +79,36 @@
 
                 <div class="text-sm text-gray-700 space-y-2 border border-gray-200 bg-gray-50 rounded-lg p-4">
                     <div class="font-semibold text-gray-800 mb-2">ข้อมูลเพิ่มเติม</div>
-                    <div>{{ application.notes or 'เป็นนักศึกษาที่มีความขยันหมั่นเพียร ต้องการทุนการศึกษาเพื่อบรรเทาภาระค่าใช้จ่ายของครอบครัว' }}</div>
+                    <div>{{ (form_data.get('reason') if form_data else None) or application.notes or 'เป็นนักศึกษาที่มีความขยันหมั่นเพียร ต้องการทุนการศึกษาเพื่อบรรเทาภาระค่าใช้จ่ายของครอบครัว' }}</div>
                 </div>
             </div>
 
-            <!-- Middle Column: Documents -->
+            <!-- Middle Column: เอกสารประกอบ (แสดงเสมอ ถ้าไม่มีแสดง "ไม่มีเอกสาร") -->
             <div class="p-6 border-b lg:border-b-0 lg:border-r border-gray-300">
-                <div class="font-semibold text-gray-800 mb-3">เอกสารประกอบ (3)</div>
+                <div class="font-semibold text-gray-800 mb-3">เอกสารประกอบ {% if all_files and all_files|length > 0 %}({{ all_files|length }}){% endif %}</div>
+                {% if all_files and all_files|length > 0 %}
                 <div class="space-y-3">
-                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-3 hover:bg-blue-100 transition cursor-pointer doc-item" data-doc="transcript" data-doc-name="ใบระเบียนผลการเรียน" onclick="viewDocument(this)">
-                        <div class="flex-1 text-gray-800">📄 ใบระเบียนผลการเรียน</div>
-                        <label class="flex items-center gap-2 text-sm text-gray-700" onclick="event.stopPropagation()">
-                            <input type="checkbox" name="doc_transcript" required class="w-4 h-4 accent-blue-600">
+                    {% for f in all_files %}
+                    {% set file_path = 'uploads/' ~ application.student_id|string ~ '/' ~ f %}
+                    {% set file_url = url_for('static', filename=file_path) %}
+                    {% set display_name = f.split('_', 3)[-1] if f.count('_') >= 3 else f %}
+                    {% set is_image = f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp')) %}
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-3 hover:bg-blue-100 transition cursor-pointer doc-item" data-doc-url="{{ file_url }}" data-doc-name="{{ display_name }}" data-is-image="{{ is_image|lower }}" onclick="viewDocument(this)">
+                        <div class="flex-1 text-gray-800 truncate">📄 {{ display_name }}</div>
+                        <label class="flex items-center gap-2 text-sm text-gray-700 shrink-0" onclick="event.stopPropagation()">
+                            <input type="checkbox" name="doc_{{ loop.index }}" required class="w-4 h-4 accent-blue-600">
                             <span class="doc-status" data-unchecked="ตรวจสอบ" data-checked="ตรวจสอบแล้ว">ตรวจสอบ</span>
                         </label>
                     </div>
-                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-3 hover:bg-blue-100 transition cursor-pointer doc-item" data-doc="idcard" data-doc-name="สำเนาบัตรประชาชน" onclick="viewDocument(this)">
-                        <div class="flex-1 text-gray-800">🪪 สำเนาบัตรประชาชน</div>
-                        <label class="flex items-center gap-2 text-sm text-gray-700" onclick="event.stopPropagation()">
-                            <input type="checkbox" name="doc_idcard" required class="w-4 h-4 accent-blue-600">
-                            <span class="doc-status" data-unchecked="ตรวจสอบ" data-checked="ตรวจสอบแล้ว">ตรวจสอบ</span>
-                        </label>
-                    </div>
-                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-3 hover:bg-blue-100 transition cursor-pointer doc-item" data-doc="house" data-doc-name="รูปถ่ายบ้าน" onclick="viewDocument(this)">
-                        <div class="flex-1 text-gray-800">🏠 รูปถ่ายบ้าน</div>
-                        <label class="flex items-center gap-2 text-sm text-gray-700" onclick="event.stopPropagation()">
-                            <input type="checkbox" name="doc_house" required class="w-4 h-4 accent-blue-600">
-                            <span class="doc-status" data-unchecked="ตรวจสอบ" data-checked="ตรวจสอบแล้ว">ตรวจสอบ</span>
-                        </label>
-                    </div>
+                    {% endfor %}
                 </div>
+                {% else %}
+                <p class="text-gray-500">ไม่มีเอกสาร</p>
+                {% endif %}
             </div>
 
-            <!-- Right Column: Photo -->
+            {% if all_files and all_files|length > 0 %}
+            <!-- Right Column: Photo / Document Viewer -->
             <div class="p-6">
                 <div class="font-semibold text-gray-800 mb-3" id="imageTitle">แสดงรูปภาพ</div>
                 <div id="imageViewer" class="bg-gray-200 h-64 flex items-center justify-center text-gray-400 border border-gray-300 rounded-lg overflow-hidden">
@@ -107,6 +118,7 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
         </div>
 
         <input type="hidden" name="decision" id="decisionValue" value="">
@@ -201,32 +213,22 @@
 </div>
 
 <script>
-    // Image viewer function
-    const documentImages = {
-        'transcript': 'https://via.placeholder.com/400x300/3B82F6/FFFFFF?text=ใบระเบียนผลการเรียน',
-        'idcard': 'https://via.placeholder.com/400x300/10B981/FFFFFF?text=สำเนาบัตรประชาชน',
-        'house': 'https://via.placeholder.com/400x300/8B5CF6/FFFFFF?text=รูปถ่ายบ้าน'
-    };
-
     function viewDocument(element) {
-        const docType = element.dataset.doc;
-        const docName = element.dataset.docName;
+        const docUrl = element.dataset.docUrl;
+        const docName = element.dataset.docName || 'เอกสาร';
+        const isImage = element.dataset.isImage === 'true';
         const imageViewer = document.getElementById('imageViewer');
         const imageTitle = document.getElementById('imageTitle');
         
-        // Remove active class from all documents
-        document.querySelectorAll('.doc-item').forEach(item => {
-            item.classList.remove('ring-2', 'ring-blue-500');
-        });
-        
-        // Add active class to clicked document
+        document.querySelectorAll('.doc-item').forEach(item => item.classList.remove('ring-2', 'ring-blue-500'));
         element.classList.add('ring-2', 'ring-blue-500');
-        
-        // Update title
         imageTitle.textContent = docName;
         
-        // Update image
-        imageViewer.innerHTML = `<img src="${documentImages[docType]}" alt="${docName}" class="w-full h-full object-contain">`;
+        if (isImage && docUrl) {
+            imageViewer.innerHTML = `<img src="${docUrl}" alt="${docName}" class="w-full h-full object-contain">`;
+        } else {
+            imageViewer.innerHTML = `<div class="text-center p-6"><p class="text-gray-600 mb-4">${docName}</p><a href="${docUrl}" target="_blank" class="text-blue-600 underline">เปิดดูในแท็บใหม่</a></div>`;
+        }
     }
 
     const modal = document.getElementById('interviewModal');

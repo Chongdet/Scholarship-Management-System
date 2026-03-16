@@ -244,16 +244,10 @@
   {# ══ HERO ══ #}
   <div class="hero-card">
   <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
-<<<<<<< HEAD
     <img src="{{ student.profile_pic if student.profile_pic else 'https://api.dicebear.com/9.x/initials/svg?seed=' ~ (student.name or 'Student') ~ '&radius=0&size=150' }}"
-     alt="profile"
-     onerror="this.src='https://api.dicebear.com/9.x/initials/svg?seed={{ student.name or 'Student' }}&radius=0&size=150'"
-     style="width: 100px; height: 100px; border-radius: 0px; border: 2px solid #d4af37; object-fit: cover; background: #f8f9fa;">
-=======
-    <img src="{{ student.profile_pic or '/static/images/students/default.jpg' }}"
          alt="profile"
+         onerror="this.src='https://api.dicebear.com/9.x/initials/svg?seed={{ student.name or 'Student' }}&radius=0&size=150'"
          style="width: 100px; height: 100px; border-radius: 0px; border: 2px solid #d4af37; object-fit: cover; background: #f8f9fa;">
->>>>>>> bc2cdd6c3dddc9008c988f71db52a91e150272ca
     <div>
       <h2 style="color: white; margin: 0 0 5px 0; font-size: 1.5rem;">{{ student.name }}</h2>
       <p style="color: rgba(255,255,255,0.8); margin: 0; font-size: 1rem;">รหัสนักศึกษา: {{ student.student_id }}</p>

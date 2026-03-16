@@ -7,7 +7,8 @@
     <a href="{{ url_for('officer.audit_log') }}" class="text-white hover:text-yellow-400 font-medium transition-colors">บันทึกการทำงาน</a>
 {% endblock %}
 
-{% block role_name %}เจ้าหน้าที่{% endblock %}
+{% block role_name %}{{ session.get('user_name', 'เจ้าหน้าที่') }}{% endblock %}
+{% block profile_link %}/officer/profile{% endblock %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto p-6">

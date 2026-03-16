@@ -83,29 +83,66 @@
                 </div>
             </div>
 
-            <!-- Middle Column: เอกสารประกอบ (แสดงเสมอ ถ้าไม่มีแสดง "ไม่มีเอกสาร") -->
+            <!-- Middle Column: เอกสารประกอบ -->
             <div class="p-6 border-b lg:border-b-0 lg:border-r border-gray-300">
-                <div class="font-semibold text-gray-800 mb-3">เอกสารประกอบ {% if all_files and all_files|length > 0 %}({{ all_files|length }}){% endif %}</div>
-                {% if all_files and all_files|length > 0 %}
-                <div class="space-y-3">
-                    {% for f in all_files %}
-                    {% set file_path = 'uploads/' ~ application.student_id|string ~ '/' ~ f %}
-                    {% set file_url = url_for('static', filename=file_path) %}
-                    {% set display_name = f.split('_', 3)[-1] if f.count('_') >= 3 else f %}
-                    {% set is_image = f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp')) %}
-                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-3 hover:bg-blue-100 transition cursor-pointer doc-item" data-doc-url="{{ file_url }}" data-doc-name="{{ display_name }}" data-is-image="{{ is_image|lower }}" onclick="viewDocument(this)">
-                        <div class="flex-1 text-gray-800 truncate">📄 {{ display_name }}</div>
-                        <label class="flex items-center gap-2 text-sm text-gray-700 shrink-0" onclick="event.stopPropagation()">
-                            <input type="checkbox" name="doc_{{ loop.index }}" required class="w-4 h-4 accent-blue-600">
-                            <span class="doc-status" data-unchecked="ตรวจสอบ" data-checked="ตรวจสอบแล้ว">ตรวจสอบ</span>
-                        </label>
-                    </div>
-                    {% endfor %}
+                <div class="font-semibold text-gray-800 mb-3">
+                    เอกสารประกอบ
+                    {% set total = (student_files|length if student_files else 0) + (officer_files|length if officer_files else 0) %}
+                    {% if total > 0 %}({{ total }}){% endif %}
                 </div>
-                {% else %}
+
+                {# ── ไฟล์จากนักศึกษา ── #}
+                {% if student_files and student_files|length > 0 %}
+                <div class="mb-4">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full">🎓 นักศึกษา</span>
+                        <span class="text-xs text-gray-400">ไฟล์ที่นักศึกษาแนบมากับใบสมัคร</span>
+                    </div>
+                    <div class="space-y-2">
+                        {% for f in student_files %}
+                        {% set file_path = 'uploads/' ~ application.student_id|string ~ '/' ~ f %}
+                        {% set file_url = url_for('static', filename=file_path) %}
+                        {% set display_name = f.split('_', 3)[-1] if f.count('_') >= 3 else f %}
+                        {% set is_image = f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp')) %}
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-3 hover:bg-blue-100 transition cursor-pointer doc-item" data-doc-url="{{ file_url }}" data-doc-name="{{ display_name }}" data-is-image="{{ is_image|lower }}" onclick="viewDocument(this)">
+                            <div class="flex-1 text-gray-800 truncate">📄 {{ display_name }}</div>
+                            <label class="flex items-center gap-2 text-sm text-gray-700 shrink-0" onclick="event.stopPropagation()">
+                                <input type="checkbox" name="doc_{{ loop.index }}" required class="w-4 h-4 accent-blue-600">
+                                <span class="doc-status" data-unchecked="ตรวจสอบ" data-checked="ตรวจสอบแล้ว">ตรวจสอบ</span>
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {# ── ไฟล์จากเจ้าหน้าที่ ── #}
+                {% if officer_files and officer_files|length > 0 %}
+                <div class="mb-2">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full">👤 เจ้าหน้าที่</span>
+                        <span class="text-xs text-gray-400">ไฟล์ที่เจ้าหน้าที่เพิ่มเข้าโฟลเดอร์</span>
+                    </div>
+                    <div class="space-y-2">
+                        {% for f in officer_files %}
+                        {% set file_path = 'uploads/' ~ application.student_id|string ~ '/' ~ f %}
+                        {% set file_url = url_for('static', filename=file_path) %}
+                        {% set display_name = f %}
+                        {% set is_image = f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp')) %}
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-3 hover:bg-green-100 transition cursor-pointer doc-item" data-doc-url="{{ file_url }}" data-doc-name="{{ display_name }}" data-is-image="{{ is_image|lower }}" onclick="viewDocument(this)">
+                            <div class="flex-1 text-gray-800 truncate">📎 {{ display_name }}</div>
+                            <a href="{{ file_url }}" target="_blank" class="text-blue-600 hover:underline text-xs shrink-0" onclick="event.stopPropagation()">เปิดไฟล์</a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if (not student_files or student_files|length == 0) and (not officer_files or officer_files|length == 0) %}
                 <p class="text-gray-500">ไม่มีเอกสาร</p>
                 {% endif %}
             </div>
+
 
             {% if all_files and all_files|length > 0 %}
             <!-- Right Column: Photo / Document Viewer -->

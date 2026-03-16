@@ -9,6 +9,7 @@ from sqlalchemy import or_
 
 # สร้าง Blueprint สำหรับ Officer
 officer_bp = Blueprint('officer', __name__)
+director_bp = Blueprint('director', __name__)
 
 @officer_bp.before_request
 def require_officer_login():
@@ -64,7 +65,7 @@ def save_uploaded_file(file):
 # ผู้รับผิดชอบ: นาย ยศสรัล ถิระบุตร (Officer ส่วนเดิม)
 # ==========================================
 
-from flask import jsonify
+from flask import jsonify  # noqa: E402
 
 @officer_bp.route('/api/scholarships', methods=['GET', 'POST'])
 def api_scholarships():
@@ -121,7 +122,7 @@ def view_applications_by_scholarship(scholarship_id):
 @officer_bp.route('/scholarships/add', methods=['GET', 'POST'])
 def add_scholarship():
     if request.method == 'POST':
-        print(f"\n=== ADD SCHOLARSHIP POST REQUEST ===")
+        print("\n=== ADD SCHOLARSHIP POST REQUEST ===")
         print(f"Form data received: {request.form}")
         print(f"All keys: {list(request.form.keys())}")
         # 1. ดึงค่าจาก HTML (ใช้ชื่อเดียวกับ attribute 'name' ใน <input>)
@@ -211,6 +212,13 @@ def list_scholarships():
     return render_template('officer/scholarships.html', scholarships=scholarships)
 
 
+@officer_bp.route('/profile')
+def profile():
+    """หน้าประวัติส่วนตัวเจ้าหน้าที่"""
+    officer = Officer.query.filter_by(username=session.get('user_id')).first_or_404()
+    return render_template('officer/profile.html', officer=officer)
+
+
 @officer_bp.route('/scholarships/<scholarship_id>/edit', methods=['GET', 'POST'])
 def edit_scholarship(scholarship_id):
     # ใช้ filter_by(id=...) ให้ตรงกับ Model
@@ -296,7 +304,7 @@ def delete_scholarship(scholarship_id):
         db.session.delete(scholarship)
         db.session.commit()
         flash(f'ลบทุน {sch_name} สำเร็จแล้ว', 'success')
-    except Exception as e:
+    except Exception:
         db.session.rollback()
         flash('ไม่สามารถลบทุนได้ เนื่องจากมีข้อมูลผู้สมัครเชื่อมโยงอยู่', 'danger')
 
@@ -404,17 +412,28 @@ def view_application(application_id):
             form_data = {}
     # ดึงรายชื่อไฟล์ที่นักศึกษาแนบ
     all_files = []
+    student_files = []
+    officer_files = []
     upload_dir = os.path.join(current_app.static_folder, 'uploads', str(application.student_id))
     if os.path.exists(upload_dir):
         all_entries = os.listdir(upload_dir)
-        all_files = [f for f in all_entries if f.startswith(f"app_{application.id}")]
-    return render_template('officer/application-detail.html', application=application, student=student, form_data=form_data, all_files=all_files)
+        student_files = [f for f in all_entries if f.startswith(f"app_{application.id}")]
+        # officer_files = ไฟล์ที่เจ้าหน้าที่เพิ่มเข้ามา (ไม่ได้มาจาก application ใดๆ)
+        officer_files = [f for f in all_entries if not f.startswith("app_APP-")]
+        all_files = student_files  # backward compat
+    return render_template('officer/application-detail.html',
+                           application=application, student=student,
+                           form_data=form_data,
+                           all_files=all_files,
+                           student_files=student_files,
+                           officer_files=officer_files)
+
 
 
 @officer_bp.route('/application/<string:application_id>/student-full')
 def view_student_full(application_id):
     """ดูข้อมูลนักศึกษาทั้งหมด (สำหรับเจ้าหน้าที่ตรวจสอบเอกสาร)"""
-    current_officer = session.get("user_id") # The before_request ensures this is an officer
+    session.get("user_id") # The before_request ensures this is an officer
     application = Application.query.get_or_404(application_id)
     student = Student.query.filter_by(student_id=application.student_id).first()
 
@@ -620,10 +639,10 @@ def scholarship_recipients(scholarship_id):
 # (หากใน app.py โหลด Director Blueprint จากที่อื่นแล้ว คุณสามารถลบส่วนด้านล่างนี้ทิ้งได้)
 # เพิ่มส่วนของกรรมการ (Director) เพื่อให้ Link ใน HTML ทำงานได้
 # ==========================================
-director_bp = Blueprint('director', __name__)
+
 
 @director_bp.route('/home')
-def home():
+def home():  # noqa: F811
     """หน้า Dashboard ของกรรมการ"""
     return render_template('director/dashboard.html')
 

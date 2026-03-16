@@ -185,8 +185,28 @@ def approve_scholarship(app_id):
 # รับผิดชอบโดย: นาย กฤชณัท ศิริรังสรรค์กุล
 @director_bp.route("/candidate/<string:app_id>")
 def candidate_detail(app_id):
+    import os
     application = Application.query.get_or_404(app_id)
-    return render_template("director/candidate_detail.html", student=application)
+    student = Student.query.filter_by(student_id=application.student_id).first()
+
+    # ค้นหารูปนักศึกษาจากโฟลเดอร์ uploads/<student_id>/
+    photo_url = None
+    if student:
+        from flask import current_app
+        upload_dir = os.path.join(current_app.static_folder, 'uploads', str(student.student_id))
+        image_exts = {'.jpg', '.jpeg', '.png', '.gif', '.webp'}
+        if os.path.isdir(upload_dir):
+            files = os.listdir(upload_dir)
+            # ลองหารูปที่เกี่ยวกับ application นี้ก่อน
+            app_images = [f for f in files if f.startswith(f"app_{app_id}") and os.path.splitext(f)[1].lower() in image_exts]
+            # ถ้าไม่มีให้เอารูปแรกที่พบในโฟลเดอร์นั้น
+            all_images = [f for f in files if os.path.splitext(f)[1].lower() in image_exts]
+            chosen = (app_images or all_images)
+            if chosen:
+                photo_url = f"uploads/{student.student_id}/{chosen[0]}"
+
+    return render_template("director/candidate_detail.html", student=application, photo_url=photo_url, student_obj=student)
+
 
 # ==========================================
 # 5. การจัดอันดับ (Ranking)
@@ -242,3 +262,11 @@ def ranking_selection():
 def audit_log():
     all_logs = DirectorAuditLog.query.order_by(DirectorAuditLog.timestamp.desc()).all()
     return render_template("director/audit_log.html", logs=all_logs)
+
+
+@director_bp.route("/profile")
+def profile():
+    """หน้าประวัติส่วนตัวกรรมการ"""
+    from models import Director
+    director = Director.query.filter_by(username=session.get('user_id')).first_or_404()
+    return render_template("director/profile.html", director=director)

@@ -139,6 +139,7 @@ def register_routes(app):
                     session.clear()
                     session["user_id"] = user.username
                     session["role"] = role_target
+                    session["user_name"] = user.name or user.username
 
                     flash(f"ยินดีต้อนรับคุณ {user.name}", "success")
 

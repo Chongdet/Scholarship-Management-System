@@ -24,4 +24,5 @@
 </a>
 {% endblock %} 
 
-{% block role_name %}กรรมการ{% endblock %}
+{% block profile_link %}/director/profile{% endblock %}
+{% block role_name %}{{ session.get('user_name', 'กรรมการ') }}{% endblock %}

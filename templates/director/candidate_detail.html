@@ -7,8 +7,6 @@
         <span class="mx-2">></span>
         <span>รายชื่อทุน</span>
         <span class="mx-2">></span>
-        <span>ทุนอาหารกลางวัน</span>
-        <span class="mx-2">></span>
         <span class="font-bold text-gray-800">ดูรายละเอียด</span>
     </div>
 
@@ -18,11 +16,19 @@
             <div class="flex-1 space-y-4">
                 <div class="grid grid-cols-3 gap-2">
                     <span class="text-gray-500 font-bold">รหัสนักศึกษา</span>
-                    <span class="col-span-2 text-gray-800">{{ student.id }}</span>
+                    <span class="col-span-2 text-gray-800">{{ student.student_id }}</span>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
                     <span class="text-gray-500 font-bold">ชื่อ-นามสกุล</span>
-                    <span class="col-span-2 text-gray-800">{{ student.name }}</span>
+                    <span class="col-span-2 text-gray-800">
+                        {{ student_obj.name if student_obj else student.student_name or '—' }}
+                    </span>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <span class="text-gray-500 font-bold">คณะ</span>
+                    <span class="col-span-2 text-gray-800">
+                        {{ student_obj.faculty if student_obj else student.faculty or '—' }}
+                    </span>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
                     <span class="text-gray-500 font-bold">GPA</span>
@@ -30,25 +36,33 @@
                 </div>
                 <div class="grid grid-cols-3 gap-2">
                     <span class="text-gray-500 font-bold">สถานะเอกสาร</span>
-                    <span class="col-span-2 text-green-600 font-bold">{{ student.doc_status }}</span>
+                    <span class="col-span-2 text-green-600 font-bold">{{ student.status }}</span>
                 </div>
                 <div class="grid grid-cols-3 gap-2 pt-4">
-                    <span class="text-gray-500 font-bold">เอกสารไฟล์แนบ</span>
-                    <div class="col-span-2">
-                        <button class="bg-gray-500 text-white px-4 py-1 rounded text-xs hover:bg-gray-600 transition">
-                            เปิดไฟล์แนบ
-                        </button>
-                    </div>
+                    <span class="text-gray-500 font-bold">คะแนนรวม</span>
+                    <span class="col-span-2 text-blue-700 font-bold text-lg">
+                        {% if student.is_scored %}{{ student.total_score }} คะแนน{% else %}ยังไม่ได้ให้คะแนน{% endif %}
+                    </span>
                 </div>
             </div>
 
-            <div class="w-full md:w-64">
+            <!-- รูปนักศึกษา -->
+            <div class="w-full md:w-56 flex-shrink-0">
                 <div class="border-2 border-gray-200 rounded-lg overflow-hidden aspect-[3/4] flex items-center justify-center bg-gray-50">
-                    <img src="{{ url_for('static', filename=student.image_url) }}" 
-                         alt="รูปถ่ายนักศึกษา" 
-                         class="w-full h-full object-cover"
-                         onerror="this.src='https://via.placeholder.com/300x400?text=No+Image';">
+                    {% if photo_url %}
+                        <img src="{{ url_for('static', filename=photo_url) }}" 
+                             alt="รูปถ่ายนักศึกษา" 
+                             class="w-full h-full object-cover">
+                    {% else %}
+                        <div class="flex flex-col items-center gap-2 text-gray-300 p-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            <span class="text-xs text-center">ไม่มีรูปถ่าย</span>
+                        </div>
+                    {% endif %}
                 </div>
+                <p class="text-xs text-gray-400 text-center mt-2">รูปถ่ายนักศึกษา</p>
             </div>
 
         </div>
@@ -60,4 +74,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock %}

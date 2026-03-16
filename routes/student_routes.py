@@ -86,45 +86,118 @@ def logout():
     return redirect(url_for("student.login"))
 
 # ==========================================
-# Profile Management
+# ฟีเจอร์: Profile Management
 # ==========================================
+# รับผิดชอบโดย: นาย กิตติพงษ์ เลี้ยงหิรัญถาวร
 @student_bp.route("/profile", methods=["GET", "POST"])
 def profile():
+    if "user_id" not in session or session.get("role") != "student":
+        return redirect(url_for("student.login"))
+ 
     current_student_id = session["user_id"]
     student_record = Student.query.filter_by(student_id=current_student_id).first()
-
+ 
+    if not student_record:
+        flash("ไม่พบข้อมูลนักศึกษา", "error")
+        return redirect(url_for("student.login"))
+ 
     if request.method == "POST":
+ 
+        # ── Helper: แปลง float ปลอดภัย (รับ '' และ None ได้) ──────────
         def safe_float(key, default=None):
             val = request.form.get(key, '').strip()
-            try:
-                return float(val) if val != '' else default
-            except ValueError:
+            if val == '':
                 return default
-
-        # อัปเดตข้อมูลส่วนตัว
-        student_record.mobile = request.form.get("mobile", "").strip() or None
-        student_record.facebook = request.form.get("facebook", "").strip() or None
-        student_record.address_current = request.form.get("address_current", "").strip() or None
-        
-        # ข้อมูลครอบครัว
-        student_record.father_name = request.form.get("father_name")
-        student_record.father_income = safe_float("father_income")
-        student_record.mother_name = request.form.get("mother_name")
-        student_record.mother_income = safe_float("mother_income")
-        student_record.parents_status = request.form.get("parents_status")
-
-        # จัดการข้อมูลพี่น้อง (JSON)
+            try:
+                return float(val)
+            except (ValueError, TypeError):
+                return default
+ 
+        # ══════════════════════════════════════════════════════════════
+        # [Security] ห้ามรับ gpax / faculty / year / citizen_id /
+        #             address_domicile / disciplinary_status จาก form
+        # ══════════════════════════════════════════════════════════════
+ 
+        # ── 1. ประวัติส่วนตัว (editable) ─────────────────────────────
+        student_record.mobile           = request.form.get("mobile",   "").strip() or None
+        student_record.facebook         = request.form.get("facebook", "").strip() or None
+        student_record.line_id          = request.form.get("line_id",  "").strip() or None
+        student_record.address_current  = request.form.get("address_current", "").strip() or None
+ 
+        # ── 2. บิดา ───────────────────────────────────────────────────
+        student_record.father_name      = request.form.get("father_name",   "").strip() or None
+        student_record.father_job       = request.form.get("father_job",    "").strip() or None
+        student_record.father_income    = safe_float("father_income")
+        student_record.inc_father       = safe_float("inc_father")
+        student_record.father_health    = request.form.get("father_health", "").strip() or None
+ 
+        # ── 3. มารดา ──────────────────────────────────────────────────
+        student_record.mother_name      = request.form.get("mother_name",   "").strip() or None
+        student_record.mother_job       = request.form.get("mother_job",    "").strip() or None
+        student_record.mother_income    = safe_float("mother_income")
+        student_record.inc_mother       = safe_float("inc_mother")
+        student_record.mother_health    = request.form.get("mother_health", "").strip() or None
+ 
+        # ── 4. สถานภาพสมรสบิดา-มารดา ─────────────────────────────────
+        student_record.parents_status   = request.form.get("parents_status") or None
+ 
+        # ── 5. ที่อยู่อาศัย ───────────────────────────────────────────
+        student_record.housing_status   = request.form.get("housing_status") or None
+        student_record.rent_amount      = safe_float("rent_amount")
+        student_record.housing_other    = request.form.get("housing_other", "").strip() or None
+ 
+        # ── 6. ที่ดินเกษตร ────────────────────────────────────────────
+        student_record.land_status      = request.form.get("land_status") or None
+        student_record.agri_own_amount  = safe_float("agri_own_amount")
+        student_record.agri_rent_amount = safe_float("agri_rent_amount")
+        student_record.agri_rent_cost   = safe_float("agri_rent_cost")
+        student_record.agri_other_detail= request.form.get("agri_other_detail", "").strip() or None
+ 
+        # ── 7. ผู้อุปการะ ─────────────────────────────────────────────
+        student_record.guardian_name     = request.form.get("guardian_name",     "").strip() or None
+        student_record.guardian_relation = request.form.get("guardian_relation", "").strip() or None
+        student_record.guardian_job      = request.form.get("guardian_job",      "").strip() or None
+        student_record.guardian_income   = safe_float("guardian_income")
+ 
+        # ── 8. กยศ. ──────────────────────────────────────────────────
+        loan_raw = request.form.get("loan_student_fund", "FALSE")
+        student_record.loan_student_fund = (loan_raw == "TRUE")
+        student_record.loan_type         = request.form.get("loan_type") or None
+ 
+        # ── 9. พี่น้อง (รับ JSON จาก hidden field) ───────────────────
+        # Template ส่งมาเป็น JSON string ใน hidden input ชื่อ siblings_json
         try:
-            siblings_data = request.form.get("siblings_json")
-            if siblings_data:
-                student_record.siblings_list = json.loads(siblings_data)
-        except Exception as e:
-            print(f"JSON Error: {e}")
+            siblings_raw = request.form.get("siblings_json", "[]").strip()
+            parsed = json.loads(siblings_raw)
+            # Sanitize — เก็บเฉพาะ key ที่ต้องการ
+            student_record.siblings_list = [
+                {
+                    "name":  str(s.get("name",  "") or "").strip(),
+                    "age":   str(s.get("age",   "") or "").strip(),
+                    "job":   str(s.get("job",   "") or "").strip(),
+                    "place": str(s.get("place", "") or "").strip(),
+                }
+                for s in parsed if isinstance(s, dict)
+            ]
+        except (json.JSONDecodeError, TypeError):
+            # ถ้า parse ไม่ได้ → คงค่าเดิม
+            pass
+ 
+        # ── 10. คำนวณ derived fields ──────────────────────────────────
+        student_record.calculate_total_income()
+        student_record.update_completeness()
+        student_record.inc_guardian    = safe_float("inc_guardian")
+        student_record.inc_scholarship = safe_float("inc_scholarship")
+        student_record.inc_parttime    = safe_float("inc_parttime")
 
+        student_record.exp_food      = safe_float("exp_food")
+        student_record.exp_dorm      = safe_float("exp_dorm")
+        student_record.exp_transport = safe_float("exp_transport")
+        student_record.exp_other     = safe_float("exp_other")
         db.session.commit()
         flash("บันทึกข้อมูลส่วนตัวเรียบร้อยแล้ว ✅", "success")
         return redirect(url_for("student.profile"))
-
+ 
     return render_template("student/profile.html", student=student_record)
 
 # ==========================================

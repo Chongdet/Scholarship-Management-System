@@ -64,11 +64,6 @@
         <a href="{{ url_for('officer.applications') }}" class="block bg-blue-50 border-l-4 border-blue-600 rounded-lg p-4 transition hover:shadow-sm{% if not selected_status %} ring-2 ring-blue-200{% endif %}">
             <p class="text-sm text-gray-600 font-medium">รวมทั้งหมด</p>
             <h3 class="text-3xl font-bold text-gray-800 mt-2">{{ total_count }}</h3>
-        </a>
-        <a href="{{ url_for('officer.applications', status='draft') }}" class="block bg-gray-50 border-l-4 border-gray-400 rounded-lg p-4 transition hover:shadow-sm{% if selected_status == 'draft' %} ring-2 ring-gray-200{% endif %}">
-            <p class="text-sm text-gray-600 font-medium">แบบร่าง</p>
-            <h3 class="text-3xl font-bold text-gray-800 mt-2">{{ draft_count }}</h3>
-        </a>
         <a href="{{ url_for('officer.applications', status='pending') }}" class="block bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-4 transition hover:shadow-sm{% if selected_status == 'pending' %} ring-2 ring-yellow-200{% endif %}">
             <p class="text-sm text-gray-600 font-medium">รอตรวจสอบ</p>
             <h3 class="text-3xl font-bold text-gray-800 mt-2">{{ pending_count }}</h3>
@@ -105,7 +100,7 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-100">
-                    {% for application in applications %}
+                    {% for application in applications if application.status != 'draft' %}
                     <tr class="hover:bg-gray-50 transition">
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">{{ loop.index }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ application.student_id }}</td>

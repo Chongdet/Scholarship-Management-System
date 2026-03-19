@@ -5,7 +5,7 @@ director_bp = Blueprint("director", __name__)
 
 @director_bp.before_request
 def require_director_login():
-    """ตรวจสอบการล็อกอินก่อนเข้าถึงทุก Route ของ Director (ยกเว้นหน้า login)"""
+    """ตรวจสอบการล็อกอินก่อนเข้าถึงทุก Route ของ Director (ยกเว้นหน้า login)"""     
     if request.endpoint and request.endpoint != 'director.login':
         if "user_id" not in session or session.get("role") != "director":
             flash("กรุณาเข้าสู่ระบบในฐานะกรรมการ", "error")
@@ -28,8 +28,9 @@ def home():
     ).count()
     progress_pct   = round((reviewed_count / total_apps * 100) if total_apps > 0 else 0)
 
-    # --- ทุนล่าสุด 5 รายการ ใช้เป็น "ประกาศ" ---
-    recent_scholarships = Scholarship.query.order_by(Scholarship.id.desc()).limit(5).all()
+    # --- ทุนล่าสุด 5 รายการ ใช้เป็น "ประกาศ" (เฉพาะที่เปิดอยู่) ---
+    all_open = [s for s in Scholarship.query.filter_by(status='open').all() if s.is_open()]
+    recent_scholarships = sorted(all_open, key=lambda x: x.id, reverse=True)[:5]
 
     today = datetime.now()
 
@@ -46,7 +47,8 @@ def home():
 # รับผิดชอบโดย: นาย ทรงเดช จำปาเทศ
 @director_bp.route("/scoring")
 def scoring():
-    scholarships = Scholarship.query.all()
+    # กรองเฉพาะทุนที่ยังเปิดอยู่
+    scholarships = [s for s in Scholarship.query.filter_by(status='open').all() if s.is_open()]
     scholarship_list = []
     for sch in scholarships:
         total_applicants = Application.query.filter_by(scholarship_id=sch.id).count()
@@ -85,6 +87,9 @@ def scholarship_students(scholarship_id):
 
     formatted_candidates = []
     for app, stu in query_results:
+        # คำนวณคะแนนอัตโนมัติเพื่อให้ข้อมูลล่าสุดเสมอ
+        app.calculate_automatic_score()
+        
         formatted_candidates.append({
             "id": app.id,
             "student_id": stu.student_id,
@@ -94,6 +99,7 @@ def scholarship_students(scholarship_id):
             "total_score": app.total_score,
             "status": app.status,
         })
+    db.session.commit()
 
     return render_template(
         "director/scoring_students.html",
@@ -122,7 +128,7 @@ def give_score(app_id):
             try:
                 fd = json.loads(application.form_data)
                 reason_text = fd.get('reason', reason_text)
-            except:
+            except Exception:
                 pass
         
         hidden_score = min(10, len(reason_text.strip()) // 20) if reason_text else 0
@@ -148,8 +154,13 @@ def give_score(app_id):
 
         application.total_score = total
         application.is_scored = True
+        
         if request.form.get("approve_scholarship") == "1":
-            application.status = "approved"
+            if total < 50:
+                flash(f"ไม่สามารถอนุมัติได้: คะแนนรวม {total} น้อยกว่าเกณฑ์ขั้นต่ำ 50 คะแนน", "error")
+                # ยังคงบันทึกคะแนนไว้แต่ไม่เปลี่ยนสถานะเป็น approved
+            else:
+                application.status = "approved"
 
         log = DirectorAuditLog(
             user_name="กรรมการ (Admin)",
@@ -178,6 +189,52 @@ def approve_scholarship(app_id):
         url_for("director.scholarship_students", scholarship_id=application.scholarship_id)
     )
 
+@director_bp.route("/quick_approve/<string:app_id>", methods=["POST"])
+def quick_approve(app_id):
+    """อนุมัติทันทีจากหน้ารายการโดยใช้คะแนนอัตโนมัติ (ผู้นำทางอำนาจกรรมการ)"""
+    application = Application.query.get_or_404(app_id)
+    
+    # 1. คำนวณคะแนนอัตโนมัติ (ถ้ายังไม่มีการให้คะแนน)
+    score = application.calculate_automatic_score()
+    
+    # 2. ปรับสถานะเป็นอนุมัติ (กรรมการสามารถอนุมัติได้ทันทีโดยไม่ติดเกณฑ์ 50 คะแนน)
+    application.status = "approved"
+    application.is_scored = True
+    
+    # 4. บันทึก Log
+    log = DirectorAuditLog(
+        user_name=session.get('user_id', 'Director'),
+        action="QUICK_APPROVE",
+        details=f"อนุมัติรวดเร็ว (Quick Approve) สำหรับ {application.student_name} ({application.student_id}) คะแนน={score}",
+        ip_address=request.remote_addr,
+    )
+    db.session.add(log)
+    db.session.commit()
+    
+    flash(f"อนุมัติทุนให้ {application.student_name} เรียบร้อยแล้ว (คะแนน {score})", "success")
+    
+    # กลับไปยังหน้าเดิม (เพื่อความสะดวก ถ้ากดจากหน้าดูรายละเอียดก็กลับไปหน้าเดิม)
+    # ถ้ามาจากหน้า scoring_students ก็กลับไปหน้านั้น
+    return redirect(request.referrer or url_for("director.scholarship_students", scholarship_id=application.scholarship_id))
+
+@director_bp.route("/reject/<string:app_id>", methods=["POST"])
+def reject_application(app_id):
+    """ปฏิเสธการให้ทุน"""
+    application = Application.query.get_or_404(app_id)
+    application.status = "rejected"
+    
+    log = DirectorAuditLog(
+        user_name=session.get('user_id', 'Director'),
+        action="REJECT_APPLICATION",
+        details=f"ปฏิเสธใบสมัครของ {application.student_name} ({application.student_id})",
+        ip_address=request.remote_addr,
+    )
+    db.session.add(log)
+    db.session.commit()
+    
+    flash(f"ปฏิเสธใบสมัครของ {application.student_name} เรียบร้อยแล้ว", "info")
+    return redirect(url_for("director.scholarship_students", scholarship_id=application.scholarship_id))
+
 
 # ==========================================
 # 5. หน้าดูรายละเอียดนักศึกษา
@@ -191,6 +248,7 @@ def candidate_detail(app_id):
 
     # ค้นหารูปนักศึกษา (ดึงจากโปรไฟล์นักศึกษาใน static/images/students ก่อน)
     photo_url = None
+    all_app_files = []
     if student:
         from flask import current_app
         # 1. ลองดึงจากโฟลเดอร์ profile ของนักศึกษาโดยตรง
@@ -208,8 +266,33 @@ def candidate_detail(app_id):
                 chosen = (app_images or all_images)
                 if chosen:
                     photo_url = f"uploads/{student.student_id}/{chosen[0]}"
+            
+        # 3. ดึงไฟล์ทั้งหมดที่อัปโหลดพร้อมใบสมัครนี้
+        upload_dir = os.path.join(current_app.static_folder, 'uploads', str(student.student_id))
+        if os.path.isdir(upload_dir):
+            all_app_files = [f for f in os.listdir(upload_dir) if f.startswith(f"app_{app_id}")]
 
-    return render_template("director/candidate_detail.html", student=application, photo_url=photo_url, student_obj=student)
+    # แปลง JSON form_data เป็น dict
+    form_info = {}
+    if application.form_data:
+        try:
+            import json
+            form_info = json.loads(application.form_data)
+        except Exception:
+            form_info = {}
+
+    # คำนวณคะแนนและวิเคราะห์แบบอัจฉริยะเพื่อให้ข้อมูลล่าสุด
+    application.calculate_automatic_score()
+    smart_analysis = application.generate_smart_analysis()
+    db.session.commit()
+
+    return render_template("director/candidate_detail.html", 
+                           student=application, 
+                           photo_url=photo_url, 
+                           student_obj=student,
+                           form_info=form_info,
+                           smart_analysis=smart_analysis,
+                           documents=all_app_files)
 
 
 # ==========================================
@@ -219,8 +302,30 @@ def candidate_detail(app_id):
 @director_bp.route("/ranking/<scholarship_id>")
 def scholarship_ranking(scholarship_id):
     sch = Scholarship.query.get_or_404(scholarship_id)
+    # Only show candidates who are approved/selected/reserved AND scored >= 50
     ranked_candidates = (
-        Application.query.filter_by(scholarship_id=scholarship_id, is_scored=True)
+        Application.query.filter(
+            Application.scholarship_id == scholarship_id,
+            Application.is_scored == True,
+            Application.total_score >= 50,
+            Application.status.in_(['approved', 'Selected', 'Reserved', 'completed', 'อนุมัติ'])
+        )
+        .all()
+    )
+
+    # คำนวณคะแนนใหม่อัตโนมัติสำหรับทุกคน (เพื่อให้ได้ค่าล่าสุด)
+    for app in ranked_candidates:
+        app.calculate_automatic_score()
+    db.session.commit()
+
+    # ดึงข้อมูลอีกครั้งแบบเรียงลำดับ
+    ranked_candidates = (
+        Application.query.filter(
+            Application.scholarship_id == scholarship_id,
+            Application.is_scored == True,
+            Application.total_score >= 50,
+            Application.status.in_(['approved', 'Selected', 'Reserved', 'completed', 'อนุมัติ'])
+        )
         .order_by(Application.total_score.desc())
         .all()
     )
@@ -242,13 +347,24 @@ def confirm_selection(scholarship_id):
     )
 
     quota = sch.number_of_scholarships or 0
-    for index, app in enumerate(candidates):
-        app.status = "Selected" if index < quota else "Reserved"
+    selected_count = 0
+    for app in candidates:
+        if app.total_score >= 50 and selected_count < quota:
+            app.status = "Selected"
+            selected_count += 1
+        else:
+            app.status = "Reserved"
+
+    # Set scholarship status to announce so it's finalized
+    sch.status = 'announce'
+    if not sch.announcement_date:
+        from datetime import datetime
+        sch.announcement_date = datetime.now()
 
     log = DirectorAuditLog(
         user_name="กรรมการ (Admin)",
         action="CONFIRM_SELECTION",
-        details=f"ยืนยันผลการคัดเลือกทุน {sch.name} (โควตา {quota} ราย)",
+        details=f"ยืนยันและประกาศผลการคัดเลือกทุน {sch.name} (คัดเลือก {selected_count} รายจากโควตา {quota})",
         ip_address=request.remote_addr,
     )
     db.session.add(log)
@@ -259,7 +375,8 @@ def confirm_selection(scholarship_id):
 
 @director_bp.route("/ranking-selection")
 def ranking_selection():
-    scholarships = Scholarship.query.all()
+    # กรองเฉพาะทุนที่เปิดอยู่
+    scholarships = [s for s in Scholarship.query.filter_by(status='open').all() if s.is_open()]
     return render_template("director/ranking_selection.html", scholarships=scholarships)
 
 @director_bp.route("/audit_log")
@@ -273,4 +390,4 @@ def profile():
     """หน้าประวัติส่วนตัวกรรมการ"""
     from models import Director
     director = Director.query.filter_by(username=session.get('user_id')).first_or_404()
-    return render_template("director/profile.html", director=director)
+    return render_template("director/profile.html", director=director)

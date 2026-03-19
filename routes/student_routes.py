@@ -201,18 +201,16 @@ def profile():
         return redirect(url_for("student.profile"))
  
     
-    # ดึงประวัติการรับทุน (สมมติว่าใช้สถานะ 'approved' หรือ 'ได้รับทุน')
-    # อาจจะใช้สถานะอื่น ๆ ตามที่ระบบออกแบบ เช่น 'announced', 'completed'
-    applications = Application.query.filter_by(
-        student_id=current_student_id,
-        status='approved'   # หรือ 'ได้รับทุน' ตามที่ใช้จริง
-    ).order_by(desc(Application.created_at)).all()
+    # ดึงประวัติการรับทุน (รวมทุกสถานะที่ผ่านการอนุมัติ)
+    success_statuses = ['approved', 'ได้รับทุน', 'Selected', 'อนุมัติ', 'completed', 'ได้รับทุนการศึกษา']
+    
 
     # ถ้าต้องการ pagination (ตามปุ่มที่มีใน template) ให้ใช้ paginate()
     page = request.args.get('page', 1, type=int)
-    pagination = Application.query.filter_by(
-        student_id=current_student_id,
-        status='approved'
+    # สำหรับ pagination
+    pagination = Application.query.filter(
+        Application.student_id == current_student_id,
+        Application.status.in_(success_statuses)
     ).order_by(desc(Application.created_at)).paginate(page=page, per_page=5, error_out=False)
     apps = pagination.items
 

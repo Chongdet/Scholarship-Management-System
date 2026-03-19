@@ -246,7 +246,7 @@
   <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
     <img src="{{ student.profile_pic if student.profile_pic else 'https://api.dicebear.com/9.x/initials/svg?seed=' ~ (student.name or 'Student') ~ '&radius=0&size=150' }}"
          alt="profile"
-         onerror="this.src='https://api.dicebear.com/9.x/initials/svg?seed={{ student.name or 'Student' }}&radius=0&size=150'"
+         onerror="this.src='https://api.dicebear.com/9.x/initials/svg?seed={{ student.name or 'Student' }}&radius=0&size=150';"
          style="width: 100px; height: 100px; border-radius: 0px; border: 2px solid #d4af37; object-fit: cover; background: #f8f9fa;">
     <div>
       <h2 style="color: white; margin: 0 0 5px 0; font-size: 1.5rem;">{{ student.name }}</h2>
@@ -286,12 +286,12 @@
               <td>{{ app.scholarship.provider or '-' }}</td>
               <td>{{ app.created_at.strftime('%d/%m/%Y') }}</td>
               <td>
-                {% if app.status == 'approved' %}
-                  <span class="status-badge success">ได้รับทุนการศึกษา</span>
+                {% if app.status in ['approved', 'ได้รับทุน', 'Selected', 'อนุมัติ', 'completed', 'ได้รับทุนการศึกษา'] %}
+                  <span class="status-badge success" style="background: #dcfce7; color: #15803d; padding: 2px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 600;">ได้รับทุนการศึกษา</span>
                 {% elif app.status == 'rejected' %}
-                  <span class="status-badge danger">ไม่ได้รับทุน</span>
+                  <span class="status-badge danger" style="background: #fee2e2; color: #b91c1c; padding: 2px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 600;">ไม่ได้รับทุน</span>
                 {% else %}
-                  <span class="status-badge info">{{ app.status }}</span>
+                  <span class="status-badge info" style="background: #dbeafe; color: #1e40af; padding: 2px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 600;">{{ app.status }}</span>
                 {% endif %}
               </td>
             </tr>

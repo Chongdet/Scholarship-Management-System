@@ -19,6 +19,17 @@
     </div>
 
     <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+        {% if scholarship.status == 'announce' %}
+        <div class="mb-6 bg-green-50 p-6 rounded-xl border border-green-100 flex items-center gap-4">
+            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600 flex-shrink-0">
+                <i class="fas fa-check-circle text-2xl"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold text-green-800">ประกาศผลทุนเรียบร้อยแล้ว</h3>
+                <p class="text-green-600">ทุนนี้ได้ทำการประกาศผลและส่งอีเมลแจ้งเตือนนักศึกษาแล้ว เมื่อวันที่ {{ scholarship.announcement_date.strftime('%d/%m/%Y') }}</p>
+            </div>
+        </div>
+        {% else %}
         <form method="post" action="{{ url_for('officer.scholarship_recipients', scholarship_id=scholarship.id) }}" class="mb-6 bg-blue-50 p-6 rounded-xl border border-blue-100">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -34,6 +45,7 @@
                 </button>
             </div>
         </form>
+        {% endif %}
         {% if applications %}
         <table class="w-full text-left text-sm">
             <thead class="bg-blue-50 text-blue-900 font-bold border-b border-blue-100">

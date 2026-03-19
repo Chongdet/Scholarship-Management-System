@@ -668,6 +668,10 @@ def scholarship_recipients(scholarship_id):
     """หน้าผู้ได้รับทุน - ดู/กำหนดวันที่ประกาศ"""
     scholarship = Scholarship.query.get_or_404(scholarship_id)
     if request.method == 'POST':
+        if scholarship.status == 'announce':
+            flash("ทุนนี้ได้ทำการประกาศผลเรียบร้อยแล้ว ไม่สามารถประกาศซ้ำได้", "warning")
+            return redirect(url_for('officer.final_announcement'))
+            
         date_str = request.form.get('announcement_date')
         if date_str:
             announcement_date = datetime.strptime(date_str, '%Y-%m-%d')

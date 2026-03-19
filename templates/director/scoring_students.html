@@ -45,33 +45,67 @@
           </td>
 
           <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
-            {% if (app['status'] if app is mapping else app.status) == 'approved' %}
-            <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">ผ่านแล้ว</span>
-            {% elif (app['is_scored'] if app is mapping else app.is_scored) %}
-            <span class="text-blue-600 font-bold">{{ app['total_score'] if app is mapping else app.total_score }} คะแนน</span>
+            {% set current_status = app['status'] if app is mapping else app.status %}
+            {% if current_status == 'approved' %}
+            <div class="flex flex-col items-center">
+                <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase bg-emerald-100 text-emerald-700 border border-emerald-200">ผ่านการพิจารณา</span>
+                {% set score = (app['total_score'] if app is mapping else app.total_score)|int %}
+                <span class="text-[10px] {{ 'text-gray-400' if score >= 50 else 'text-orange-500 font-black' }} mt-1">{{ score }} คะแนน</span>
+                {% if score < 50 %}
+                  <span class="text-[8px] text-orange-400 font-bold">ต่ำกว่าเกณฑ์ (50)</span>
+                {% endif %}
+            </div>
+            {% elif current_status == 'rejected' %}
+            <div class="flex flex-col items-center">
+                <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase bg-red-100 text-red-700 border border-red-200">ปฏิเสธแล้ว</span>
+                <span class="text-[10px] text-gray-400 mt-1 font-bold">{{ app['total_score'] if app is mapping else app.total_score }} คะแนน</span>
+            </div>
             {% else %}
-            <span class="text-gray-400 italic">ยังไม่ให้คะแนน</span>
+            <div class="flex flex-col items-center">
+                {% set score = (app['total_score'] if app is mapping else app.total_score)|int %}
+                <span class="{{ 'text-blue-600' if score >= 50 else 'text-orange-500' }} font-black text-xl tracking-tighter">{{ score }}</span>
+                <span class="text-[9px] text-gray-400 uppercase font-black -mt-1">Auto Score</span>
+                {% if score < 50 %}
+                  <span class="text-[8px] text-orange-400 font-bold">ต่ำกว่าเกณฑ์ (50)</span>
+                {% endif %}
+            </div>
             {% endif %}
           </td>
 
-          <td class="px-6 py-4 whitespace-nowrap text-center text-xs font-medium space-x-2">
-            <a href="{{ url_for('director.candidate_detail', app_id=(app['id'] if app is mapping else app.id)) }}" class="inline-block bg-gray-400 text-white px-3 py-1.5 rounded-md hover:bg-gray-500">
-              ดูรายละเอียด
-            </a>
+          <td class="px-6 py-4 whitespace-nowrap text-center text-xs font-medium">
+            <div class="flex items-center justify-center gap-2">
+                <a href="{{ url_for('director.candidate_detail', app_id=(app['id'] if app is mapping else app.id)) }}" 
+                   class="bg-white text-blue-600 border-2 border-blue-50 px-4 py-2 rounded-xl hover:border-blue-600 hover:bg-blue-50 transition-all font-bold shadow-sm flex items-center gap-2">
+                  <span>🔎</span> รายละเอียด
+                </a>
 
-            {% if (app['status'] if app is mapping else app.status) == 'approved' %}
-            <span class="px-2 py-1 rounded-md bg-green-100 text-green-700 font-medium">อนุมัติแล้ว</span>
-            {% elif (app['is_scored'] if app is mapping else app.is_scored) %}
-            <form method="POST" action="{{ url_for('director.approve_scholarship', app_id=(app['id'] if app is mapping else app.id)) }}" class="inline">
-              <button type="submit" class="inline-block bg-green-600 text-white px-3 py-1.5 rounded-md hover:bg-green-700 transition">
-                อนุมัติได้รับทุน
-              </button>
-            </form>
-            {% else %}
-            <a href="{{ url_for('director.give_score', app_id=(app['id'] if app is mapping else app.id)) }}" class="inline-block bg-gray-800 text-white px-3 py-1.5 rounded-md hover:bg-black transition shadow-sm">
-              ให้คะแนน
-            </a>
-            {% endif %}
+                {% set current_status = app['status'] if app is mapping else app.status %}
+                {% if current_status not in ['approved', 'rejected'] %}
+                  <form method="POST" action="{{ url_for('director.quick_approve', app_id=(app['id'] if app is mapping else app.id)) }}">
+                    <button type="submit" 
+                            onclick="return confirm('ยืนยันการอนุมัติรับทุนทันที?')"
+                            class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl transition-all font-black shadow-lg shadow-emerald-100 group flex items-center gap-2">
+                      <span class="group-hover:scale-125 transition-transform">✅</span> อนุมัติทันที
+                    </button>
+                  </form>
+
+                  <form method="POST" action="{{ url_for('director.reject_application', app_id=(app['id'] if app is mapping else app.id)) }}">
+                    <button type="submit" 
+                            onclick="return confirm('ยืนยันการปฏิเสธใบสมัครนี้?')"
+                            class="bg-white text-red-600 border-2 border-red-50 px-5 py-2 rounded-xl hover:border-red-600 hover:bg-red-50 transition-all font-black shadow-sm flex items-center gap-2">
+                      <span>❌</span> ปฏิเสธ
+                    </button>
+                  </form>
+                {% elif current_status == 'rejected' %}
+                <div class="bg-red-50 text-red-400 px-5 py-2 rounded-xl font-bold border border-red-100 flex items-center gap-2">
+                  <span class="opacity-50">🚫</span> ปฏิเสธแล้ว
+                </div>
+                {% else %}
+                <div class="bg-gray-50 text-gray-400 px-5 py-2 rounded-xl font-bold border border-gray-100 flex items-center gap-2">
+                  <span class="opacity-50">✨</span> เรียบร้อย
+                </div>
+                {% endif %}
+            </div>
           </td>
         </tr>
         {% endfor %}

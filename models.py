@@ -113,6 +113,9 @@ class Student(db.Model):
     loan_student_fund  = db.Column(db.Boolean)      # [Self] สถานะ กยศ.
     loan_type          = db.Column(db.String(100))  # [Self] ประเภทการกู้
     scholarship_history = db.Column(db.JSON)        # [Self] ประวัติรับทุน
+    activity_hours      = db.Column(db.Integer, default=0) # [Self] ชั่วโมงกิจกรรม
+    parttime_type      = db.Column(db.String(50))      # [Self] ประเภทรายได้พิเศษ (วันต่อวัน/ทำทุกวัน)
+    parttime_description = db.Column(db.Text)           # [Self] รายละเอียดงานพิเศษ
 
     # --- 6. ข้อมูลคำนวณและสถานะระบบ ---
     profile_completeness    = db.Column(db.Integer, default=0)    # คะแนนความสมบูรณ์ของโปรไฟล์ (0-100)
@@ -207,11 +210,24 @@ class Scholarship(db.Model):
 
     def is_open(self):
         """เช็คว่าทุนเปิดอยู่และยังไม่หมดเขต"""
-        now = datetime.now()
-        if self.status != "open": # เปลี่ยนเป็นพิมพ์เล็กให้ตรงกับค่า default
+        if self.status != "open":
             return False
-        if self.start_date and self.end_date:
-            return self.start_date <= now.date() <= self.end_date # เปรียบเทียบ date() ให้ตรงกัน
+            
+        now = datetime.now()
+        
+        # เปรียบเทียบเฉพาะวันที่ (Date) เพื่อความง่ายและลดปัญหาเรื่องวินาที
+        current_date = now.date()
+        
+        start = self.start_date.date() if self.start_date else None
+        end = self.end_date.date() if self.end_date else None
+        
+        if start and end:
+            return start <= current_date <= end
+        elif start:
+            return start <= current_date
+        elif end:
+            return current_date <= end
+            
         return True
 
     def __repr__(self):
@@ -240,6 +256,123 @@ class Application(db.Model):
     interview_location = db.Column(db.String(255), nullable=True) #สถานที่นัดสัมภาษณ์
     notes = db.Column(db.Text, nullable=True) # เหตุผล/ข้อมูลเพิ่มเติมจากนักศึกษา
     form_data = db.Column(db.Text, nullable=True) # JSON ข้อมูลเต็มจากฟอร์มสมัคร
+    activity_hours = db.Column(db.Integer, default=0)
+    parttime_type = db.Column(db.String(50))
+    parttime_description = db.Column(db.Text)
+
+    def calculate_automatic_score(self):
+        """คำนวณคะแนนอัตโนมัติ 100 คะแนน (จะข้ามหากมีคะแนนที่กรรมการให้เองแล้ว)"""
+        # หากมีการให้คะแนนจากกรรมการ (Evaluation) ให้คงคะแนนนั้นไว้ ไม่คำนวณทับ
+        if self.evaluations:
+            return self.total_score
+
+        student = Student.query.filter_by(student_id=self.student_id).first()
+        if not student:
+            return 0
+        
+        score = 0
+        
+        # 1. GPA (Max 25) - ปรับให้ละเอียดขึ้น
+        gpa = student.gpax or 0.0
+        if gpa >= 3.75:
+            score += 25
+        elif gpa >= 3.50:
+            score += 20
+        elif gpa >= 3.25:
+            score += 15
+        elif gpa >= 3.00:
+            score += 10
+        elif gpa >= 2.00:
+            score += 5
+        
+        # 2. Income (Max 35) - ปรับเกณฑ์ให้คะแนนง่ายขึ้นสำหรับคนลำบาก
+        monthly_income = (student.father_income or 0) + (student.mother_income or 0) + (student.guardian_income or 0)
+        yearly_income = monthly_income * 12
+        if yearly_income < 100000:
+            score += 35
+        elif yearly_income < 180000:
+            score += 25
+        elif yearly_income < 250000:
+            score += 15
+        elif yearly_income < 350000:
+            score += 5
+        
+        # 3. Activities (Max 20)
+        hours = self.activity_hours or 0
+        if hours >= 41:
+            score += 20
+        elif hours >= 31:
+            score += 15
+        elif hours >= 21:
+            score += 10
+        elif hours >= 1:
+            score += 5
+        
+        # 4. Extra Income & Work (Max 20)
+        pt_type = self.parttime_type
+        if pt_type == "ทำทุกวัน":
+            score += 20
+        elif pt_type == "วันต่อวัน":
+            score += 10
+        
+        # ลดคะแนนส่วน reasoning ออกไปเพราะมักจะคลาดเคลื่อน และเอาไปเพิ่มในหมวดอื่นแทน
+        
+        self.total_score = score
+        self.is_scored = True
+        return score
+
+    def generate_smart_analysis(self):
+        """วิเคราะห์ใบสมัครแบบอัจฉริยะ (Smart Analysis)"""
+        student = Student.query.filter_by(student_id=self.student_id).first()
+        if not student:
+            return ["ไม่พบข้อมูลนักศึกษาเพื่อวิเคราะห์"]
+        
+        insights = []
+        monthly_income = (student.father_income or 0) + (student.mother_income or 0) + (student.guardian_income or 0)
+        
+        # 1. วิเคราะห์รายได้ (ละเอียดขึ้น)
+        if monthly_income <= 5000:
+            insights.append("🔴 ครัวเรือนมีรายได้วิกฤต (น้อยกว่า 5,000 บ./เดือน)")
+        elif monthly_income <= 12000:
+            insights.append("🟠 ครัวเรือนมีรายได้จำกัด (ความจำเป็นสูง)")
+        elif monthly_income > 30000:
+            insights.append("⚪ รายได้ครอบครัวอยู่ในระดับปานกลาง-สูง")
+
+        # 2. วิเคราะห์ผลการเรียน
+        gpa = student.gpax or 0.0
+        if gpa >= 3.80:
+            insights.append("🌟 ศักยภาพการเรียนดีเยี่ยม (GPAX 3.80+)")
+        elif gpa >= 3.00:
+            insights.append("🟢 ผลการเรียนอยู่ในเกณฑ์ดีเยี่ยม")
+        elif gpa < 2.00:
+            insights.append("⚠️ ผลการเรียนต่ำกว่าเกณฑ์ปกติ")
+            
+        # 3. วิเคราะห์ความขยันและกิจกรรม
+        if (self.activity_hours or 0) >= 40:
+            insights.append("💪 จิตอาสาดีเด่น (กิจกรรม 40+ ชม.)")
+            
+        if self.parttime_type == "ทำทุกวัน":
+            insights.append("⚡ มีความรับผิดชอบสูง (ทำงานพิเศษทุกวัน)")
+        elif self.parttime_type == "วันต่อวัน":
+            insights.append("✅ พยายามช่วยเหลือตนเอง (ทำงานพิเศษรายวัน)")
+
+        # 4. วิเคราะห์คีย์เวิร์ดจากรายละเอียด (Keyword Detection)
+        desc = (self.parttime_description or "").lower()
+        if any(word in desc for word in ["ช่วยพ่อ", "ช่วยแม่", "ช่วยที่บ้าน", "ดูแล"]):
+            insights.append("🏠 มีความกตัญญู (ช่วยเหลืองานที่บ้าน)")
+        if any(word in desc for word in ["ขายของ", "ตลาด", "เซเว่น", "พาร์ทไทม์", "รับจ้าง"]):
+            insights.append("💰 ขยันหารายได้เสริมนอกเวลาเรียน")
+
+        # 5. สรุปความเห็นระบบ
+        if self.total_score >= 80:
+            insights.append("🏆 แนะนำเป็นอันดับต้น (คะแนนวิเคราะห์ 80+)")
+        elif self.total_score >= 60:
+            insights.append("👍 อยู่ในเกณฑ์แนะนำให้พิจารณา")
+            
+        if not insights:
+            insights.append("📝 ข้อมูลอยู่ในเกณฑ์มาตรฐานทั่วไป")
+            
+        return insights
 
     @property
     def gpa(self):

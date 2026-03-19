@@ -23,7 +23,7 @@
                     {% for app in pagination.items %}
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="p-4 border-b text-center">{{ loop.index + (pagination.page - 1) * pagination.per_page }}</td>
-                        <td class="p-4 border-b font-medium">{{ app.scholarship.name }}</td>
+                        <td class="p-4 border-b font-medium">{{ app.scholarship.name if app.scholarship else 'ไม่พบข้อมูลทุน' }}</td>
                         <td class="p-4 border-b text-center">{{ app.scholarship_type if app.scholarship_type else 'ทุนทั่วไป' }}</td>
                         <td class="p-4 border-b text-center">{{ app.provider if app.provider else 'มหาวิทยาลัย'}}</td>
                         <td class="p-4 border-b text-center">

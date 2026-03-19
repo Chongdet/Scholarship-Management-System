@@ -715,6 +715,25 @@
     });
   }
 
+  /* Form Validation: Submit requires at least 1 file */
+  const applyForm = document.getElementById('apply-form');
+  if (applyForm) {
+    applyForm.addEventListener('submit', function(e) {
+      // Check which button was clicked
+      const action = e.submitter ? e.submitter.value : 'submit';
+      
+      if (action === 'submit') {
+        if (!fileInput.files || fileInput.files.length === 0) {
+          e.preventDefault();
+          alert('⚠️ กรุณาแนบเอกสารประกอบการสมัครอย่างน้อย 1 ฉบับ (สำเนาบัตรประชาชน/ทะเบียนบ้าน/Transcript) ก่อนกดยืนยันครับ');
+          dropZone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          dropZone.style.border = '2px dashed #ef4444';
+          dropZone.style.background = '#fef2f2';
+        }
+      }
+    });
+  }
+
   function addSiblingRow() {
     const tbody = document.getElementById('siblingsTbody');
     const tr = document.createElement('tr');

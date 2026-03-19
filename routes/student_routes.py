@@ -314,9 +314,18 @@ def apply_scholarship():
             flash("คุณได้สมัครทุนนี้ไปแล้ว", "error")
             return redirect(url_for("student.dashboard"))
         
-        # จัดการสถานะ (บันทึกร่าง หรือ ส่งใบสมัคร)
+        # ตรวจสอบสถานะ (บันทึกร่าง หรือ ส่งใบสมัคร)
         status = "draft" if action == "save_draft" else "pending"
         
+        # --- [NEW] Server-side validation: ต้องมีไฟล์แนบถ้าเป็นการส่งใบสมัคร ---
+        files = request.files.getlist("documents")
+        if action == "submit":
+            # กรองเอาเฉพาะไฟล์ที่มีชื่อ (มีการเลือกไฟล์จริง)
+            valid_files = [f for f in files if f and f.filename != '']
+            if not valid_files:
+                flash("กรุณาแนบเอกสารประกอบการสมัครอย่างน้อย 1 ฉบับ (สำเนาบัตรประชาชน/ทะเบียนบ้าน/Transcript)", "error")
+                return redirect(url_for("student.apply_scholarship", scholarship_id=scholarship_id))
+
         # รวบรวมเหตุผลและหมายเหตุรายได้
         reason = request.form.get("reason", "").strip()
         income_note = request.form.get("income_note", "").strip()

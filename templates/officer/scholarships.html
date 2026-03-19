@@ -82,8 +82,15 @@
                         <td class="px-6 py-5 text-center">
                             {% if scholarship.status|lower == 'open' %}
                                 <span class="px-3 py-1 rounded-full text-[10px] font-black bg-green-100 text-green-700 border border-green-200">● OPEN</span>
-                            {% else %}
+                            {% endif %}
+                            {% if scholarship.status|lower == 'closed' %}
                                 <span class="px-3 py-1 rounded-full text-[10px] font-black bg-red-50 text-red-600 border border-red-100">● CLOSED</span>
+                            {% endif %}
+                            {% if scholarship.status|lower == 'interview' %}
+                                <span class="px-3 py-1 rounded-full text-[10px] font-black bg-yellow-50 text-yellow-600 border border-yellow-100">● INTERVIEW</span>
+                            {% endif %}
+                            {% if scholarship.status|lower == 'announce' %}
+                                <span class="px-3 py-1 rounded-full text-[10px] font-black bg-blue-50 text-blue-600 border border-blue-100">● Announce</span>
                             {% endif %}
                         </td>
 

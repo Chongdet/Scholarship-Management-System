@@ -163,6 +163,9 @@
                         <select name="scholarship_type" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                             <option value="ทุนบริจาค" {% if scholarship.scholarship_type == 'ทุนบริจาค' %}selected{% endif %}>ทุนบริจาค</option>
                             <option value="ทุนอื่นๆ" {% if scholarship.scholarship_type == 'ทุนอื่นๆ' %}selected{% endif %}>ทุนอื่นๆ</option>
+                            <option value="ทุนฉุกเฉิน" {% if scholarship.scholarship_type == 'ทุนฉุกเฉิน' %}selected{% endif %}>ทุนฉุกเฉิน</option>
+                            <option value="ทุนภายนอก" {% if scholarship.scholarship_type == 'ทุนภายนอก' %}selected{% endif %}>ทุนภายนอก</option>
+                            <option value="ทุนภายใน" {% if scholarship.scholarship_type == 'ทุนภายใน' %}selected{% endif %}>ทุนภายใน</option>
                         </select>
                     </div>
 
@@ -170,6 +173,7 @@
                         <label class="block text-sm font-semibold text-gray-700 mb-2">ลักษณะทุน</label>
                         <select name="scholarship_nature" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                             <option value="ทุนรายปี" {% if scholarship.scholarship_nature == 'ทุนรายปี' %}selected{% endif %}>ทุนรายปี</option>
+                            <option value="ทุนต่อเนื่อง" {% if scholarship.scholarship_nature == 'ทุนต่อเนื่อง' %}selected{% endif %}>ทุนต่อเนื่อง</option>
                             <option value="ทุนอื่นๆ" {% if scholarship.scholarship_nature == 'ทุนอื่นๆ' %}selected{% endif %}>ทุนอื่นๆ</option>
                         </select>
                     </div>
@@ -182,9 +186,40 @@
 
                     <div class="md:col-span-2">
                         <label class="block text-sm font-semibold text-gray-700 mb-2">เอกสารที่ต้องส่งตอนยื่นสมัคร</label>
-                        <textarea name="required_documents" rows="4" 
-                                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">{{ scholarship.required_documents or '' }}</textarea>
-                    </div>
+                        <div class="md:col-span-2">
+
+                        <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 rounded px-2 py-2 transition">
+                            <input type="checkbox" name="required_documents" value="ใบรับรองรายได้"
+                                class="w-5 h-5 text-blue-700 border-gray-400 rounded focus:ring-blue-500 cursor-pointer">
+                            <span class="text-base font-semibold text-gray-800">ใบรับรองรายได้</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 rounded px-2 py-2 transition">
+                            <input type="checkbox" name="required_documents" value="ใบรับรองจากอาจารย์"
+                                class="w-5 h-5 text-blue-700 border-gray-400 rounded focus:ring-blue-500 cursor-pointer">
+                            <span class="text-base font-semibold text-gray-800">ใบรับรองจากอาจารย์</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 rounded px-2 py-2 transition">
+                            <input type="checkbox" name="required_documents" value="ใบรับรองความประพฤติ"
+                                class="w-5 h-5 text-blue-700 border-gray-400 rounded focus:ring-blue-500 cursor-pointer">
+                            <span class="text-base font-semibold text-gray-800">ใบรับรองความประพฤติ</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 rounded px-2 py-2 transition">
+                            <input type="checkbox" name="required_documents" value="ผลการเรียน"
+                                class="w-5 h-5 text-blue-700 border-gray-400 rounded focus:ring-blue-500 cursor-pointer">
+                            <span class="text-base font-semibold text-gray-800">ผลการเรียน</span>
+                        </label>
+
+                        <div class="px-2 py-1">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="other_documents_check"
+                                    class="w-5 h-5 text-blue-700 border-gray-400 rounded focus:ring-blue-500 cursor-pointer"
+                                    onchange="document.getElementById('other_documents_input').classList.toggle('hidden', !this.checked)">
+                                <span class="text-base font-semibold text-gray-800">อื่นๆ</span>
+                            </label>
+                            <input type="text" id="other_documents_input" name="required_documents_other"
+                                placeholder="ระบุเอกสารอื่นๆ"
+                                class="hidden mt-2 w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
+                        </div>
                 </div>
             </section>
         </div>

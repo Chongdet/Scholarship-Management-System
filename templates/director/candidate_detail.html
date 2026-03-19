@@ -11,67 +11,390 @@
     </div>
 
     <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-        <div class="flex flex-col md:flex-row gap-10">
-            
-            <div class="flex-1 space-y-4">
-                <div class="grid grid-cols-3 gap-2">
-                    <span class="text-gray-500 font-bold">รหัสนักศึกษา</span>
-                    <span class="col-span-2 text-gray-800">{{ student.student_id }}</span>
+        {# --- Premium Header & Dashboard --- #}
+        <div class="mb-10">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                <div>
+                    <h1 class="text-3xl font-black text-gray-900 tracking-tight">รายละเอียดใบสมัคร</h1>
+                    <p class="text-gray-500 font-medium">ชุดใบสมัครเลขที่ <span class="text-blue-600">APP-{{ student.id }}</span></p>
                 </div>
-                <div class="grid grid-cols-3 gap-2">
-                    <span class="text-gray-500 font-bold">ชื่อ-นามสกุล</span>
-                    <span class="col-span-2 text-gray-800">
-                        {{ student_obj.name if student_obj else student.student_name or '—' }}
-                    </span>
-                </div>
-                <div class="grid grid-cols-3 gap-2">
-                    <span class="text-gray-500 font-bold">คณะ</span>
-                    <span class="col-span-2 text-gray-800">
-                        {{ student_obj.faculty if student_obj else student.faculty or '—' }}
-                    </span>
-                </div>
-                <div class="grid grid-cols-3 gap-2">
-                    <span class="text-gray-500 font-bold">GPA</span>
-                    <span class="col-span-2 text-gray-800">{{ student.gpa }}</span>
-                </div>
-                <div class="grid grid-cols-3 gap-2">
-                    <span class="text-gray-500 font-bold">สถานะเอกสาร</span>
-                    <span class="col-span-2 text-green-600 font-bold">{{ student.status }}</span>
-                </div>
-                <div class="grid grid-cols-3 gap-2 pt-4">
-                    <span class="text-gray-500 font-bold">คะแนนรวม</span>
-                    <span class="col-span-2 text-blue-700 font-bold text-lg">
-                        {% if student.is_scored %}{{ student.total_score }} คะแนน{% else %}ยังไม่ได้ให้คะแนน{% endif %}
-                    </span>
+                <div class="flex gap-3">
+                    <button onclick="window.print()" class="p-3 bg-white border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-all shadow-sm">
+                        🖨️ พิมพ์
+                    </button>
                 </div>
             </div>
 
-            <!-- รูปนักศึกษา -->
-            <div class="w-full md:w-56 flex-shrink-0">
-                <div class="border-2 border-gray-200 rounded-lg overflow-hidden aspect-[3/4] flex items-center justify-center bg-gray-50">
-                    {% if photo_url %}
-                        <img src="{{ url_for('static', filename=photo_url) }}" 
-                             alt="รูปถ่ายนักศึกษา" 
-                             class="w-full h-full object-cover">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {# 1. Student Summary Card #}
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col items-center">
+                    <div class="relative mb-4 group">
+                        <div class="w-32 h-44 rounded-2xl overflow-hidden border-4 border-white shadow-lg bg-gray-50">
+                            {% if photo_url %}
+                                <img src="{{ url_for('static', filename=photo_url) }}" alt="รูปถ่ายนักศึกษา" class="w-full h-full object-cover">
+                            {% else %}
+                                <div class="w-full h-full flex flex-col items-center justify-center text-gray-300">
+                                    <span class="text-5xl">👤</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-900">{{ student_obj.name if student_obj else student.student_name or '—' }}</h2>
+                    <p class="text-blue-600 font-bold text-sm mb-4">{{ student.student_id }}</p>
+                    
+                    <div class="w-full space-y-3 pt-4 border-t border-gray-50">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">คณะ</span>
+                            <span class="font-bold text-gray-800">{{ student_obj.faculty if student_obj else student.faculty or '—' }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">เกรดเฉลี่ย (GPA)</span>
+                            <span class="font-bold text-blue-700 bg-blue-50 px-2 rounded">{{ student.gpa }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">สถานะ</span>
+                            <span class="px-3 py-1 bg-amber-50 text-amber-600 rounded-full font-bold text-[10px] uppercase">
+                                {{ student.status }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {# 2. Smart Scoring Breakdown #}
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-black text-gray-900 uppercase tracking-widest text-xs">📊 คะแนนวิเคราะห์อัตโนมัติ</h3>
+                        <div class="text-right">
+                            <span class="text-4xl font-black text-blue-600">{{ student.total_score }}</span>
+                            <span class="text-gray-400 text-xs font-bold">/ 100</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-5">
+                        {# GPA Score #}
+                        <div>
+                            {% set gpa_score = 0 %}
+                            {% set gpa_val = student.gpa|float %}
+                            {% if gpa_val >= 3.75 %}{% set gpa_score = 25 %}
+                            {% elif gpa_val >= 3.50 %}{% set gpa_score = 20 %}
+                            {% elif gpa_val >= 3.25 %}{% set gpa_score = 15 %}
+                            {% elif gpa_val >= 3.00 %}{% set gpa_score = 10 %}
+                            {% elif gpa_val >= 2.00 %}{% set gpa_score = 5 %}{% endif %}
+                            <div class="flex justify-between text-xs mb-1 font-bold">
+                                <span class="text-gray-600">เกรดเฉลี่ย (GPA)</span>
+                                <span class="text-blue-600">{{ gpa_score }} / 25</span>
+                            </div>
+                            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                                <div class="h-full bg-blue-500 rounded-full" style="width: {{ (gpa_score/25*100)|round }}%"></div>
+                            </div>
+                        </div>
+
+                        {# Income Score #}
+                        <div>
+                            {% set inc_score = 0 %}
+                            {% set monthly_inc = (student_obj.father_income or 0) + (student_obj.mother_income or 0) + (student_obj.guardian_income or 0) %}
+                            {% set yearly_inc = monthly_inc * 12 %}
+                            {% if yearly_inc < 100000 %}{% set inc_score = 35 %}
+                            {% elif yearly_inc < 180000 %}{% set inc_score = 25 %}
+                            {% elif yearly_inc < 250000 %}{% set inc_score = 15 %}
+                            {% elif yearly_inc < 350000 %}{% set inc_score = 5 %}{% endif %}
+                            <div class="flex justify-between text-xs mb-1 font-bold">
+                                <span class="text-gray-600">ความจำเป็นด้านรายได้</span>
+                                <span class="text-emerald-600">{{ inc_score }} / 35</span>
+                            </div>
+                            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                                <div class="h-full bg-emerald-500 rounded-full" style="width: {{ (inc_score/35*100)|round }}%"></div>
+                            </div>
+                        </div>
+
+                        {# Activity Score #}
+                        <div>
+                            {% set act_score = 0 %}
+                            {% set hrs = student.activity_hours or 0 %}
+                            {% if hrs >= 41 %}{% set act_score = 20 %}
+                            {% elif hrs >= 31 %}{% set act_score = 15 %}
+                            {% elif hrs >= 21 %}{% set act_score = 10 %}
+                            {% elif hrs >= 1 %}{% set act_score = 5 %}{% endif %}
+                            <div class="flex justify-between text-xs mb-1 font-bold">
+                                <span class="text-gray-600">ชั่วโมงกิจกรรมสะสม</span>
+                                <span class="text-amber-600">{{ act_score }} / 20</span>
+                            </div>
+                            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                                <div class="h-full bg-amber-500 rounded-full" style="width: {{ (act_score/20*100)|round }}%"></div>
+                            </div>
+                        </div>
+
+                        {# Extra Work Score #}
+                        <div>
+                            {% set work_score = 0 %}
+                            {% if student.parttime_type == "ทำทุกวัน" %}{% set work_score = 20 %}
+                            {% elif student.parttime_type == "วันต่อวัน" %}{% set work_score = 10 %}{% endif %}
+                            <div class="flex justify-between text-xs mb-1 font-bold">
+                                <span class="text-gray-600">ความขยัน / งานพิเศษ</span>
+                                <span class="text-purple-600">{{ work_score }} / 20</span>
+                            </div>
+                            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                                <div class="h-full bg-purple-500 rounded-full" style="width: {{ (work_score/20*100)|round }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# 3. Smart Analysis Card #}
+                <div class="bg-gradient-to-br from-gray-900 to-blue-900 rounded-2xl shadow-xl p-6 text-white overflow-hidden relative">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 text-8xl">🧠</div>
+                    <h3 class="font-black uppercase tracking-widest text-xs mb-6 flex items-center gap-2">
+                        <span class="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></span>
+                        Smart Analysis Insights
+                    </h3>
+                    
+                    <div class="space-y-4 relative z-10">
+                        {% for insight in smart_analysis %}
+                            <div class="flex items-start gap-3 group">
+                                <div class="mt-1 w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-[10px] group-hover:bg-blue-400 transition-colors">
+                                    {% if 'วิกฤต' in insight or 'ต่ำ' in insight or 'มาก' in insight %}🔥{% else %}✨{% endif %}
+                                </div>
+                                <p class="text-sm font-medium leading-relaxed opacity-90">{{ insight }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="mt-8 pt-4 border-t border-white/10 text-[10px] uppercase font-bold tracking-widest text-blue-300">
+                        💡 ระบบวิเคราะห์ความเหมาะสมเบื้องต้น
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# --- Detailed Information Sections --- #}
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 divide-y divide-gray-50 overflow-hidden">
+            
+            {# Section 1: Family & Financial Details #}
+            <div class="p-8">
+                <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-3">
+                    <span class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl">🏠</span>
+                    ข้อมูลครอบครัวและรายได้โดยละเอียด
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                        <label class="text-[10px] uppercase font-black text-gray-400 block mb-1">รายได้บิดา/เดือน</label>
+                        <p class="font-bold text-gray-900">{{ form_info.get('father_income', '0') }} บาท</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                        <label class="text-[10px] uppercase font-black text-gray-400 block mb-1">รายได้มารดา/เดือน</label>
+                        <p class="font-bold text-gray-900">{{ form_info.get('mother_income', '0') }} บาท</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                        <label class="text-[10px] uppercase font-black text-gray-400 block mb-1">สถานภาพครอบครัว</label>
+                        <p class="font-bold text-indigo-600">{{ form_info.get('parents_status', '—') }}</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                        <label class="text-[10px] uppercase font-black text-gray-400 block mb-1">จำนวนพี่น้อง</label>
+                        <p class="font-bold text-gray-900">{{ form_info.get('siblings', '—') }} คน</p>
+                    </div>
+                </div>
+            </div>
+
+            {# Section 2: Activities & Work Description #}
+            <div class="p-8">
+                <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-3">
+                    <span class="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-xl">⏳</span>
+                    กิจกรรมและรายละเอียดงานพิเศษ
+                </h3>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-4">
+                            <div class="flex-1 p-5 bg-gray-50 rounded-2xl border border-gray-100">
+                                <span class="text-[10px] text-gray-400 uppercase font-black tracking-widest block mb-1">ชั่วโมงกิจกรรม</span>
+                                <p class="text-3xl font-black text-gray-900">{{ student.activity_hours or 0 }} <span class="text-xs font-normal text-gray-500">ชม.</span></p>
+                            </div>
+                            <div class="flex-1 p-5 bg-gray-50 rounded-2xl border border-gray-100">
+                                <span class="text-[10px] text-gray-400 uppercase font-black tracking-widest block mb-1">ประเภทงานพิเศษ</span>
+                                <p class="text-xl font-bold text-gray-900">{{ student.parttime_type or 'ไม่ทำ' }}</p>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[10px] uppercase font-black text-gray-400 block mb-2">รายละเอียดงานพิเศษ / กิจกรรมหารายได้:</label>
+                            <div class="p-5 bg-blue-50/50 rounded-2xl border border-blue-100 text-sm text-gray-800 leading-relaxed font-medium break-words">
+                                {{ student.parttime_description or '— ไม่ได้ระบุรายละเอียดงานพิเศษ —' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="text-[10px] uppercase font-black text-gray-400 block mb-2">ประวัติกิจกรรมเพิ่มเติม:</label>
+                            <div class="p-5 bg-gray-50 rounded-2xl border border-gray-100 text-sm text-gray-600 italic leading-relaxed break-words">
+                                "{{ form_info.get('activities', 'ไม่มีข้อมูลกิจกรรมเพิ่มเติม') }}"
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[10px] uppercase font-black text-gray-400 block mb-2">เหตุผลและความจำเป็นในการขอรับทุน:</label>
+                            <div class="p-5 bg-white border-2 border-indigo-100 rounded-2xl text-sm text-gray-900 leading-relaxed shadow-sm break-words">
+                                <span class="text-indigo-600 text-xl font-serif">"</span>
+                                {{ student.notes or form_info.get('reason', 'ไม่ได้ระบุเหตุผล') }}
+                                <div class="text-right">
+                                    <span class="text-indigo-600 text-xl font-serif">"</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Section 3: Document Previewer #}
+            <div class="p-8">
+                <div class="flex flex-col lg:flex-row gap-10">
+                    <div class="lg:w-1/3">
+                        <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-3">
+                            <span class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl">📄</span>
+                            เอกสารประกอบ
+                        </h3>
+                        {% if documents %}
+                            <div class="space-y-2">
+                                {% for doc in documents %}
+                                    {% set file_url = url_for('static', filename='uploads/' + student.student_id|string + '/' + doc) %}
+                                    {% set is_image = doc.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp')) %}
+                                    <div onclick="viewDocument(this)" 
+                                         data-doc-url="{{ file_url }}"
+                                         data-doc-name="{{ doc.replace('app_' + student.id|string + '_', '') }}"
+                                         data-is-image="{{ is_image|lower }}"
+                                         class="flex items-center gap-3 p-3 border border-transparent rounded-xl hover:bg-gray-50 transition-all group cursor-pointer doc-item">
+                                        <span class="text-xl">{% if '.pdf' in doc.lower() %}📕{% elif is_image %}🖼️{% else %}📄{% endif %}</span>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-xs font-bold text-gray-700 truncate">{{ doc.replace('app_' + student.id|string + '_', '') }}</p>
+                                        </div>
+                                        <span class="text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-gray-400 italic text-sm p-4 bg-gray-50 rounded-xl text-center">ไม่พบเอกสาร</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="lg:w-2/3">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="text-sm font-bold text-gray-800 flex items-center gap-2">
+                                <span id="docTypeIcon">🔎</span>
+                                <span id="imageTitle">ตัวอย่างเอกสาร</span>
+                            </div>
+                            <button type="button" onclick="toggleExpandViewer()" id="expandBtn" class="hidden text-blue-600 font-bold text-xs flex items-center gap-1">
+                                <span id="expandIcon">➕</span> ขยายภาพ
+                            </button>
+                        </div>
+                        <div id="viewerContainer" class="bg-gray-100 rounded-2xl overflow-hidden h-[450px] flex items-center justify-center border-2 border-dashed border-gray-200 relative group">
+                            <div id="placeholderContent" class="text-center opacity-40">
+                                <span class="text-5xl block mb-2">📄</span>
+                                <p class="text-xs font-bold">คลิกเลือกเอกสารเพื่อแสดงตัวอย่าง</p>
+                            </div>
+                            <div id="imageViewer" class="w-full h-full hidden"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Final Action Bar #}
+            <div class="p-8 bg-gray-50 flex flex-col sm:flex-row justify-between items-center gap-6">
+                <button onclick="history.back()" class="text-gray-500 hover:text-black flex items-center gap-2 font-bold transition-colors">
+                    <span>←</span> ย้อนกลับ
+                </button>
+
+                <div class="flex gap-4 w-full sm:w-auto">
+                    {% if student.status not in ['approved', 'Selected', 'rejected'] %}
+                        <form action="{{ url_for('director.quick_approve', app_id=student.id) }}" method="POST" class="flex-1 sm:flex-initial">
+                            <button type="submit" 
+                                    onclick="return confirm('ยืนยันการอนุมัติรับทุนทันที?')"
+                                    class="w-full bg-emerald-600 text-white px-10 py-4 rounded-xl hover:bg-emerald-700 transition-all font-black shadow-lg shadow-emerald-100 active:scale-95 flex items-center justify-center gap-3">
+                                 ✅ อนุมัติทันที
+                            </button>
+                        </form>
+                        <a href="{{ url_for('director.give_score', app_id=student.id) }}" class="flex-1 sm:flex-initial bg-white border-2 border-gray-200 text-gray-700 px-8 py-4 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-all font-bold flex items-center justify-center gap-3">
+                             ให้คะแนนละเอียด (Manual)
+                        </a>
+                    {% elif student.status == 'rejected' %}
+                        <div class="bg-red-500 text-white px-10 py-4 rounded-xl font-black flex items-center gap-2 shadow-lg shadow-red-100">
+                            🚫 ปฏิเสธการให้ทุนแล้ว
+                        </div>
                     {% else %}
-                        <div class="flex flex-col items-center gap-2 text-gray-300 p-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                            </svg>
-                            <span class="text-xs text-center">ไม่มีรูปถ่าย</span>
+                        <div class="bg-emerald-500 text-white px-10 py-4 rounded-xl font-black flex items-center gap-2 shadow-lg shadow-emerald-100">
+                            ✨ อนุมัติการได้รับทุนแล้ว
                         </div>
                     {% endif %}
                 </div>
-                <p class="text-xs text-gray-400 text-center mt-2">รูปถ่ายนักศึกษา</p>
             </div>
-
-        </div>
-
-        <div class="mt-10 border-t pt-6">
-            <button onclick="history.back()" class="text-gray-600 hover:text-black flex items-center gap-2">
-                <span>←</span> ย้อนกลับ
-            </button>
         </div>
     </div>
 </div>
-{% endblock %}
+
+<script>
+    function viewDocument(element) {
+        const docUrl = element.dataset.docUrl;
+        const docName = element.dataset.docName || 'เอกสาร';
+        const isImage = element.dataset.isImage === 'true';
+        const isPdf = docUrl.toLowerCase().endsWith('.pdf');
+        
+        const imageViewer = document.getElementById('imageViewer');
+        const imageTitle = document.getElementById('imageTitle');
+        const docTypeIcon = document.getElementById('docTypeIcon');
+        const placeholder = document.getElementById('placeholderContent');
+        const expandBtn = document.getElementById('expandBtn');
+        
+        document.querySelectorAll('.doc-item').forEach(item => item.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50'));
+        element.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50');
+        
+        imageTitle.textContent = docName;
+        if (placeholder) placeholder.classList.add('hidden');
+        imageViewer.classList.remove('hidden');
+        expandBtn.classList.remove('hidden');
+
+        if (isImage) {
+            docTypeIcon.textContent = '🖼️';
+            imageViewer.innerHTML = `<img src="${docUrl}" class="w-full h-full object-contain bg-white">`;
+        } else if (isPdf) {
+            docTypeIcon.textContent = '📕';
+            imageViewer.innerHTML = `<iframe src="${docUrl}#toolbar=0" class="w-full h-full border-0"></iframe>`;
+        } else {
+            docTypeIcon.textContent = '📄';
+            imageViewer.innerHTML = `<div class="flex flex-col items-center justify-center h-full p-4 text-center">
+                <span class="text-4xl mb-2">📄</span>
+                <p class="text-xs text-gray-500 mb-4">${docName}</p>
+                <a href="${docUrl}" target="_blank" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold">ดาวน์โหลดไฟล์</a>
+            </div>`;
+        }
+    }
+
+    let isExpanded = false;
+    function toggleExpandViewer() {
+        const container = document.getElementById('viewerContainer');
+        const expandIcon = document.getElementById('expandIcon');
+        
+        if (!isExpanded) {
+            container.style.position = 'fixed';
+            container.style.top = '20px';
+            container.style.left = '20px';
+            container.style.right = '20px';
+            container.style.bottom = '20px';
+            container.style.width = 'calc(100% - 40px)';
+            container.style.height = 'calc(100% - 40px)';
+            container.style.zIndex = '9999';
+            container.style.backgroundColor = 'white';
+            container.classList.remove('rounded-2xl');
+            container.classList.add('shadow-2xl', 'border-gray-300');
+            document.body.style.overflow = 'hidden';
+        } else {
+            container.style.position = 'relative';
+            container.style.top = 'auto';
+            container.style.left = 'auto';
+            container.style.right = 'auto';
+            container.style.bottom = 'auto';
+            container.style.width = '100%';
+            container.style.height = '450px';
+            container.style.zIndex = 'auto';
+            container.classList.add('rounded-2xl');
+            container.classList.remove('shadow-2xl', 'border-gray-300');
+            document.body.style.overflow = 'auto';
+        }
+        isExpanded = !isExpanded;
+    }
+</script>
+{% endblock %}

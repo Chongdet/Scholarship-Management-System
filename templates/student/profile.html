@@ -455,6 +455,17 @@
         <div class="field-group"><span class="field-label">ได้รับจากผู้อุปการะ (บาท)</span><input type="number" name="inc_guardian" value="{{ v(student.inc_guardian) }}" placeholder="0" class="editable-input" readonly></div>
         <div class="field-group"><span class="field-label">ได้รับจากทุนการศึกษา (เฉลี่ยรายเดือน) (บาท)</span><input type="number" name="inc_scholarship" value="{{ v(student.inc_scholarship) }}" placeholder="0" class="editable-input" readonly></div>
         <div class="field-group"><span class="field-label">ได้รับจากการทำงาน (Part time) (บาท)</span><input type="number" name="inc_parttime" value="{{ v(student.inc_parttime) }}" placeholder="0" class="editable-input" readonly></div>
+        <div class="field-group"><span class="field-label">ลักษณะการทำงานพิเศษ</span>
+          <div class="radio-group">
+            <label class="rpill"><input type="radio" name="parttime_type" value="ทำทุกวัน" {% if student.parttime_type == 'ทำทุกวัน' %}checked{% endif %} class="editable-radio" disabled onchange="runValidation()"> ทำทุกวัน</label>
+            <label class="rpill"><input type="radio" name="parttime_type" value="วันต่อวัน" {% if student.parttime_type == 'วันต่อวัน' %}checked{% endif %} class="editable-radio" disabled onchange="runValidation()"> วันต่อวัน</label>
+            <label class="rpill"><input type="radio" name="parttime_type" value="ไม่ทำ" {% if not student.parttime_type or student.parttime_type == 'ไม่ทำ' %}checked{% endif %} class="editable-radio" disabled onchange="runValidation()"> ไม่ทำ</label>
+          </div>
+        </div>
+      </div>
+      <div class="field-group" style="margin-top: 1rem;">
+        <span class="field-label">รายละเอียดการทำงานพิเศษ / กิจกรรมหารายได้</span>
+        <textarea name="parttime_description" rows="3" placeholder="ระบุรายละเอียดงานที่ทำ" class="editable-input" readonly>{{ v(student.parttime_description) }}</textarea>
       </div>
       <div class="income-summary"><span class="label">💵 รายได้รวมต่อเดือน (ประมาณการ)</span><span class="amount" id="totalIncomeDisplay">— บาท</span></div>
 

@@ -16,6 +16,9 @@
                 <h1 class="text-3xl font-bold mb-2 flex items-center gap-2">
                     <span>สรุปผลการจัดอันดับ</span>
                     <span class="text-yellow-400">🏆</span>
+                    {% if scholarship.status == 'announce' %}
+                        <span class="ml-4 bg-emerald-400/20 text-emerald-300 text-[10px] font-black px-3 py-1 rounded-full border border-emerald-400/30 uppercase tracking-widest">FINALIZED</span>
+                    {% endif %}
                 </h1>
                 <p class="text-blue-100 text-lg opacity-90">{{ scholarship.name }}</p>
                 
@@ -47,7 +50,8 @@
                         <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-widest">อันดับ</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-widest">ข้อมูลนักศึกษา</th>
                         <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-widest">คะแนนรวม</th>
-                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-widest">ผลการพิจารณาเบื้องต้น</th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-widest">จัดการ/ตรวจสอบ</th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-widest">สถานะ</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 bg-white">
@@ -69,6 +73,14 @@
                         </td>
                         <td class="px-6 py-5 text-center">
                             <span class="text-xl font-black text-indigo-700">{{ app.total_score }}</span>
+                        </td>
+                        <td class="px-6 py-5 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <a href="{{ url_for('director.candidate_detail', app_id=app.id) }}" class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                                    <span>🔍</span> ตรวจใบสมัคร
+                                </a>
+                                {# Redundant Approve button removed - candidates in this list are already approved for ranking #}
+                            </div>
                         </td>
                         <td class="px-6 py-5 text-center">
                             {% if in_quota %}
@@ -102,13 +114,25 @@
         <div class="text-sm text-gray-500 bg-gray-100 px-4 py-2 rounded-lg border border-gray-200">
             📌 <strong>หมายเหตุ:</strong> ระบบเรียงลำดับตามคะแนนรวม (Total Score) จากมากไปน้อยโดยอัตโนมัติ
         </div>
-        
-        <form action="{{ url_for('director.confirm_selection', scholarship_id=scholarship.id) }}" method="POST" onsubmit="return confirm('⚠️ ยืนยันการประกาศรายชื่อผู้ได้รับทุนใช่หรือไม่?\n(ระบบจะส่งสถานะไปยังนักศึกษาทุกคนทันที)')">
-            <button type="submit" class="group bg-indigo-600 hover:bg-indigo-700 text-white px-12 py-4 rounded-2xl transition-all shadow-xl shadow-indigo-200 font-bold flex items-center gap-3 active:scale-95">
-                <span>ประกาศรายชื่อผู้ได้รับทุนอย่างเป็นทางการ</span>
-                <svg class="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 5l7 7-7 7M5 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-            </button>
-        </form>
+        <div class="mt-12 flex justify-center no-print">
+        {% if scholarship.status == 'announce' %}
+            <div class="bg-emerald-50 text-emerald-700 px-10 py-5 rounded-2xl border-2 border-emerald-200 flex flex-col items-center gap-2 shadow-sm">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl text-emerald-500">✅</span>
+                    <span class="text-xl font-extrabold uppercase tracking-widest">ประกาศระบุรายชื่อเรียบร้อย</span>
+                </div>
+                <p class="text-xs text-emerald-600 font-medium opacity-80 italic">ระบบทำการประกาศผลอย่างเป็นทางการแล้วและไม่สามารถแก้ไขได้</p>
+            </div>
+        {% else %}
+            <form action="{{ url_for('director.confirm_selection', scholarship_id=scholarship.id) }}" method="POST">
+                <button type="submit" 
+                        onclick="return confirm('⚠️ ยืนยันการประกาศรายชื่อผู้ได้รับทุนอย่างเป็นทางการ?\n(ระบบจะอัปเดตสถานะและประกาศผลให้นักศึกษาทราบทันที)')"
+                        class="group bg-indigo-600 hover:bg-indigo-700 text-white px-12 py-4 rounded-2xl transition-all shadow-xl shadow-indigo-200 font-bold flex items-center gap-3 active:scale-95">
+                    <span>ประกาศรายชื่อผู้ได้รับทุนอย่างเป็นทางการ</span>
+                    <svg class="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 5l7 7-7 7M5 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                </button>
+            </form>
+        {% endif %}
     </div>
 </div>
 

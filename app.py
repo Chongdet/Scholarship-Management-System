@@ -84,8 +84,11 @@ def register_routes(app):
 
     @app.route("/")
     def index():
-        scholarships = Scholarship.query.all()
-        return render_template("index.html", scholarships=scholarships)
+        # แสดงเฉพาะทุนที่สถานะเป็น 'open' เท่านั้นตามที่ User ต้องการ
+        scholarships = Scholarship.query.filter_by(status='open').all()
+        # กรองเพิ่มด้วย is_open() (เผื่อเรื่องวันที่)
+        active_scholarships = [s for s in scholarships if s.is_open()]
+        return render_template("index.html", scholarships=active_scholarships)
 
 
     @app.route("/login", methods=["GET", "POST"])

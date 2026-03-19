@@ -177,15 +177,40 @@
         <span class="s-title">ทุนการศึกษาที่ต้องการสมัคร</span>
       </div>
       <div class="s-body">
-        <div class="field-group">
-          <span class="field-label">ทุนการศึกษา <span class="field-note">*</span></span>
-          <select name="scholarship_id" required class="form-input">
-            <option value="">-- เลือกทุนการศึกษา --</option>
-            {% for sch in scholarships %}
-              <option value="{{ sch.id }}" {{ 'selected' if prefill.get('scholarship_id') == sch.id else '' }}>{{ sch.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
+        {% if prefill.get('scholarship_id') %}
+          {% set selected_sch = scholarships|selectattr('id', 'equalto', prefill.get('scholarship_id')|int)|first %}
+          {% if selected_sch %}
+            <div style="background:var(--sky); border:1.5px solid var(--sky2); border-radius:var(--radius-sm); padding:1rem; display:flex; align-items:center; gap:12px;">
+              <div style="font-size:1.5rem;">🎓</div>
+              <div>
+                <div style="font-size:.75rem; color:var(--slate); font-weight:600; text-transform:uppercase;">ทุนที่เลือกสมัคร:</div>
+                <div style="font-size:1rem; color:var(--navy); font-weight:700;">{{ selected_sch.name }}</div>
+              </div>
+              <input type="hidden" name="scholarship_id" value="{{ selected_sch.id }}">
+              <a href="{{ url_for('student.apply_scholarship') }}" style="margin-left:auto; font-size:.7rem; color:var(--navy2); font-weight:600; text-decoration:underline;">เลือกทุนอื่น</a>
+            </div>
+          {% else %}
+            <div class="field-group">
+              <span class="field-label">ทุนการศึกษา <span class="field-note">*</span></span>
+              <select name="scholarship_id" required class="form-input">
+                <option value="">-- เลือกทุนการศึกษา --</option>
+                {% for sch in scholarships %}
+                  <option value="{{ sch.id }}">{{ sch.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          {% endif %}
+        {% else %}
+          <div class="field-group">
+            <span class="field-label">ทุนการศึกษา <span class="field-note">*</span></span>
+            <select name="scholarship_id" required class="form-input">
+              <option value="">-- เลือกทุนการศึกษา --</option>
+              {% for sch in scholarships %}
+                <option value="{{ sch.id }}" {{ 'selected' if prefill.get('scholarship_id') == sch.id else '' }}>{{ sch.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        {% endif %}
       </div>
     </div>
 
@@ -462,18 +487,14 @@
           <span class="field-label">ระบุชื่อทุนและปีที่ได้รับ (ถ้าเคย)</span>
           <input type="text" name="prev_scholarship_detail" value="{{ prefill.get('prev_scholarship_detail', '') }}" placeholder="เช่น ทุน กสศ. ปี 2565" class="form-input">
         </div>
-        <div class="field-group" style="margin-bottom:1.25rem;">
-          <span class="field-label">กิจกรรมที่เคยเข้าร่วม / ความสามารถพิเศษ</span>
-          <textarea name="activities" rows="3" placeholder="ระบุกิจกรรม หรือความสามารถพิเศษ (ถ้ามี)" class="form-input">{{ prefill.get('activities', '') }}</textarea>
-        </div>
+
+        <div class="div-label">📝 เหตุผลความจำเป็นและความคาดหวัง <span class="field-note" style="margin-left:4px;">*</span></div>
         <div class="field-group">
-          <span class="field-label">เหตุผลที่ต้องการสมัครทุน <span class="field-note">*</span></span>
-          <textarea name="reason" rows="3" placeholder="อธิบายเหตุผลและความจำเป็นในการสมัครทุน" required class="form-input">{{ prefill.get('reason', '') }}</textarea>
+          <span class="field-label">ทำไมคุณถึงควรได้รับทุนนี้? (ระบุเหตุผลความจำเป็นและแผนการใช้ทุน)</span>
+          <textarea name="reason" rows="4" placeholder="ระบุเหตุผลความจำเป็นของคุณ..." required class="form-input">{{ prefill.get('reason', '') }}</textarea>
         </div>
       </div>
     </div>
-
-    {# 7. รายได้ของนักศึกษาและข้อมูลพี่น้อง #}
     <div class="section-card">
       <div class="section-header">
         <div class="s-icon teal">7</div>
@@ -502,6 +523,20 @@
           <div class="field-group">
             <span class="field-label">ได้รับจากการทำงาน (Part time)</span>
             <input type="number" name="inc_parttime" value="{{ prefill.get('inc_parttime', '') }}" placeholder="0" class="form-input">
+          </div>
+          <div class="field-group">
+            <span class="field-label">ลักษณะการทำงานพิเศษ <span class="field-note">*</span></span>
+            <div class="radio-group">
+              <label class="rpill">
+                <input type="radio" name="parttime_type" value="ทำทุกวัน" {{ 'checked' if prefill.get('parttime_type') == 'ทำทุกวัน' else '' }} required> ทำทุกวัน
+              </label>
+              <label class="rpill">
+                <input type="radio" name="parttime_type" value="วันต่อวัน" {{ 'checked' if prefill.get('parttime_type') == 'วันต่อวัน' else '' }} required> วันต่อวัน
+              </label>
+              <label class="rpill">
+                <input type="radio" name="parttime_type" value="ไม่ทำ" {{ 'checked' if not prefill.get('parttime_type') or prefill.get('parttime_type') == 'ไม่ทำ' else '' }} required> ไม่ทำ
+              </label>
+            </div>
           </div>
         </div>
 

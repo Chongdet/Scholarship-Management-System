@@ -354,9 +354,11 @@ def delete_scholarship(scholarship_id):
 # (Audit Log, Application, Application-detail)
 # ==========================================
 
+from typing import Optional
+
 def _log_audit(officer_username: str, action: str, action_title: str,
-               reference_id: str = None, details: str = None,
-               status_after: str = None, previous_value: str = None):
+               reference_id: Optional[str] = None, details: Optional[str] = None,
+               status_after: Optional[str] = None, previous_value: Optional[str] = None):
     """บันทึก Audit Log"""
     if not officer_username:
         return
@@ -376,7 +378,7 @@ def _log_audit(officer_username: str, action: str, action_title: str,
 
 @officer_bp.route('/')
 def home():
-    return redirect(url_for('officer.applications'))
+    return redirect(url_for('officer.list_scholarships'))
 
 @officer_bp.route('/applications')
 def applications():

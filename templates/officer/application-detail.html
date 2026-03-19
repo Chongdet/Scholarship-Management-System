@@ -77,7 +77,7 @@
                     <div>วันที่สมัคร: {{ application.application_date }}</div>
                 </div>
 
-                <div class="text-sm text-gray-700 space-y-2 border border-gray-200 bg-gray-50 rounded-lg p-4">
+                <div class="text-sm text-gray-700 space-y-2 border border-gray-200 bg-gray-50 rounded-lg p-4 break-words">
                     <div class="font-semibold text-gray-800 mb-2">ข้อมูลเพิ่มเติม</div>
                     <div>{{ (form_data.get('reason') if form_data else None) or application.notes or 'เป็นนักศึกษาที่มีความขยันหมั่นเพียร ต้องการทุนการศึกษาเพื่อบรรเทาภาระค่าใช้จ่ายของครอบครัว' }}</div>
                 </div>
@@ -145,13 +145,23 @@
 
 
             {% if all_files and all_files|length > 0 %}
-            <!-- Right Column: Photo / Document Viewer -->
-            <div class="p-6">
-                <div class="font-semibold text-gray-800 mb-3" id="imageTitle">แสดงรูปภาพ</div>
-                <div id="imageViewer" class="bg-gray-200 h-64 flex items-center justify-center text-gray-400 border border-gray-300 rounded-lg overflow-hidden">
-                    <div class="text-center">
-                        <div class="text-4xl mb-2">👆</div>
-                        <div>คลิกที่เอกสารเพื่อดูรูปภาพ</div>
+            <!-- Right Column: Document Viewer -->
+            <div class="p-6 transition-all duration-300" id="viewerContainer">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="font-bold text-gray-800 flex items-center gap-2">
+                        <span id="docTypeIcon">📄</span>
+                        <span id="imageTitle">แสดงเอกสาร</span>
+                    </div>
+                    <button type="button" onclick="toggleExpandViewer()" class="text-blue-600 hover:bg-blue-50 p-1.5 rounded-lg transition border border-transparent hover:border-blue-200 flex items-center gap-1 text-xs font-bold" title="ขยายเต็มหน้าจอ">
+                        <span id="expandIcon">🔍</span> <span id="expandText">ขยาย</span>
+                    </button>
+                </div>
+                
+                <div id="imageViewer" class="bg-gray-100 h-[600px] flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200 rounded-xl overflow-hidden relative group">
+                    <div class="text-center py-20" id="placeholderContent">
+                        <div class="text-6xl mb-4 grayscale opacity-30">📂</div>
+                        <div class="text-sm font-medium">คลิกเลือกเอกสารด้านซ้ายเพื่อดูตัวอย่าง</div>
+                        <p class="text-[10px] mt-2 text-gray-400">รองรับไฟล์รูปภาพ และ PDF</p>
                     </div>
                 </div>
             </div>
@@ -254,18 +264,72 @@
         const docUrl = element.dataset.docUrl;
         const docName = element.dataset.docName || 'เอกสาร';
         const isImage = element.dataset.isImage === 'true';
+        const isPdf = docUrl.toLowerCase().endsWith('.pdf');
         const imageViewer = document.getElementById('imageViewer');
         const imageTitle = document.getElementById('imageTitle');
+        const docTypeIcon = document.getElementById('docTypeIcon');
+        const placeholder = document.getElementById('placeholderContent');
         
-        document.querySelectorAll('.doc-item').forEach(item => item.classList.remove('ring-2', 'ring-blue-500'));
-        element.classList.add('ring-2', 'ring-blue-500');
+        document.querySelectorAll('.doc-item').forEach(item => item.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-100'));
+        element.classList.add('ring-2', 'ring-blue-500', 'bg-blue-100');
         imageTitle.textContent = docName;
+
+        if (placeholder) placeholder.style.display = 'none';
         
-        if (isImage && docUrl) {
-            imageViewer.innerHTML = `<img src="${docUrl}" alt="${docName}" class="w-full h-full object-contain">`;
+        if (isImage) {
+            docTypeIcon.textContent = '🖼️';
+            imageViewer.innerHTML = `<img src="${docUrl}" alt="${docName}" class="w-full h-full object-contain bg-white">`;
+        } else if (isPdf) {
+            docTypeIcon.textContent = '📕';
+            // ใช้ iframe สำหรับ PDF
+            imageViewer.innerHTML = `<iframe src="${docUrl}#toolbar=0" class="w-full h-full border-0" allow="autoplay"></iframe>
+                                    <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <a href="${docUrl}" target="_blank" class="bg-white/90 backdrop-blur px-3 py-1.5 rounded-lg shadow-sm border border-gray-200 text-xs font-bold text-gray-700 hover:text-blue-600">เปิดในหน้าต่างใหม่ ↗</a>
+                                    </div>`;
         } else {
-            imageViewer.innerHTML = `<div class="text-center p-6"><p class="text-gray-600 mb-4">${docName}</p><a href="${docUrl}" target="_blank" class="text-blue-600 underline">เปิดดูในแท็บใหม่</a></div>`;
+            docTypeIcon.textContent = '📄';
+            imageViewer.innerHTML = `<div class="text-center p-6">
+                                        <div class="text-4xl mb-3">📄</div>
+                                        <p class="text-gray-600 mb-4">${docName}</p>
+                                        <a href="${docUrl}" target="_blank" class="bg-blue-600 text-white px-6 py-2 rounded-full font-bold shadow-lg shadow-blue-100 hover:bg-blue-700 transition">ดาวน์โหลดไฟล์</a>
+                                     </div>`;
         }
+    }
+
+    let isExpanded = false;
+    function toggleExpandViewer() {
+        const container = document.getElementById('viewerContainer');
+        const viewer = document.getElementById('imageViewer');
+        const expandIcon = document.getElementById('expandIcon');
+        const expandText = document.getElementById('expandText');
+        
+        if (!isExpanded) {
+            // Expand to full overlay
+            container.style.position = 'fixed';
+            container.style.top = '0';
+            container.style.left = '0';
+            container.style.width = '100%';
+            container.style.height = '100%';
+            container.style.zIndex = '9999';
+            container.style.backgroundColor = 'white';
+            container.classList.add('p-10');
+            viewer.style.height = 'calc(100% - 60px)';
+            expandIcon.textContent = '✖';
+            expandText.textContent = 'ย่อชุด';
+            document.body.style.overflow = 'hidden'; // มั่นใจว่าเลื่อนหน้าหลังไม่ได้
+        } else {
+            // Back to normal
+            container.style.position = 'static';
+            container.style.width = 'auto';
+            container.style.height = 'auto';
+            container.style.zIndex = 'auto';
+            container.classList.remove('p-10');
+            viewer.style.height = '600px';
+            expandIcon.textContent = '🔍';
+            expandText.textContent = 'ขยาย';
+            document.body.style.overflow = 'auto';
+        }
+        isExpanded = !isExpanded;
     }
 
     const modal = document.getElementById('interviewModal');

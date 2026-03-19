@@ -37,8 +37,11 @@ def dashboard():
         flash("ไม่พบข้อมูลนักศึกษา", "error")
         return redirect(url_for("student.login"))
 
-    all_scholarships = Scholarship.query.all()
-    return render_template("student/dashboard.html", student=student, scholarships=all_scholarships)
+    # แสดงเฉพาะทุนที่สถานะเปิด (open) และยังไม่หมดเขต (is_open)
+    all_scholarships = Scholarship.query.filter_by(status='open').all()
+    active_scholarships = [s for s in all_scholarships if s.is_open()]
+    
+    return render_template("student/dashboard.html", student=student, scholarships=active_scholarships)
 
 # ==========================================
 # Login / Logout
@@ -191,11 +194,14 @@ def profile():
         student_record.inc_guardian    = safe_float("inc_guardian")
         student_record.inc_scholarship = safe_float("inc_scholarship")
         student_record.inc_parttime    = safe_float("inc_parttime")
+        student_record.activity_hours  = int(request.form.get("activity_hours", 0))
+        student_record.parttime_type   = request.form.get("parttime_type")
 
         student_record.exp_food      = safe_float("exp_food")
         student_record.exp_dorm      = safe_float("exp_dorm")
         student_record.exp_transport = safe_float("exp_transport")
         student_record.exp_other     = safe_float("exp_other")
+        student_record.parttime_description = request.form.get("parttime_description", "").strip() or None
         db.session.commit()
         flash("บันทึกข้อมูลส่วนตัวเรียบร้อยแล้ว ✅", "success")
         return redirect(url_for("student.profile"))
@@ -240,6 +246,11 @@ def scholarship_detail(scholarship_id):
         scholarship_id=scholarship_id
     ).first()
 
+    # ตรวจสอบว่าทุนเปิดอยู่หรือไม่ (Server-side check)
+    if not scholarship.is_open() and not existing_app:
+        flash("ขออภัย ทุนการศึกษานี้ปิดรับสมัครแล้ว หรือหมดเขตการรับสมัคร", "error")
+        return redirect(url_for('student.dashboard'))
+
     # ตรวจสอบความสมบูรณ์ของโปรไฟล์และคุณสมบัติ
     profile_complete = False
     is_eligible = False
@@ -264,10 +275,6 @@ def scholarship_detail(scholarship_id):
 # ==========================================
 # ฟีเจอร์: การสมัครทุนและจัดการไฟล์
 # ==========================================
-ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @student_bp.route("/apply", methods=["GET", "POST"])
 def apply_scholarship():
@@ -282,6 +289,13 @@ def apply_scholarship():
     if request.method == "POST":
         # รับข้อมูลจากแบบฟอร์ม
         scholarship_id = request.form.get("scholarship_id")
+        
+        # ─── Server-side check: ทุนยังเปิดอยู่หรือไม่ ───
+        target_scholarship = Scholarship.query.get(scholarship_id)
+        if not target_scholarship or not target_scholarship.is_open():
+            flash("ไม่สามารถส่งใบสมัครได้เนื่องจากทุนปิดรับสมัครแล้ว หรือหมดเขตแล้ว", "error")
+            return redirect(url_for("student.dashboard"))
+        
         action = request.form.get("action", "submit")
         
         # ข้อมูลนักศึกษาจากฟอร์ม
@@ -303,6 +317,13 @@ def apply_scholarship():
         # จัดการสถานะ (บันทึกร่าง หรือ ส่งใบสมัคร)
         status = "draft" if action == "save_draft" else "pending"
         
+        # รวบรวมเหตุผลและหมายเหตุรายได้
+        reason = request.form.get("reason", "").strip()
+        income_note = request.form.get("income_note", "").strip()
+        combined_notes = f"เหตุผลความจำเป็น: {reason}"
+        if income_note:
+            combined_notes += f"\n\nหมายเหตุรายได้: {income_note}"
+
         # บันทึกข้อมูลลงฐานข้อมูล Application
         new_app = Application(
             id=str(uuid.uuid4())[:12],
@@ -310,8 +331,22 @@ def apply_scholarship():
             student_name=student_name if student_name else student.name,
             faculty=faculty if faculty else student.faculty,
             scholarship_id=scholarship_id,
-            status=status
+            status=status,
+            activity_hours=int(request.form.get("activity_hours", 0)),
+            parttime_type=request.form.get("parttime_type"),
+            parttime_description=request.form.get("parttime_description", "").strip() or None,
+            notes=combined_notes
         )
+        
+        # คณคะแนนอัตโนมัติทันที
+        new_app.calculate_automatic_score()
+        
+        # อัปเดตข้อมูลกลับไปยังโปรไฟล์นักศึกษาด้วย (เพื่อให้ข้อมูลล่าสุดติดตัวนักศึกษาไป)
+        if student:
+            student.activity_hours = new_app.activity_hours
+            student.parttime_type = new_app.parttime_type
+            student.parttime_description = new_app.parttime_description
+            student.inc_parttime = float(request.form.get("inc_parttime", 0) or 0)
         db.session.add(new_app)
         db.session.commit()
         
@@ -330,8 +365,8 @@ def apply_scholarship():
         flash("บันทึกข้อมูลการสมัครเรียบร้อยแล้ว", "success")
         return redirect(url_for("student.dashboard"))
     
-    # GET method
-    scholarships = Scholarship.query.all()
+    # GET method - แสดงเฉพาะทุนที่เปิดรับสมัครเท่านั้น
+    scholarships = [s for s in Scholarship.query.filter_by(status='open').all() if s.is_open()]
     
     # ดึงข้อมูลนักศึกษามาแสดงไว้ก่อน (Prefill)
     prefill = {}
@@ -385,7 +420,12 @@ def apply_scholarship():
             "inc_guardian": getattr(student, 'inc_guardian', ''),
             "inc_scholarship": getattr(student, 'inc_scholarship', ''),
             "inc_parttime": getattr(student, 'inc_parttime', ''),
-            "national_id": getattr(student, 'citizen_id', '')
+            "national_id": getattr(student, 'citizen_id', ''),
+            "activity_hours": getattr(student, 'activity_hours', 0),
+            "parttime_type": getattr(student, 'parttime_type', ''),
+            "parttime_description": getattr(student, 'parttime_description', ''),
+            "scholarship_id": request.args.get("scholarship_id"),
+            "reason": "" # Default empty for new applications
         }
 
     titles = ["นาย", "นางสาว", "นาง"]

@@ -369,8 +369,8 @@
             ดูรายการทุนที่สมัครไว้ →
           </a>
 
-        {% elif scholarship.status in ['checking','close','interview','announce'] %}
-          <!-- ปิดรับสมัครแล้ว แต่มีประกาศ -->
+        {% elif not scholarship.is_open() %}
+          <!-- ปิดรับสมัครแล้ว (เช็คจาก is_open() ครอบคลุมทั้ง Date และ Status) -->
           <div class="alert-warn flex items-start gap-3 mb-4">
             <span class="text-2xl">🔒</span>
             <div>
@@ -378,7 +378,7 @@
               <p class="text-sm text-yellow-700 mt-1">
                 {% if scholarship.status == 'interview' %}กรุณาตรวจสอบรายชื่อสัมภาษณ์จากไฟล์ประกาศด้านบน
                 {% elif scholarship.status == 'announce' %}ผลการพิจารณาทุนได้ประกาศแล้ว กรุณาตรวจสอบรายชื่อด้านบน
-                {% else %}ขณะนี้อยู่ระหว่างการตรวจสอบใบสมัคร{% endif %}
+                {% else %}ขออภัย ขณะนี้หมดเขตการรับสมัครหรือทุนปิดรับสมัครแล้ว{% endif %}
               </p>
             </div>
           </div>

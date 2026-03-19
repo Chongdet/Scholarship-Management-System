@@ -487,7 +487,9 @@ def track_status():
     student_id = session.get("user_id")
 
     page = request.args.get('page', 1, type=int)
-    pagination = Application.query.filter_by(student_id=student_id)\
+    # กรองเฉพาะใบสมัครที่นักศึกษาเป็นเจ้าของ และทุนยังต้องมีตัวตนอยู่ในระบบ (ไม่ถูกลบโดยเจ้าหน้าที่)
+    pagination = Application.query.join(Scholarship)\
+        .filter(Application.student_id == student_id)\
         .order_by(Application.created_at.desc())\
         .paginate(page=page, per_page=5, error_out=False)
 
@@ -504,4 +506,8 @@ def track_status():
 @student_bp.route("/status/detail/<app_id>")
 def status_detail(app_id):
     application = Application.query.get_or_404(app_id)
+    # หากทุนถูกลบไปแล้ว ไม่ให้เข้าถึงหน้านี้ (ให้หายไปตามที่ผู้ใช้ต้องการ)
+    if not application.scholarship:
+        flash("ไม่พบข้อมูลทุนการศึกษา หรือทุนนี้ถูกลบออกจากระบบแล้ว", "error")
+        return redirect(url_for("student.track_status"))
     return render_template("student/status_detail.html", app=application)
